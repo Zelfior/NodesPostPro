@@ -43,12 +43,12 @@ if __name__ == '__main__':
     graph_widget.show()
 
     # # create node with custom text color and disable it.
-    # n_basic_a = graph.create_node(
-    #     'nodes.basic.MultiplyNode', text_color='#feab20')
+    n_basic_a = graph.create_node(
+        'nodes.Pandas.LoadFileNode', text_color='#feab20')
 
     # # create node and set a custom icon.
-    # n_basic_b = graph.create_node(
-    #     'nodes.basic.BasicNodeB', name='custom icon')
+    n_basic_b = graph.create_node(
+        'nodes.Pandas.GetColumnNode', name='custom icon')
     # n_basic_b.set_icon(
     #     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'star.png')
     # )

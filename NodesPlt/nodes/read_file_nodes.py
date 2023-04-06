@@ -43,6 +43,7 @@ class LoadFileNode(BaseNode):
         self.add_output('Columns count', color=(0, 255, 0))
 
         self.output_data_frame = None
+        self.has_loaded_data_frame = False
 
         # create QLineEdit text input widget.
         self.add_text_input('Filename', 'File name', tab='widgets')
@@ -68,11 +69,18 @@ class LoadFileNode(BaseNode):
         given_path = self.get_property(name)
 
         if os.path.isfile(given_path):
-            self.output_data_frame = pd.read_csv(given_path)
+            self.output_data_frame = pd.read_csv(given_path, sep = ";")
 
             print(self.output_data_frame.columns)
 
             print(self.get_output('Output Array'))
+
+            self.has_loaded_data_frame = True
+
+        else:
+            self.output_data_frame = None
+            self.has_loaded_data_frame = False
+
 
         # F:/Documents/NodeEditor/NodeGraphQt-master/test.csv
 

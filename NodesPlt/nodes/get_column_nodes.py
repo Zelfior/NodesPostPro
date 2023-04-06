@@ -31,7 +31,7 @@ class GetColumnNode(BaseNode):
         self.add_combo_menu('Column name', 'Column name', items=self.columns)
 
         print(self.model.properties.keys())
-        print(self.view)
+        print("view", self.view)
 
     def update_model(self):
         super(GetColumnNode, self).update_model()
@@ -53,13 +53,6 @@ class GetColumnNode(BaseNode):
 
         given_path = self.get_property(name)
 
-        if os.path.isfile(given_path):
-            df_data = pd.read_csv(given_path)
-
-            print(df_data.columns)
-
-            print(self.get_output('Output Array'))
-
         # F:/Documents/NodeEditor/NodeGraphQt-master/test.csv
 
         print("Set property called")
@@ -73,12 +66,18 @@ class GetColumnNode(BaseNode):
         print(out_port.node())
         print(out_port.node().output_data_frame)
 
-        self.input_data_frame = out_port.node().output_data_frame
-        self.columns = self.input_data_frame.columns
+
+        if out_port.node().has_loaded_data_frame:
+            self.input_data_frame = out_port.node().output_data_frame
+            self.columns = self.input_data_frame.columns
+
+            self.view.widgets["Column name"].clear()
+            self.view.widgets["Column name"].add_items(list(self.columns))
 
         print(self.model.get_property("Column name"))
 
         print("on_input_connected", in_port, out_port, self._model.name)
+        
     
 
     def on_input_disconnected(self, in_port, out_port):

@@ -13,7 +13,7 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, read_file_nodes, get_column_nodes
+from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node
 
 if __name__ == '__main__':
 
@@ -34,7 +34,8 @@ if __name__ == '__main__':
     graph.register_nodes([
         operation_nodes.MultiplyNode,
         read_file_nodes.LoadFileNode,
-        get_column_nodes.GetColumnNode
+        get_column_nodes.GetColumnNode,
+        plt_node.PltNode
     ])
 
     # show the node graph widget.
@@ -48,7 +49,10 @@ if __name__ == '__main__':
 
     # # create node and set a custom icon.
     n_basic_b = graph.create_node(
-        'nodes.Pandas.GetColumnNode', name='custom icon')
+        'nodes.Pandas.GetColumnNode')#, name='custom icon')
+
+    n_basic_c = graph.create_node(
+        'Matplotlib.PltNode')#, name='custom icon')
     # n_basic_b.set_icon(
     #     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'star.png')
     # )

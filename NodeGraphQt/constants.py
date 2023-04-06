@@ -250,3 +250,6 @@ class NodePropWidgetEnum(Enum):
     INT = 19
     #: Node property represented with button widget.
     BUTTON = 20
+    #: Node property represented with button widget.
+    QPLOT = 21
+

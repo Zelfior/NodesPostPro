@@ -40,7 +40,6 @@ class LoadFileNode(BaseNode):
 
         # create input & output ports
         self.add_output('Output DataFrame', color=(0, 0, 255))
-        self.add_output('Columns count', color=(0, 255, 0))
 
         self.output_data_frame = None
         self.has_loaded_data_frame = False
@@ -66,10 +65,20 @@ class LoadFileNode(BaseNode):
     def set_property(self, name, value, push_undo=True):
         super(LoadFileNode, self).set_property(name, value, push_undo=push_undo)
 
-        given_path = self.get_property(name)
+        self.given_path = self.get_property(name)
 
-        if os.path.isfile(given_path):
-            self.output_data_frame = pd.read_csv(given_path, sep = ";")
+        self.update_from_input()
+
+
+        # F:/Documents/NodeEditor/NodeGraphQt-master/test.csv
+
+        print("Set property called")
+        
+
+    def update_from_input(self):
+
+        if os.path.isfile(self.given_path):
+            self.output_data_frame = pd.read_csv(self.given_path, sep = ";")
 
             print(self.output_data_frame.columns)
 
@@ -82,21 +91,6 @@ class LoadFileNode(BaseNode):
             self.has_loaded_data_frame = False
 
 
-        # F:/Documents/NodeEditor/NodeGraphQt-master/test.csv
-
-        print("Set property called")
-        
-    def on_input_connected(self, in_port, out_port):
-        super(LoadFileNode, self).on_input_connected(in_port, out_port)
-
-        print(in_port, out_port)
-        
-    def on_input_connected(self, in_port, out_port):
-        super(LoadFileNode, self).on_input_connected(in_port, out_port)
-
-        print("on_input_connected", in_port, out_port)
-    
-    def on_input_disconnected(self, in_port, out_port):
-        super(LoadFileNode, self).on_input_disconnected(in_port, out_port)
-
-        print("on_input_disconnected", in_port, out_port)
+        for output_id in range(len(self.outputs())):
+            for connected_id in range(len(self.output(output_id).connected_ports())):
+                self.output(output_id).connected_ports()[connected_id].node().update_from_input()

@@ -78,7 +78,7 @@ class LoadFileNode(BaseNode):
     def update_from_input(self):
 
         if os.path.isfile(self.given_path):
-            self.output_data_frame = pd.read_csv(self.given_path, sep = ";")
+            self.output_data_frame = pd.read_csv(self.given_path, sep = ",")
 
             print(self.output_data_frame.columns)
 

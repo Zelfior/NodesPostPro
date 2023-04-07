@@ -3,6 +3,7 @@ from functools import wraps
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from NodeGraphQt.constants import NodePropWidgetEnum, PortTypeEnum
+from Qt import QtCore, QtWidgets
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,41 +11,71 @@ import pandas as pd
 import os
 
 
-class MplCanvas(FigureCanvasQTAgg):
-
-    def __init__(self, parent=None, width=5, height=4, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)
+class PltCanvasWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        super(PltCanvasWidget, self).__init__(parent)
+        self.fig = Figure(figsize=(5, 5), dpi=100)
+        self.canvas = FigureCanvasQTAgg(self.fig)
         self.axes = self.fig.add_subplot(111)
-        super(MplCanvas, self).__init__(self.fig)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.canvas)
+
 
 
 
 
 class pltWidget(NodeBaseWidget):
     def __init__(self, parent=None, name=''):
-        super(pltWidget, self).__init__()
-        self.canvas = MplCanvas()
-        self.canvas.setMinimumHeight(24)
-        # combo.addItems(items or [])
-        # combo.currentIndexChanged.connect(self.on_value_changed)
-        # self.canvas.clearFocus()
+        super(pltWidget, self).__init__(parent)
+
+        # set the name for node property.
+        self.set_name('my_widget')
+
+        # set the label above the widget.
+        self.set_label('Custom Widget')
+
+        self.canvas = PltCanvasWidget()
+        # set the custom widget.
         self.set_custom_widget(self.canvas)
 
-
+        self.to_plot = []
 
     def update_plot(self):
-        self.canvas.axes.plot([0,1,2,3], [0,1,2,3])
-        self.canvas.draw()  # actually draw the new content
-        # self.canvas.fig.canvas.draw_idle()  # actually draw the new content
+        self.canvas.axes.cla()  # clear the axes content
+
+        for element in self.to_plot:
+            if element['type'] == "plot":
+                self.canvas.axes.plot(element['x'], element['y'])
+
+        self.canvas.canvas.draw()  # actually draw the new content
+
+    def update_plot_list(self, array):
+        self.to_plot = array
+
+        self.update_plot()
+
+
+
+    def get_value(self):
+        widget = self.get_custom_widget()
+        return ''
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class PltNode(BaseNode):
-
-
-
-    """
-    An example of a node with a embedded QLineEdit.
-    """
 
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -60,66 +91,18 @@ class PltNode(BaseNode):
 
         self.input_array = None
 
-        # self.add_plt_menu()
-
-        # combo = MplCanvas()
-        # combo.setMinimumHeight(24)
-        # combo.addItems(items or [])
-        # combo.currentIndexChanged.connect(self.on_value_changed)
-        # combo.clearFocus()
-        # self.set_custom_widget(combo)
-        self.create_property(
-            "plot",
-            value=None,
-            items=[],
-            widget_type=NodePropWidgetEnum.QPLOT.value,
-            tab=None
-        )
-
-        widget = pltWidget(self.view, name="plot")
-        self.view.add_widget(widget)
+        self.plot_widget = pltWidget(self.view, name="plot")
+        self.view.add_widget(self.plot_widget)
         #: redraw node to address calls outside the "__init__" func.
         self.view.draw_node()
 
-        widget.update_plot()
+        self.plot_widget.update_plot()
 
         # print(self.model.properties.keys())
         # print("view", self.view)
 
-    def add_plt_menu(self):
-        
-        self.figure = MplCanvas(self, width=5, height=4, dpi=100)
-        self.figure.axes.plot([0,1,2,3,4], [10,1,20,3,40])
-
-        # mainLayout = QtWidgets.QGridLayout()
-        # mainLayout.addWidget(canvas1,1,0)
-
-        # self.setLayout(mainLayout)
-
-        self.view.add_widget(self.figure)
-        #: redraw node to address calls outside the "__init__" func.
-        self.view.draw_node()
-
-
-    def update_model(self):
-        super(PltNode, self).update_model()
-
-        print("update_model")
-    
-    def update(self):
-        super(PltNode, self).update()
-
-        print("update")
-
-    def set_model(self, model):
-        super(PltNode, self).set_model()
-
-        print("set_model")
-
-    def set_property(self, name, value, push_undo=True):
-        super(PltNode, self).set_property(name, value, push_undo=push_undo)
-
-        print("Set property called")
+    # def set_property(self, name, value, push_undo=True):
+    #     super(PltNode, self).set_property(name, value, push_undo=push_undo)
         
     def on_input_connected(self, in_port, out_port):
         super(PltNode, self).on_input_connected(in_port, out_port)
@@ -130,7 +113,6 @@ class PltNode(BaseNode):
 
         print("on_input_connected", in_port, out_port, self._model.name)
         
-    
 
     def on_input_disconnected(self, in_port, out_port):
         super(PltNode, self).on_input_disconnected(in_port, out_port)
@@ -145,7 +127,7 @@ class PltNode(BaseNode):
                 self.is_defined = True
                 self.input_array = self.plugged_input_port.node().output_array
 
-                print("From plt node, input array", self.input_array)
+                self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
 
 
         for output_id in range(len(self.outputs())):

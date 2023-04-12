@@ -42,12 +42,17 @@ class pltWidget(NodeBaseWidget):
 
         self.to_plot = []
 
+        self.title = ""
+
     def update_plot(self):
         self.canvas.axes.cla()  # clear the axes content
 
         for element in self.to_plot:
             if element['type'] == "plot":
                 self.canvas.axes.plot(element['x'], element['y'])
+
+        if not self.title == "":
+            self.canvas.title = self.title
 
         self.canvas.canvas.draw()  # actually draw the new content
 
@@ -88,7 +93,20 @@ class PltNode(BaseNode):
 
         # create input & output ports
         self.add_input('Input Array', color=(0, 255, 0))
+        
+        self.add_input('Title', color=(255, 0, 0))
+        
+        self.add_input('X_min', color=(125, 125, 125))
+        self.add_input('X_max', color=(125, 125, 125))
+        
+        self.add_input('Y_min', color=(125, 125, 125))
+        self.add_input('Y_max', color=(125, 125, 125))
+        
+        self.add_checkbox("x_log", text='X log scale')
+        self.add_checkbox("y_log", text='Y log scale')
 
+
+        
         self.input_array = None
 
         self.plot_widget = pltWidget(self.view, name="plot")
@@ -126,6 +144,8 @@ class PltNode(BaseNode):
             if self.plugged_input_port.node().is_defined:
                 self.is_defined = True
                 self.input_array = self.plugged_input_port.node().output_array
+
+                self.plot_widget.title = self.get_input("Title")
 
                 self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
 

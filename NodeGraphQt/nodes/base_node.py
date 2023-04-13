@@ -14,7 +14,21 @@ from NodeGraphQt.widgets.node_widgets import (NodeBaseWidget,
                                               NodeLineEdit,
                                               NodeCheckBox)
 import pandas as pd
-from pandas.util.testing import assert_frame_equal
+
+def are_identical(dataframe_1:pd.DataFrame, dataframe_2:pd.DataFrame):
+    is_empty_1 = dataframe_1.empty
+    is_empty_2 = dataframe_2.empty
+
+    if is_empty_1 and is_empty_2:
+        return True
+    elif is_empty_2 != is_empty_1:
+        return False
+    else:
+        try:
+            return dataframe_1.equals(dataframe_2)
+        except:
+            return False
+        
 class BaseNode(NodeObject):
     """
     The ``NodeGraphQt.BaseNode`` class is the base class for nodes that allows
@@ -81,13 +95,6 @@ class BaseNode(NodeObject):
             push_undo (bool): register the command to the undo stack. (default: True)
         """
         # prevent signals from causing a infinite loop.
-        print("test if dataframe", value,  type(value), self.get_property(name), type(self.get_property(name)))
-
-        if type(value) == pd.DataFrame and type(self.get_property(name)) == pd.DataFrame:
-            print("are dataframe")
-            if assert_frame_equal(value, self.get_property(name)):
-                return
-
         if self.get_property(name) == value:
             return
 

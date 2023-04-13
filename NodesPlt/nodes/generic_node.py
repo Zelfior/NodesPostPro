@@ -113,13 +113,17 @@ class GenericNode(BaseNode):
 
 
     def get_value_from_port(self, port_name):
-        if port_name in self.inputs():
-            if len(self.inputs()[port_name].connected_ports()) > 0 and self.inputs()[port_name].connected_ports()[0].node().is_output_port_defined(port_name):
-                return self.inputs()[port_name].connected_ports()[0].node().get_property(port_name)
-            else:
-                return None
+        print(self.inputs())
+        if port_name in self.inputs().keys():
+
+            if len(self.inputs()[port_name].connected_ports()) > 0:
+                connected_port_name = self.inputs()[port_name].connected_ports()[0].name()
+                if self.inputs()[port_name].connected_ports()[0].node().is_output_port_defined(connected_port_name):
+                    print("_____ getting value from node _____", self.inputs()[port_name].connected_ports()[0].node().name())
+                    return self.inputs()[port_name].connected_ports()[0].node().get_property(connected_port_name)
+            return None
         else:
-            return ValueError("Wrong port name given:", port_name)
+            raise ValueError("Wrong port name given:", port_name)
         
 
     def is_output_port_defined(self, port_name):
@@ -137,6 +141,7 @@ class GenericNode(BaseNode):
     def propagate(self):
         for output_id in range(len(self.outputs())):
             for connected_id in range(len(self.output(output_id).connected_ports())):
+                print("Updating node", self.output(output_id).connected_ports()[connected_id].node().name())
                 self.output(output_id).connected_ports()[connected_id].node().update_values()
     
 

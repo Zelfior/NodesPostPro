@@ -23,7 +23,7 @@ class GetColumnNode(GenericNode):
         # create input & output ports
         self.add_custom_input('Input DataFrame', PortValueType.PD_DATAFRAME)
 
-        self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
+        self.add_custom_output('Output Array', PortValueType.PD_DATAFRAME)
         self.add_custom_output('Selected column name', PortValueType.STRING)
 
         # create the QComboBox menu.

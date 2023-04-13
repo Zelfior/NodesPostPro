@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
+from nodes.generic_node import GenericNode, PortValueType, get_reset_value_from_enum
 
 class PltCanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -80,7 +81,7 @@ class pltWidget(NodeBaseWidget):
 
 
 
-class PltNode(BaseNode):
+class PltNode(GenericNode):
 
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -92,64 +93,53 @@ class PltNode(BaseNode):
         super(PltNode, self).__init__()
 
         # create input & output ports
-        self.add_input('Input Array', color=(0, 255, 0))
+        self.add_custom_input('Input Array', PortValueType.PD_DATAFRAME)
         
-        self.add_input('Title', color=(255, 0, 0))
+        self.add_custom_input('Title', PortValueType.STRING)
         
-        self.add_input('X_min', color=(125, 125, 125))
-        self.add_input('X_max', color=(125, 125, 125))
+        self.add_custom_input('X_min', PortValueType.FLOAT)
+        self.add_custom_input('X_max', PortValueType.FLOAT)
         
-        self.add_input('Y_min', color=(125, 125, 125))
-        self.add_input('Y_max', color=(125, 125, 125))
+        self.add_custom_input('Y_min', PortValueType.FLOAT)
+        self.add_custom_input('Y_max', PortValueType.FLOAT)
         
         self.add_checkbox("x_log", text='X log scale')
         self.add_checkbox("y_log", text='Y log scale')
-
-
         
-        self.input_array = None
+        self.input_array = pd.DataFrame()
 
         self.plot_widget = pltWidget(self.view, name="plot")
+
         self.view.add_widget(self.plot_widget)
-        #: redraw node to address calls outside the "__init__" func.
         self.view.draw_node()
 
         self.plot_widget.update_plot()
 
-        # print(self.model.properties.keys())
-        # print("view", self.view)
-
-    # def set_property(self, name, value, push_undo=True):
-    #     super(PltNode, self).set_property(name, value, push_undo=push_undo)
-        
-    def on_input_connected(self, in_port, out_port):
-        super(PltNode, self).on_input_connected(in_port, out_port)
-
-        self.plugged_input_port = out_port
-
-        self.update_from_input()
-
-        print("on_input_connected", in_port, out_port, self._model.name)
-        
-
-    def on_input_disconnected(self, in_port, out_port):
-        super(PltNode, self).on_input_disconnected(in_port, out_port)
-
-        print("on_input_disconnected", in_port, out_port, self._model.name)
-
     def update_from_input(self):
-        if self.plugged_input_port == None:
-            pass
+        self.input_array = self.get_value_from_port("Input Array")
+
+        print("**********************", self.input_array)
+        # self.plot_widget.title = self.get_input("Title")
+
+        self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
+
+
+
+    def check_inputs(self):
+        print("////////////////////////////////     returned input:", self.get_value_from_port("Input Array"))
+        self.set_property("is_valid", type(self.get_value_from_port("Input Array")) == pd.DataFrame)
+
+        
+    def get_property(self, name):
+        if name == 'Input Array':
+            return self.input_array
+
+        return super().get_property(name)
+    
+    def set_property(self, name, value, push_undo=True):
+        if name == 'Input Array':
+            self.input_array = value
+            
         else:
-            if self.plugged_input_port.node().is_defined:
-                self.is_defined = True
-                self.input_array = self.plugged_input_port.node().output_array
-
-                self.plot_widget.title = self.get_input("Title")
-
-                self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
-
-
-        for output_id in range(len(self.outputs())):
-            for connected_id in range(len(self.output(output_id).connected_ports())):
-                self.output(output_id).connected_ports()[connected_id].node().update_from_input()
+            return super().set_property(name, value, push_undo)
+        

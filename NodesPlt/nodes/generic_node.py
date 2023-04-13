@@ -14,9 +14,9 @@ class PortValueType(Enum):
 
 def get_color_from_enum(enum_value):
     if enum_value == PortValueType.FLOAT:
-        return (0, 0, 255)
+        return (255, 0, 0)
     elif enum_value == PortValueType.INTEGER:
-        return (0, 0, 255)
+        return (0, 255, 0)
     elif enum_value == PortValueType.STRING:
         return (0, 0, 255)
     elif enum_value == PortValueType.LIST:
@@ -90,8 +90,6 @@ class GenericNode(BaseNode):
 
     def on_input_disconnected(self, in_port, out_port):
         super(GenericNode, self).on_input_disconnected(in_port, out_port)
-
-        print("on_input_disconnected", in_port, out_port, self._model.name)
 
         self.update_values()
 

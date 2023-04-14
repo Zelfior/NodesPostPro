@@ -37,6 +37,7 @@ if __name__ == '__main__':
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
         operation_nodes.MultiplyNode,
+        operation_nodes.GetAverageNode,
         read_file_nodes.LoadFileNode,
         get_column_nodes.GetColumnNode,
         plt_node.PltNode

@@ -3,6 +3,9 @@ from enum import Enum
 import pandas as pd
 import numpy as np
 
+"""
+    All value type that can be exchanged between nodes
+"""
 class PortValueType(Enum):
     FLOAT = 1
     INTEGER = 2
@@ -12,6 +15,9 @@ class PortValueType(Enum):
     NP_ARRAY = 6
     PD_DATAFRAME = 7
 
+"""
+    Color association with the port type enum
+"""
 def get_color_from_enum(enum_value):
     if enum_value == PortValueType.FLOAT:
         return (255, 0, 0)
@@ -27,23 +33,10 @@ def get_color_from_enum(enum_value):
         return (100, 100, 255)
     elif enum_value == PortValueType.BOOL:
         return (255, 255, 255)
-
-def get_reset_value_from_enum(enum_value):
-    if enum_value == PortValueType.FLOAT:
-        return None
-    elif enum_value == PortValueType.INTEGER:
-        return None
-    elif enum_value == PortValueType.STRING:
-        return None
-    elif enum_value == PortValueType.LIST:
-        return None
-    elif enum_value == PortValueType.NP_ARRAY:
-        return None
-    elif enum_value == PortValueType.PD_DATAFRAME:
-        return pd.DataFrame()
-    elif enum_value == PortValueType.BOOL:
-        return None
     
+"""
+    Checks if the given value type corresponds to the enum.
+"""
 def check_type(value, enum_value):
     if enum_value == PortValueType.FLOAT:
         return type(value) == float
@@ -63,27 +56,27 @@ def check_type(value, enum_value):
         raise ValueError
     
 
-class Countainer():
-    # def __init__(self, init_value, enum_value:PortValueType, name):
-    #     if check_type(init_value, enum_value):
-    #         self.countained_value = init_value
-    #         self.enum_value = enum_value
-    #         self.defined = True
-    #         self.name = name
-    #     else:
-    #         raise TypeError
-
+class Container():
+    """
+        The countainer is initialized empty and undefined
+    """
     def __init__(self, enum_value:PortValueType):
-        self.countained_value = get_reset_value_from_enum(enum_value)
+        self.countained_value = None
         self.enum_value = enum_value
         self.defined = False
         self.name = ""
 
+    """
+        Sets the contained value as none, and sets as not defined
+    """
     def reset(self):
         self.countained_value = None
         self.defined = False
         self.name = ""
 
+    """
+        If the given value type correspond to the container enum, the value is updated and is set as defined
+    """
     def set_property(self, value):
         if check_type(value, self.enum_value):
             self.countained_value = value
@@ -91,21 +84,30 @@ class Countainer():
         else:
             raise TypeError
 
+    """
+        Returns the contained value
+    """
     def get_property(self):
         return self.countained_value
 
+    """
+        Returns if the container is defined
+    """
     def is_defined(self):
         return self.defined
 
-    def set_defined(self, is_defined):
-        self.defined = is_defined
-
+    """
+        Returns the container type enum
+    """
     def get_property_type(self):
         return self.enum_value
 
 
 
 
+"""
+    Generic node class that embed the value transmission functions
+"""
 class GenericNode(BaseNode):
     def __init__(self):
         super(GenericNode, self).__init__()
@@ -120,6 +122,10 @@ class GenericNode(BaseNode):
         self.input_properties = {}
 
 
+    """
+        BaseNode set_property overload:
+            Starts the node output property update process when a property is changed if the property is not "is_valid" and if the node is not resetting (prevents infinite loops)
+    """
     def set_property(self, name, value, push_undo=True):
         if name == "is_valid":
             super(GenericNode, self).set_property(name, value, push_undo=push_undo)
@@ -130,18 +136,35 @@ class GenericNode(BaseNode):
                 self.update_values()
 
         
+    """
+        BaseNode set_property overload:
+            Starts the node output property update process when an input port is plugged
+    """
     def on_input_connected(self, in_port, out_port):
         super(GenericNode, self).on_input_connected(in_port, out_port)
 
         self.update_values()
 
 
+    """
+        BaseNode set_property overload:
+            Starts the node output property update process when an input port is unplugged
+    """
     def on_input_disconnected(self, in_port, out_port):
         super(GenericNode, self).on_input_disconnected(in_port, out_port)
 
         self.update_values()
 
 
+    """
+        Node output property update process:
+            Checks the inputs to know if they match the expectation to compute the outputs. The result is stored in the property "is_valid".
+
+            If True:
+                -   call the update_from_input function, that will compute the outputs
+            Else:
+                -   Resets the node outputs
+    """
     def update_values(self):
 
         self.check_inputs()
@@ -156,9 +179,15 @@ class GenericNode(BaseNode):
         self.propagate()
 
 
+    """
+        Get the value associated to the port to which the given input port is connected
+    """
     def get_value_from_port(self, port_name):
+        #   If the given port name is not correct, raises an error.
         if port_name in self.inputs().keys():
+            #   If the port is not plugged, returns None
             if len(self.inputs()[port_name].connected_ports()) > 0:
+                # Checks if the port to which the port is connected container is defined. If yes, returns its property, returns None otherwise
                 connected_port_name = self.inputs()[port_name].connected_ports()[0].name()
                 if self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name).is_defined():
                     return self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name)
@@ -167,51 +196,87 @@ class GenericNode(BaseNode):
             raise ValueError("Wrong port name given:", port_name)
 
 
+    """
+        Function to be overloaded.
+        Set in the "is_defined" property if the inputs match the expectations to compute the outputs.
+    """
     def check_inputs(self):
         raise NotImplementedError
     
 
+    """
+        Function to be overloaded.
+        Compute the outputs and store them in their containers.
+    """
     def update_from_input(self):
         raise NotImplementedError
     
 
+    """
+        Calls the update_values function of all of the node children
+    """
     def propagate(self):
+        #   Loop on outputs
         for output_id in range(len(self.outputs())):
+            #   Loop on each ports to which the output is connected
             for connected_id in range(len(self.output(output_id).connected_ports())):
+                #   Call the update_values function of the connected node
                 self.output(output_id).connected_ports()[connected_id].node().update_values()
     
 
+    """
+        Resets all of the outputs containers.
+
+        Can be overloaded depending on the used widgets
+    """
     def reset_outputs(self):
         for output_name in self.outputs():
             self.output_properties[output_name].reset()
     
     
+    """
+        Add an input node and create its empty container
+    """
     def add_custom_input(self, input_name, type_enum):
-        self.create_output_property(input_name, type_enum)
+        self.create_input_property(input_name, type_enum)
         self.add_input(input_name, color=get_color_from_enum(type_enum))
 
         
+    """
+        Add an output node and create its empty container
+    """
     def add_custom_output(self, output_name, type_enum):
         self.create_output_property(output_name, type_enum)
         self.add_output(output_name, color=get_color_from_enum(type_enum))
 
         self.output_type_list[output_name] = type_enum
 
+    """
+        Creates an output empty container associated to the given enum
+    """
     def create_output_property(self, output_name, type_enum):
-        self.output_properties[output_name] = Countainer(type_enum)
+        self.output_properties[output_name] = Container(type_enum)
 
+    """
+        Creates an input empty container associated to the given enum
+    """
     def create_input_property(self, output_name, type_enum):
-        self.input_properties[output_name] = Countainer(type_enum)
+        self.input_properties[output_name] = Container(type_enum)
     
+    """
+        Returns if the output container if the given port name exists
+    """
     def get_output_property(self, output_name):
         if output_name in self.output_properties:
             return self.output_properties[output_name]
         else:
             raise ValueError
 
+    """
+        Updates the output container value if the given port name exists
+    """
     def set_output_property(self, output_name, value):
         if output_name in self.output_properties:
             self.output_properties[output_name].set_property(value)
-            self.output_properties[output_name].set_defined(True)
         else:
             raise ValueError

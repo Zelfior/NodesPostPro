@@ -1,16 +1,14 @@
-from NodeGraphQt import BaseNode, BaseNodeCircle, NodeBaseWidget
-from functools import wraps
+from NodeGraphQt import NodeBaseWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
-from NodeGraphQt.constants import NodePropWidgetEnum, PortTypeEnum
-from Qt import QtCore, QtWidgets
+from Qt import QtWidgets
 
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-from nodes.generic_node import GenericNode, PortValueType, get_reset_value_from_enum
+from nodes.generic_node import GenericNode, PortValueType
 
 class PltCanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):

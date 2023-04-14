@@ -59,7 +59,40 @@ def check_type(value, enum_value):
         return type(value) == pd.DataFrame
     elif enum_value == PortValueType.BOOL:
         return type(value) == bool
+    else:
+        raise ValueError
     
+
+class Countainer():
+    def __init__(self, init_value, enum_value:PortValueType, name):
+        if check_type(init_value, enum_value):
+            self.countained_value = init_value
+            self.enum_value = enum_value
+            self.is_defined = True
+            self.name = name
+        else:
+            raise TypeError
+
+    def __init__(self, enum_value:PortValueType):
+        self.countained_value = get_reset_value_from_enum(enum_value)
+        self.enum_value = enum_value
+        self.is_defined = False
+        self.name = ""
+
+    def reset(self):
+        self.countained_value = None
+        self.is_defined = False
+        self.name = ""
+
+    def set_property(self, value):
+        if check_type(value, self.enum_value):
+            self.countained_value = value
+            self.is_defined = True
+        else:
+            raise TypeError
+
+
+
 
 class GenericNode(BaseNode):
     def __init__(self):
@@ -70,6 +103,8 @@ class GenericNode(BaseNode):
         self.create_property("is_valid", True)
 
         self.is_reseting = False
+
+        self.output_properties = {}
 
 
     def set_property(self, name, value, push_undo=True):
@@ -158,3 +193,19 @@ class GenericNode(BaseNode):
         self.add_output(output_name, color=get_color_from_enum(type_enum))
 
         self.output_type_list[output_name] = type_enum
+
+    def create_output_property(self, output_name, type_enum):
+        self.output_properties[output_name] = Countainer(type_enum)
+
+    
+    def get_output_property(self, output_name):
+        if output_name in self.output_properties:
+            return self.output_properties[output_name]
+        else:
+            raise ValueError
+
+    def set_output_property(self, output_name, value):
+        if output_name in self.output_properties:
+            self.output_properties[output_name].set_property(value)
+        else:
+            raise ValueError

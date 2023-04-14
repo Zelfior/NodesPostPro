@@ -105,8 +105,6 @@ class PltNode(GenericNode):
         
         self.add_checkbox("x_log", text='X log scale')
         self.add_checkbox("y_log", text='Y log scale')
-        
-        self.input_array = pd.DataFrame()
 
         self.plot_widget = pltWidget(self.view, name="plot")
 
@@ -116,30 +114,22 @@ class PltNode(GenericNode):
         self.plot_widget.update_plot()
 
     def update_from_input(self):
-        self.input_array = self.get_value_from_port("Input Array")
+        if not self.get_value_from_port("Input Array") == None:
+            self.input_array = self.get_value_from_port("Input Array").get_property()
 
-        print("**********************", self.input_array)
-        # self.plot_widget.title = self.get_input("Title")
-
-        self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
+            self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
 
 
 
     def check_inputs(self):
-        print("////////////////////////////////     returned input:", self.get_value_from_port("Input Array"))
-        self.set_property("is_valid", type(self.get_value_from_port("Input Array")) == pd.DataFrame)
-
+        input_given = self.get_value_from_port("Input Array")
         
-    def get_property(self, name):
-        if name == 'Input Array':
-            return self.input_array
+        self.set_property("is_valid", input_given is not None \
+                                            and input_given.is_defined() \
+                                                and input_given.get_property_type() == PortValueType.PD_DATAFRAME)
 
-        return super().get_property(name)
-    
-    def set_property(self, name, value, push_undo=True):
-        if name == 'Input Array':
-            self.input_array = value
-            
-        else:
-            return super().set_property(name, value, push_undo)
-        
+    def reset_outputs(self):
+        super(PltNode, self).reset_outputs()
+
+        self.plot_widget.update_plot_list([])
+

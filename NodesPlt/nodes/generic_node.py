@@ -64,32 +64,44 @@ def check_type(value, enum_value):
     
 
 class Countainer():
-    def __init__(self, init_value, enum_value:PortValueType, name):
-        if check_type(init_value, enum_value):
-            self.countained_value = init_value
-            self.enum_value = enum_value
-            self.is_defined = True
-            self.name = name
-        else:
-            raise TypeError
+    # def __init__(self, init_value, enum_value:PortValueType, name):
+    #     if check_type(init_value, enum_value):
+    #         self.countained_value = init_value
+    #         self.enum_value = enum_value
+    #         self.defined = True
+    #         self.name = name
+    #     else:
+    #         raise TypeError
 
     def __init__(self, enum_value:PortValueType):
         self.countained_value = get_reset_value_from_enum(enum_value)
         self.enum_value = enum_value
-        self.is_defined = False
+        self.defined = False
         self.name = ""
 
     def reset(self):
         self.countained_value = None
-        self.is_defined = False
+        self.defined = False
         self.name = ""
 
     def set_property(self, value):
         if check_type(value, self.enum_value):
             self.countained_value = value
-            self.is_defined = True
+            self.defined = True
         else:
             raise TypeError
+
+    def get_property(self):
+        return self.countained_value
+
+    def is_defined(self):
+        return self.defined
+
+    def set_defined(self, is_defined):
+        self.defined = is_defined
+
+    def get_property_type(self):
+        return self.enum_value
 
 
 
@@ -105,6 +117,7 @@ class GenericNode(BaseNode):
         self.is_reseting = False
 
         self.output_properties = {}
+        self.input_properties = {}
 
 
     def set_property(self, name, value, push_undo=True):
@@ -133,8 +146,6 @@ class GenericNode(BaseNode):
 
         self.check_inputs()
 
-        print("Check valid :", self.get_property("is_valid"))
-
         if self.get_property("is_valid"):
             self.update_from_input()
         else:
@@ -146,22 +157,15 @@ class GenericNode(BaseNode):
 
 
     def get_value_from_port(self, port_name):
-        print(self.inputs())
         if port_name in self.inputs().keys():
-
             if len(self.inputs()[port_name].connected_ports()) > 0:
                 connected_port_name = self.inputs()[port_name].connected_ports()[0].name()
-                if self.inputs()[port_name].connected_ports()[0].node().is_output_port_defined(connected_port_name):
-                    print("_____ getting value from node _____", self.inputs()[port_name].connected_ports()[0].node().name())
-                    return self.inputs()[port_name].connected_ports()[0].node().get_property(connected_port_name)
+                if self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name).is_defined():
+                    return self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name)
             return None
         else:
             raise ValueError("Wrong port name given:", port_name)
-        
 
-    def is_output_port_defined(self, port_name):
-        return self.get_property(port_name) != get_reset_value_from_enum(self.output_type_list[port_name])
-            
 
     def check_inputs(self):
         raise NotImplementedError
@@ -174,22 +178,21 @@ class GenericNode(BaseNode):
     def propagate(self):
         for output_id in range(len(self.outputs())):
             for connected_id in range(len(self.output(output_id).connected_ports())):
-                print("Updating node", self.output(output_id).connected_ports()[connected_id].node().name())
                 self.output(output_id).connected_ports()[connected_id].node().update_values()
     
 
     def reset_outputs(self):
         for output_name in self.outputs():
-            self.set_property(output_name, get_reset_value_from_enum(self.output_type_list[output_name]))
+            self.output_properties[output_name].reset()
     
     
     def add_custom_input(self, input_name, type_enum):
-        self.create_property(input_name, get_reset_value_from_enum(type_enum))
+        self.create_output_property(input_name, type_enum)
         self.add_input(input_name, color=get_color_from_enum(type_enum))
 
         
     def add_custom_output(self, output_name, type_enum):
-        self.create_property(output_name, get_reset_value_from_enum(type_enum))
+        self.create_output_property(output_name, type_enum)
         self.add_output(output_name, color=get_color_from_enum(type_enum))
 
         self.output_type_list[output_name] = type_enum
@@ -197,6 +200,8 @@ class GenericNode(BaseNode):
     def create_output_property(self, output_name, type_enum):
         self.output_properties[output_name] = Countainer(type_enum)
 
+    def create_input_property(self, output_name, type_enum):
+        self.input_properties[output_name] = Countainer(type_enum)
     
     def get_output_property(self, output_name):
         if output_name in self.output_properties:
@@ -207,5 +212,6 @@ class GenericNode(BaseNode):
     def set_output_property(self, output_name, value):
         if output_name in self.output_properties:
             self.output_properties[output_name].set_property(value)
+            self.output_properties[output_name].set_defined(True)
         else:
             raise ValueError

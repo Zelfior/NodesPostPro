@@ -13,7 +13,7 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node
+from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes
 
 if __name__ == '__main__':
 
@@ -32,6 +32,10 @@ if __name__ == '__main__':
 
     # registered example nodes.
     graph.register_nodes([
+        input_nodes.InputFloatNode,
+        input_nodes.InputIntegerNode,
+        input_nodes.InputBooleanNode,
+        input_nodes.InputStringNode,
         operation_nodes.MultiplyNode,
         read_file_nodes.LoadFileNode,
         get_column_nodes.GetColumnNode,

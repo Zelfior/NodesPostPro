@@ -49,15 +49,18 @@ if __name__ == '__main__':
     graph_widget.show()
 
     # # create node with custom text color and disable it.
-    n_basic_a = graph.create_node(
-        'nodes.Pandas.LoadFileNode', text_color='#feab20')
+    read_file_node = graph.create_node('nodes.Pandas.LoadFileNode', text_color='#feab20')
+    read_file_node.set_pos(-400,0)
 
     # # create node and set a custom icon.
-    n_basic_b = graph.create_node(
-        'nodes.Pandas.GetColumnNode')#, name='custom icon')
+    get_column_node = graph.create_node('nodes.Pandas.GetColumnNode')
 
-    n_basic_c = graph.create_node(
-        'Matplotlib.PltNode')#, name='custom icon')
+    plot_node = graph.create_node('Matplotlib.PltNode')
+    plot_node.set_pos(400,0)
+    
+    read_file_node.set_output(0, get_column_node.input(0))
+    get_column_node.set_output(0, plot_node.input(0))
+    
     # n_basic_b.set_icon(
     #     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'star.png')
     # )

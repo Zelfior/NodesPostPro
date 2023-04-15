@@ -22,6 +22,10 @@ class PltCanvasWidget(QtWidgets.QWidget):
         layout.addWidget(self.canvas)
 
 
+    def get_value(self):
+        widget = self.get_custom_widget()
+        return ''
+
 
 
 

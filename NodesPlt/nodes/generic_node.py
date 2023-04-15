@@ -170,9 +170,14 @@ class GenericNode(BaseNode):
         self.check_inputs()
 
         if self.get_property("is_valid"):
+            self.is_reseting = True
+            self.set_valid_color()
+            self.is_reseting = False
+
             self.update_from_input()
         else:
             self.is_reseting = True
+            self.set_invalid_color()
             self.reset_outputs()
             self.is_reseting = False
 
@@ -280,3 +285,15 @@ class GenericNode(BaseNode):
             self.output_properties[output_name].set_property(value)
         else:
             raise ValueError
+
+    """
+        Changes the node to red as its inputs are invalid
+    """
+    def set_invalid_color(self):
+        self.set_property ('color', (40, 0, 0, 255))
+
+    """
+        Changes the node to gray as its inputs are valid
+    """
+    def set_valid_color(self):
+        self.set_property('color', (13, 18, 23, 255))

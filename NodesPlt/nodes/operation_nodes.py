@@ -100,6 +100,6 @@ class GetAverageNode(GenericNode):
     
 
     def update_from_input(self):
-        self.set_output_property('Output Float', 10000.0)
+        self.set_output_property('Output Float', float(self.get_value_from_port("Input Array").get_property().mean()))
 
         #self.view.widget['Value'].clear()

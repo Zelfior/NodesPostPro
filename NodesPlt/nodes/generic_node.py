@@ -91,7 +91,7 @@ class InformationLabelWidget(NodeBaseWidget):
         self.set_name('Information widget')
 
         # set the label above the widget.
-        self.set_label('Custom Widget')
+        # self.set_label('Custom Widget')
 
         self.label_widget = LabelWidget(name = 'Information')
 
@@ -257,6 +257,8 @@ class GenericNode(BaseNode):
             self.reset_outputs()
             self.is_reseting = False
 
+        self.view.draw_node()
+        self.update()
         self.propagate()
 
 

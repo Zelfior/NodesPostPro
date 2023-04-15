@@ -13,7 +13,7 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes
+from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes, cast_nodes
 
 if __name__ == '__main__':
 
@@ -32,14 +32,41 @@ if __name__ == '__main__':
 
     # registered example nodes.
     graph.register_nodes([
+        #   Input nodes
         input_nodes.InputFloatNode,
         input_nodes.InputIntegerNode,
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
+
+        #   Cast nodes
+        cast_nodes.FloatToIntegerCastNode,
+        cast_nodes.FloatToStringCastNode,
+        cast_nodes.FloatToBooleanCastNode,
+        
+        cast_nodes.IntegerToFloatCastNode,
+        cast_nodes.IntegerToStringCastNode,
+        cast_nodes.IntegerToBooleanCastNode,
+        
+        cast_nodes.StringToIntegerCastNode,
+        cast_nodes.StringToFloatCastNode,
+        cast_nodes.StringToBooleanCastNode,
+        
+        cast_nodes.BooleanToIntegerCastNode,
+        cast_nodes.BooleanToStringCastNode,
+        cast_nodes.BooleanToFloatCastNode,
+        
+        cast_nodes.DataFrameToArrayCastNode,
+        cast_nodes.ArrayToDataFrameCastNode,
+
+        #   Operation nodes
         operation_nodes.MultiplyNode,
         operation_nodes.GetAverageNode,
+
+        #   Pandas nodes
         read_file_nodes.LoadFileNode,
         get_column_nodes.GetColumnNode,
+        
+        #   Matplotlib nodes
         plt_node.PltNode
     ])
 
@@ -49,11 +76,11 @@ if __name__ == '__main__':
     graph_widget.show()
 
     # # create node with custom text color and disable it.
-    read_file_node = graph.create_node('nodes.Pandas.LoadFileNode', text_color='#feab20')
+    read_file_node = graph.create_node('Pandas.LoadFileNode', text_color='#feab20')
     read_file_node.set_pos(-400,0)
 
     # # create node and set a custom icon.
-    get_column_node = graph.create_node('nodes.Pandas.GetColumnNode')
+    get_column_node = graph.create_node('Pandas.GetColumnNode')
 
     plot_node = graph.create_node('Matplotlib.PltNode')
     plot_node.set_pos(400,0)

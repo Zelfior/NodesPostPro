@@ -10,7 +10,7 @@ class LoadFileNode(GenericNode):
     """
 
     # unique node identifier.
-    __identifier__ = 'nodes.Pandas'
+    __identifier__ = 'Pandas'
 
     # initial default node name.
     NODE_NAME = 'Read CSV file'

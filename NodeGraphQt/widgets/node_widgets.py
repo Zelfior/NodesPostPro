@@ -194,7 +194,7 @@ class NodeBaseWidget(QtWidgets.QGraphicsProxyWidget):
         Args:
             text (str): new text value.
         """
-        raise NotImplementedError
+        raise NotImplementedError("class:", self._name)
 
     def get_custom_widget(self):
         """

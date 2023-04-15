@@ -32,6 +32,9 @@ class GetColumnNode(GenericNode):
         #   Create the QComboBox menu to select the desired column.
         self.add_combo_menu('Column name', 'Column name', items=[])
 
+        self.add_label("Information")
+        self.change_label("Information", "No information", False)
+
 
     def check_inputs(self):
         input_given = self.get_value_from_port("Input DataFrame")
@@ -43,6 +46,13 @@ class GetColumnNode(GenericNode):
         self.set_property("is_valid", input_given is not None \
                                             and input_given.is_defined() \
                                                 and input_given.get_property_type() == PortValueType.PD_DATAFRAME)
+        
+        if input_given is None:
+            self.change_label("Information", "Input not plugged.", True)
+        elif not input_given.is_defined():
+            self.change_label("Information", "No DataFrame defined at the plugged port.", True)
+        elif not input_given.get_property_type() == PortValueType.PD_DATAFRAME:
+            self.change_label("Information", "Plugged port is not a DataFrame.", True)
     
     def update_from_input(self):
         #   Called only if check_inputs returned True:
@@ -53,6 +63,8 @@ class GetColumnNode(GenericNode):
             self.view.widgets["Column name"].add_items(list(self.get_value_from_port("Input DataFrame").get_property().columns))
 
         self.set_output_property('Output Array', self.get_value_from_port("Input DataFrame").get_property()[self.get_property("Column name")].to_frame())
+        
+        self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output Array").get_property())), False)
 
     def reset_outputs(self):
         super(GetColumnNode, self).reset_outputs()

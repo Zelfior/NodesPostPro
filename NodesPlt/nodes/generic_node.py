@@ -1,8 +1,8 @@
-from NodeGraphQt import BaseNode
+from NodeGraphQt import BaseNode, NodeBaseWidget
 from enum import Enum
 import pandas as pd
 import numpy as np
-
+from Qt import QtWidgets
 """
     All value type that can be exchanged between nodes
 """
@@ -55,6 +55,61 @@ def check_type(value, enum_value):
     else:
         raise ValueError
     
+
+class LabelWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None, name=''):
+        super(LabelWidget, self).__init__(parent)
+
+        self.label_widget = QtWidgets.QLabel('Information')
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.label_widget)
+
+    def get_value(self):
+        return self.label_widget.text()
+
+    def set_value(self, value):
+        return self.label_widget.setText(value)
+    
+    def clear(self):
+        self.label_widget.clear()
+    
+    def setText(self, label_value):
+        self.label_widget.setText(label_value)
+    
+    def update(self):
+        self.label_widget.update()
+
+
+
+class InformationLabelWidget(NodeBaseWidget):
+    def __init__(self, parent=None, name=''):
+        super(InformationLabelWidget, self).__init__(parent)
+
+        # set the name for node property.
+        self.set_name('Information widget')
+
+        # set the label above the widget.
+        self.set_label('Custom Widget')
+
+        self.label_widget = LabelWidget(name = 'Information')
+
+        self.set_custom_widget(self.label_widget)
+
+    def get_value(self):
+        return self.label_widget.text()
+
+    def set_value(self, value):
+        return self.set_text(value)
+    
+    def set_text(self, label_value, color):
+        self.label_widget.clear()
+        self.label_widget.setText(label_value)
+        self.label_widget.setStyleSheet("color: "+color)
+        self.label_widget.update()
+
+
 
 class Container():
     """
@@ -120,14 +175,35 @@ class GenericNode(BaseNode):
 
         self.output_properties = {}
         self.input_properties = {}
+        self.label_list = {}
 
+
+    def add_label(self, label_name):
+        if label_name in self.label_list:
+            raise ValueError("Label name already exists")
+        else:
+            self.label_list[label_name] = InformationLabelWidget(self.view, name = label_name)
+            # self.add_custom_widget(self.label_list[label_name])
+            self.view.add_widget(self.label_list[label_name])
+            self.view.draw_node()
+
+
+    def change_label(self, label_name, label_value, error):
+        if label_name in self.label_list:
+            if error:
+                self.label_list[label_name].set_text(label_value, 'red')
+            else:
+                self.label_list[label_name].set_text(label_value, 'white')
+
+        else:
+            raise ValueError("Label name doesn't exists")
 
     """
         BaseNode set_property overload:
             Starts the node output property update process when a property is changed if the property is not "is_valid" and if the node is not resetting (prevents infinite loops)
     """
     def set_property(self, name, value, push_undo=True):
-        if name == "is_valid":
+        if name in ["is_valid", "color"]:
             super(GenericNode, self).set_property(name, value, push_undo=push_undo)
         elif ( not name in self.output_type_list ) or ( check_type(value, self.output_type_list[name]) ):
             super(GenericNode, self).set_property(name, value, push_undo=push_undo)
@@ -242,9 +318,9 @@ class GenericNode(BaseNode):
     """
         Add an input node and create its empty container
     """
-    def add_custom_input(self, input_name, type_enum):
+    def add_custom_input(self, input_name, type_enum, multi_input=False):
         self.create_input_property(input_name, type_enum)
-        self.add_input(input_name, color=get_color_from_enum(type_enum))
+        self.add_input(input_name, color=get_color_from_enum(type_enum), multi_input=multi_input)
 
         
     """

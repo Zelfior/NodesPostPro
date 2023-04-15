@@ -95,7 +95,7 @@ class PltNode(GenericNode):
         super(PltNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input Array', PortValueType.PD_DATAFRAME)
+        self.add_custom_input('Input Array', PortValueType.PD_DATAFRAME, multi_input=True)
         
         self.add_custom_input('Title', PortValueType.STRING)
         
@@ -114,6 +114,8 @@ class PltNode(GenericNode):
         self.view.draw_node()
 
         self.plot_widget.update_plot()
+        
+        self.add_label("Information")
 
     def update_from_input(self):
         if not self.get_value_from_port("Input Array") == None:

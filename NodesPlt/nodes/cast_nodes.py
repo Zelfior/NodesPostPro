@@ -4,6 +4,17 @@ from nodes.generic_node import GenericNode, PortValueType
 import numpy as np
 import pandas as pd
 
+def is_float(string):
+    try:
+        float(string)
+        return True
+    except ValueError:
+        return False
+    
+
+
+
+
 class GenericCastNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Cast Variables'
@@ -204,7 +215,7 @@ class StringToFloatCastNode(GenericCastNode):
         super(StringToFloatCastNode, self).check_inputs()
 
         if self.get_property("is_valid"):
-            self.set_property("is_valid",  self.input_properties["Input"].get_property().lstrip("-").isdigit())
+            self.set_property("is_valid",  is_float(self.get_value_from_port("Input").get_property()))
     
     def update_from_input(self):
         output_value = float(self.get_value_from_port("Input").get_property())
@@ -227,10 +238,10 @@ class StringToIntegerCastNode(GenericCastNode):
         
     
     def check_inputs(self):
-        super(StringToFloatCastNode, self).check_inputs()
+        super(StringToIntegerCastNode, self).check_inputs()
 
         if self.get_property("is_valid"):
-            self.set_property("is_valid",  self.input_properties["Input"].get_property().lstrip("-").isdigit())
+            self.set_property("is_valid",  self.get_value_from_port("Input").get_property().lstrip("-").isdigit())
 
     def update_from_input(self):
         output_value = int(self.get_value_from_port("Input").get_property())
@@ -253,10 +264,10 @@ class StringToBooleanCastNode(GenericCastNode):
         
     
     def check_inputs(self):
-        super(StringToFloatCastNode, self).check_inputs()
+        super(StringToBooleanCastNode, self).check_inputs()
 
         if self.get_property("is_valid"):
-            self.set_property("is_valid",  self.input_properties["Input"].get_property() in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.'])
+            self.set_property("is_valid",  self.get_value_from_port("Input").get_property() in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.'])
 
     def update_from_input(self):
         output_value = bool(self.get_value_from_port("Input").get_property())
@@ -380,7 +391,7 @@ class ArrayToDataFrameCastNode(GenericCastNode):
         
     
     def check_inputs(self):
-        super(StringToFloatCastNode, self).check_inputs()
+        super(ArrayToDataFrameCastNode, self).check_inputs()
 
         if self.get_property("is_valid"):
 

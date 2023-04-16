@@ -15,6 +15,7 @@ class PortValueType(Enum):
     LIST = 5
     NP_ARRAY = 6
     PD_DATAFRAME = 7
+    PLOTTABLE = 8
 
 """
     Color association with the port type enum
@@ -34,6 +35,8 @@ def get_color_from_enum(enum_value):
         return (100, 100, 255)
     elif enum_value == PortValueType.BOOL:
         return (255, 255, 255)
+    elif enum_value == PortValueType.PLOTTABLE:
+        return (255, 50, 50)
     
 """
     Checks if the given value type corresponds to the enum.
@@ -53,6 +56,8 @@ def check_type(value, enum_value):
         return type(value) == pd.DataFrame
     elif enum_value == PortValueType.BOOL:
         return type(value) == bool
+    elif enum_value == PortValueType.PLOTTABLE:
+        return type(value) in [list, np.ndarray, pd.DataFrame]
     else:
         raise ValueError
     
@@ -170,7 +175,7 @@ class GenericNode(BaseNode):
 
         self.output_type_list = {"is_valid": PortValueType.BOOL}
 
-        self.create_property("is_valid", True)
+        self.create_property("is_valid", False)
 
         self.is_reseting = False
 
@@ -266,15 +271,24 @@ class GenericNode(BaseNode):
     """
         Get the value associated to the port to which the given input port is connected
     """
-    def get_value_from_port(self, port_name):
+    def get_value_from_port(self, port_name, multiple = False):
         #   If the given port name is not correct, raises an error.
         if port_name in self.inputs().keys():
             #   If the port is not plugged, returns None
             if len(self.inputs()[port_name].connected_ports()) > 0:
                 # Checks if the port to which the port is connected container is defined. If yes, returns its property, returns None otherwise
-                connected_port_name = self.inputs()[port_name].connected_ports()[0].name()
-                if self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name).is_defined():
-                    return self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name)
+                #   If multiple is at True, it will return the values of each connected ports.
+                if multiple:
+                    outputs = []
+                    for connected_port in range(len(self.inputs()[port_name].connected_ports())):
+                        connected_port_name = self.inputs()[port_name].connected_ports()[connected_port].name()
+                        if self.inputs()[port_name].connected_ports()[connected_port].node().get_output_property(connected_port_name).is_defined():
+                            outputs.append(self.inputs()[port_name].connected_ports()[connected_port].node().get_output_property(connected_port_name))
+                    return outputs
+                else:
+                    connected_port_name = self.inputs()[port_name].connected_ports()[0].name()
+                    if self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name).is_defined():
+                        return self.inputs()[port_name].connected_ports()[0].node().get_output_property(connected_port_name)
             return None
         else:
             raise ValueError("Wrong port name given:", port_name)

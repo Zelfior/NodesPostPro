@@ -52,7 +52,7 @@ class LoadNumpyNode(GenericNode):
 
     def update_from_input(self):
         #   Called only if check_inputs returned True:
-        #       we set in the "Output DataFrame" output the dataframe associated to the given path
+        #       we set in the "Output Array" output the array associated to the given path
         self.get_output_property("Output Array").set_property(self.data)
         
         self.change_label("Information", "Array shape : "+str(self.data.shape), False)

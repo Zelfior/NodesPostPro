@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import os
 
-from nodes.generic_node import GenericNode, PortValueType
+from nodes.generic_node import GenericNode, PortValueType, check_type
 
 class PltCanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -89,13 +89,13 @@ class PltNode(GenericNode):
     __identifier__ = 'Matplotlib'
 
     # initial default node name.
-    NODE_NAME = 'plot input array'
+    NODE_NAME = 'plot Input Plottable'
 
     def __init__(self):
         super(PltNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input Array', PortValueType.PD_DATAFRAME, multi_input=True)
+        self.add_custom_input('Input Plottable', PortValueType.PLOTTABLE, multi_input=True)
         
         self.add_custom_input('Title', PortValueType.STRING)
         
@@ -118,22 +118,28 @@ class PltNode(GenericNode):
         self.add_label("Information")
 
     def update_from_input(self):
-        if not self.get_value_from_port("Input Array") == None:
-            self.input_array = self.get_value_from_port("Input Array").get_property()
+        if not self.get_value_from_port("Input Plottable") == None:
+            self.input_arrays = [element.get_property() for element in self.get_value_from_port("Input Plottable", multiple=True)]
 
-            self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_array))), 'y':self.input_array}])
+            self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_arrays[i]))), 'y':self.input_arrays[i]} for i in range(len(self.input_arrays))])
 
 
 
     def check_inputs(self):
-        input_given = self.get_value_from_port("Input Array")
+        input_given = self.get_value_from_port("Input Plottable")
         
         self.set_property("is_valid", input_given is not None \
                                             and input_given.is_defined() \
-                                                and input_given.get_property_type() == PortValueType.PD_DATAFRAME)
+                                                and check_type(input_given.get_property(), PortValueType.PLOTTABLE))
+        
+        if input_given is None or not input_given.is_defined():
+                self.change_label("Information", "Input not plugged to a defined plottable.", True)
+        elif not check_type(input_given.get_property(), PortValueType.PLOTTABLE):
+                self.change_label("Information", "Plugged is not valid plottable.", True)
 
     def reset_outputs(self):
         super(PltNode, self).reset_outputs()
 
         self.plot_widget.update_plot_list([])
+        self.change_label("Information", "", False)
 

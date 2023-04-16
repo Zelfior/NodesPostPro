@@ -3,6 +3,7 @@ from enum import Enum
 import pandas as pd
 import numpy as np
 from Qt import QtWidgets
+
 """
     All value type that can be exchanged between nodes
 """

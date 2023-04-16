@@ -13,7 +13,7 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes, cast_nodes
+from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes, cast_nodes, pickle_nodes, numpy_nodes
 
 if __name__ == '__main__':
 
@@ -65,9 +65,16 @@ if __name__ == '__main__':
         #   Pandas nodes
         read_file_nodes.LoadFileNode,
         get_column_nodes.GetColumnNode,
+
+        #   Numpy nodes
+        numpy_nodes.SetAxisNode,
         
         #   Matplotlib nodes
-        plt_node.PltNode
+        plt_node.PltNode,
+        
+        #   Pickle nodes
+        pickle_nodes.LoadNumpyNode,
+        pickle_nodes.LoadPandasNode
     ])
 
     # show the node graph widget.

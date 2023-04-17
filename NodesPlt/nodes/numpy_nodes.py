@@ -73,6 +73,9 @@ class IntSelector_Widget(NodeBaseWidget):
 
     def set_range(self, val_min, val_max):
         return self.int_selector_widget.set_range(val_min, val_max)
+        
+    def set_value(self, value):
+        return self.int_selector_widget.set_value(value)
     
 
 class SetAxisNode(GenericNode):
@@ -101,6 +104,9 @@ class SetAxisNode(GenericNode):
 
         self.axis_widget = IntSelector_Widget(self.view, name="Axis", label='Axis to set')
         self.value_widget = IntSelector_Widget(self.view, name="Value", label='Axis value')
+
+        self.create_property("Axis", 0)
+        self.create_property("Value", 0)
 
         self.axis_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
         self.value_widget.value_changed.connect(lambda k, v: self.set_property(k, v))

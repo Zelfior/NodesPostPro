@@ -16,6 +16,7 @@ class PortValueType(Enum):
     NP_ARRAY = 6
     PD_DATAFRAME = 7
     PLOTTABLE = 8
+    PLOT_ELEMENT = 9
 
 """
     Color association with the port type enum
@@ -37,6 +38,8 @@ def get_color_from_enum(enum_value):
         return (255, 255, 255)
     elif enum_value == PortValueType.PLOTTABLE:
         return (255, 50, 50)
+    elif enum_value == PortValueType.PLOT_ELEMENT:
+        return (255, 50, 50)
     
 """
     Checks if the given value type corresponds to the enum.
@@ -57,6 +60,8 @@ def check_type(value, enum_value):
     elif enum_value == PortValueType.BOOL:
         return type(value) == bool
     elif enum_value == PortValueType.PLOTTABLE:
+        return type(value) in [list, np.ndarray, pd.DataFrame]
+    elif enum_value == PortValueType.PLOT_ELEMENT:
         return type(value) in [list, np.ndarray, pd.DataFrame]
     else:
         raise ValueError

@@ -83,8 +83,79 @@ class pltWidget(NodeBaseWidget):
 
 
 
-class PltNode(GenericNode):
+class PlotElement():
+    def __init__(self, plot_type):
+        self.plot_type = plot_type
 
+        self.X = None
+        self.Y = None
+
+        self.defined = False
+
+        self.name = ""
+
+    """
+        Sets the contained value as none, and sets as not defined
+    """
+    def reset(self):
+        self.X = None
+        self.Y = None
+
+        self.defined = False
+        
+        self.name = ""
+
+    """
+        If the given value type correspond to the container enum, the value is updated and is set as defined
+    """
+    def set_property(self, value):
+        if check_type(value, self.enum_value):
+            self.countained_value = value
+            self.defined = True
+        else:
+            raise TypeError
+
+    """
+        Returns the contained value
+    """
+    def get_property(self):
+        return self.countained_value
+
+    """
+        Returns if the container is defined
+    """
+    def is_defined(self):
+        return self.defined
+
+    """
+        Returns the container type enum
+    """
+    def get_property_type(self):
+        return self.enum_value
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class PltElementNode(GenericNode):
+
+    def __init__(self):
+        super(PltElementNode, self).__init__()
+
+
+class PlotNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
 
@@ -92,7 +163,46 @@ class PltNode(GenericNode):
     NODE_NAME = 'plot Input Plottable'
 
     def __init__(self):
-        super(PltNode, self).__init__()
+        super(PlotNode, self).__init__()
+
+        self.add_custom_input('X', PortValueType.PLOTTABLE)
+        self.add_custom_input('Y', PortValueType.PLOTTABLE)
+
+        self.add_custom_input('label', PortValueType.STRING)
+
+        self.add_custom_input('color', PortValueType.STRING)
+
+        self.add_custom_input('linestyle', PortValueType.STRING)
+        self.add_custom_input('linewidth ', PortValueType.STRING)
+        
+        self.add_custom_input('marker', PortValueType.STRING)
+        self.add_custom_input('markersize', PortValueType.STRING)
+
+        self.add_custom_output('Plot Element', PortValueType.PLOT_ELEMENT)
+
+
+
+
+    # def update_from_input(self):
+
+
+    # def check_inputs(self):
+
+
+
+
+
+
+class PltShowNode(GenericNode):
+
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Show Plot'
+
+    def __init__(self):
+        super(PltShowNode, self).__init__()
 
         # create input & output ports
         self.add_custom_input('Input Plottable', PortValueType.PLOTTABLE, multi_input=True)

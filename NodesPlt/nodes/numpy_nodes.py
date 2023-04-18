@@ -92,12 +92,11 @@ class SetAxisNode(GenericNode):
     def __init__(self):
         super(SetAxisNode, self).__init__()
 
-        #   Create input port for input dataframe
+        #   Create input port for input array
         self.add_custom_input('Input Array', PortValueType.NP_ARRAY)
 
         #   Create output ports for :
-        #       The output dataframe corresponding to the given column
-        #       The selected column name
+        #       The output array corresponding to the given axis value
         self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
 
         #   Create the QComboBox menu to select the desired column.
@@ -125,7 +124,7 @@ class SetAxisNode(GenericNode):
         #   Checks if the Input DataFrame is:
         #       -   plugged
         #       -   defined (if the previous node has its outputs defined)
-        #       -   is a pandas DataFrame
+        #       -   is a numpy Array
         self.set_property("is_valid", input_given is not None \
                                             and input_given.is_defined() \
                                                 and input_given.get_property_type() == PortValueType.NP_ARRAY)
@@ -136,13 +135,6 @@ class SetAxisNode(GenericNode):
             self.change_label("Information", "Plugged port is not a Array.", True)
     
     def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       -   If the combo widget labels are different from the DataFrame columns, we update the combo widget
-        #       -   The "Output DataFrame" output becomes the column asked as a DataFrame
-        # if list(self.get_value_from_port("Input DataFrame").get_property().columns) != self.view.widgets["Column name"].all_items():
-        #     self.view.widgets["Column name"].clear()
-        #     self.view.widgets["Column name"].add_items(list(self.get_value_from_port("Input DataFrame").get_property().columns))
-
         if self.axis_widget.get_range()[-1] != len(self.get_value_from_port("Input Array").get_property().shape) - 1:
             self.axis_widget.set_range(0, len(self.get_value_from_port("Input Array").get_property().shape) - 1)
 
@@ -157,7 +149,5 @@ class SetAxisNode(GenericNode):
     def reset_outputs(self):
         super(SetAxisNode, self).reset_outputs()
 
-        #   If this node is reseted, the combo widget also needs to be cleared
-        # self.view.widgets["Column name"].clear()
-        # self.view.widgets["Column name"].add_items([])
-
+        self.axis_widget.set_range(0, 0)
+        self.value_widget.set_range(0, 0)

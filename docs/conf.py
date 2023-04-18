@@ -47,8 +47,10 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
+    'sphinx.ext.inheritance_diagram',
     'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
+    'autodocsumm',
 ]
 
 intersphinx_mapping = {
@@ -56,8 +58,25 @@ intersphinx_mapping = {
     'PySide2': ('https://doc.qt.io/qtforpython/', None),
 }
 
-# order of members.
-autodoc_member_order = 'groupwise'
+# inheritance diagram remapping.
+inheritance_alias = {
+    'NodeGraphQt.base.graph.NodeGraph': 'NodeGraphQt.NodeGraph',
+    'NodeGraphQt.base.graph.SubGraph': 'NodeGraphQt.SubGraph',
+    'NodeGraphQt.base.node.NodeObject': 'NodeGraphQt.NodeObject',
+    'NodeGraphQt.base.port.Port': 'NodeGraphQt.Port',
+    'NodeGraphQt.nodes.backdrop_node.BackdropNode': 'NodeGraphQt.BackdropNode',
+    'NodeGraphQt.nodes.base_node.BaseNode': 'NodeGraphQt.BaseNode',
+    'NodeGraphQt.nodes.base_node_circle.BaseNodeCircle': 'NodeGraphQt.BaseNodeCircle',
+    'NodeGraphQt.nodes.group_node.GroupNode': 'NodeGraphQt.GroupNode',
+}
+
+# autodoc options.
+autodoc_default_options = {
+    'autosummary': True,
+    'members': True,
+    'member-order': 'bysource',
+    'undoc-members': False,
+}
 
 # autosummary generate stubs.
 autosummary_generate = True

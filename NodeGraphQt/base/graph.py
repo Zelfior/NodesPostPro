@@ -39,7 +39,8 @@ class NodeGraph(QtCore.QObject):
     The ``NodeGraph`` class is the main controller for managing all nodes
     and the node graph.
 
-    Inherited from: :class:`PySide2.QtCore.QObject`
+    .. inheritance-diagram:: NodeGraphQt.NodeGraph
+        :top-classes: PySide2.QtCore.QObject
 
     .. image:: _images/graph.png
         :width: 60%
@@ -584,16 +585,17 @@ class NodeGraph(QtCore.QObject):
 
     def set_grid_mode(self, mode=None):
         """
-        Set node graph grid mode.
+        Set node graph background grid mode.
 
-        Note:
-            By default grid mode is set to "VIEWER_GRID_LINES".
+        (default: :attr:`NodeGraphQt.constants.ViewerEnum.GRID_DISPLAY_LINES`).
 
-            Node graph background types:
+        See: :attr:`NodeGraphQt.constants.ViewerEnum`
 
-            * :attr:`NodeGraphQt.constants.ViewerEnum.GRID_DISPLAY_NONE.value`
-            * :attr:`NodeGraphQt.constants.ViewerEnum.GRID_DISPLAY_DOTS.value`
-            * :attr:`NodeGraphQt.constants.ViewerEnum.GRID_DISPLAY_LINES.value`
+        .. code-block:: python
+            :linenos:
+
+            graph = NodeGraph()
+            graph.set_grid_mode(ViewerEnum.CURVED.value)
 
         Args:
             mode (int): background style.
@@ -694,7 +696,8 @@ class NodeGraph(QtCore.QObject):
         """
         Returns the context menu specified by the name.
 
-        Menu Types:
+        menu types:
+
             - ``"graph"`` context menu from the node graph.
             - ``"nodes"`` context menu for the nodes.
 
@@ -839,7 +842,8 @@ class NodeGraph(QtCore.QObject):
         """
         Disable/Enable context menus from the node graph.
 
-        Menu Types:
+        menu types:
+
             - ``"all"`` all context menus from the node graph.
             - ``"graph"`` context menu from the node graph.
             - ``"nodes"`` context menu for the nodes.
@@ -946,19 +950,19 @@ class NodeGraph(QtCore.QObject):
 
     def set_pipe_style(self, style=PipeLayoutEnum.CURVED.value):
         """
-        Set node graph pipes to be drawn as straight, curved or angled.
+        Set node graph pipes to be drawn as curved `(default)`, straight or angled.
+
+        .. code-block:: python
+            :linenos:
+
+            graph = NodeGraph()
+            graph.set_pipe_style(PipeLayoutEnum.CURVED.value)
+
+        See: :attr:`NodeGraphQt.constants.PipeLayoutEnum`
 
         .. image:: _images/pipe_layout_types.gif
             :width: 80%
 
-        Note:
-            By default pipe layout is set to "PIPE_LAYOUT_CURVED".
-
-            Pipe Layout Styles:
-
-            * :attr:`NodeGraphQt.constants.PipeLayoutEnum.CURVED.value`
-            * :attr:`NodeGraphQt.constants.PipeLayoutEnum.STRAIGHT.value`
-            * :attr:`NodeGraphQt.constants.PipeLayoutEnum.ANGLE.value`
 
         Args:
             style (int): pipe layout style.
@@ -991,21 +995,20 @@ class NodeGraph(QtCore.QObject):
 
         `Implemented in` ``v0.3.0``
 
-        See Also:
-            :meth:`NodeGraph.layout_direction`,
-            :meth:`NodeObject.set_layout_direction`
+        **Layout Types:**
 
-        Note:
-            Node Graph Layout Types:
+        - :attr:`NodeGraphQt.constants.LayoutDirectionEnum.HORIZONTAL`
+        - :attr:`NodeGraphQt.constants.LayoutDirectionEnum.VERTICAL`
 
-            * :attr:`NodeGraphQt.constants.LayoutDirectionEnum.HORIZONTAL`
-            * :attr:`NodeGraphQt.constants.LayoutDirectionEnum.VERTICAL`
-
-            .. image:: _images/layout_direction_switch.gif
-                :width: 300px
+        .. image:: _images/layout_direction_switch.gif
+            :width: 300px
 
         Warnings:
             This function does not register to the undo stack.
+
+        See Also:
+            :meth:`NodeGraph.layout_direction`,
+            :meth:`NodeObject.set_layout_direction`
 
         Args:
             direction (int): layout direction.
@@ -1496,6 +1499,7 @@ class NodeGraph(QtCore.QObject):
         nodes_data = {}
 
         # serialize graph session.
+        serial_data['graph']['layout_direction'] = self.layout_direction()
         serial_data['graph']['acyclic'] = self.acyclic()
         serial_data['graph']['pipe_collision'] = self.pipe_collision()
         serial_data['graph']['pipe_slicing'] = self.pipe_slicing()
@@ -1555,7 +1559,9 @@ class NodeGraph(QtCore.QObject):
         """
         # update node graph properties.
         for attr_name, attr_value in data.get('graph', {}).items():
-            if attr_name == 'acyclic':
+            if attr_name == 'layout_direction':
+                self.set_layout_direction(attr_value)
+            elif attr_name == 'acyclic':
                 self.set_acyclic(attr_value)
             elif attr_name == 'pipe_collision':
                 self.set_pipe_collision(attr_value)
@@ -1611,6 +1617,9 @@ class NodeGraph(QtCore.QObject):
                                         in_port.model.multi_connection])
                 if allow_connection:
                     self._undo_stack.push(PortConnectedCmd(in_port, out_port))
+
+                # Run on_input_connected to ensure connections are fully set up after deserialization.
+                in_node.on_input_connected(in_port, out_port)
 
         node_objs = nodes.values()
         if relative_pos:
@@ -2221,9 +2230,11 @@ class NodeGraph(QtCore.QObject):
 class SubGraph(NodeGraph):
     """
     The ``SubGraph`` class is just like the ``NodeGraph`` but is the main
-    controller for managing the expanded node graph for a group node.
+    controller for managing the expanded node graph for a
+    :class:`NodeGraphQt.GroupNode`.
 
-    Inherited from: :class:`NodeGraphQt.NodeGraph`
+    .. inheritance-diagram:: NodeGraphQt.SubGraph
+        :top-classes: PySide2.QtCore.QObject
 
     .. image:: _images/sub_graph.png
         :width: 70%

@@ -17,7 +17,9 @@ class Port(object):
     """
     The ``Port`` class is used for connecting one node to another.
 
-    .. image:: ../_images/port.png
+    .. inheritance-diagram:: NodeGraphQt.Port
+
+    .. image:: _images/port.png
         :width: 50%
 
     See Also:

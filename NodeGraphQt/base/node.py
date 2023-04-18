@@ -1,10 +1,11 @@
 #!/usr/bin/python
+import functools
+
+import pandas as pd
 from NodeGraphQt.base.commands import PropertyChangedCmd
 from NodeGraphQt.base.model import NodeModel
 from NodeGraphQt.constants import NodePropWidgetEnum
 
-import functools
-import pandas as pd
 
 def are_identical(dataframe_1:pd.DataFrame, dataframe_2:pd.DataFrame):
     is_empty_1 = dataframe_1.empty
@@ -50,35 +51,66 @@ class _ClassProperty(object):
         return self.f(owner)
 
 
-class NodeObject(Decoratable):#, metaclass=LogMethodCalls):
+class NodeObject(Decoratable):
     """
     The ``NodeGraphQt.NodeObject`` class is the main base class that all
     nodes inherit from.
 
-    **Inherited by:**
-        :class:`NodeGraphQt.BaseNode`,
-        :class:`NodeGraphQt.BackdropNode`
+    .. inheritance-diagram:: NodeGraphQt.NodeObject
 
     Args:
         qgraphics_item (AbstractNodeItem): QGraphicsItem item used for drawing.
-
-            .. code-block:: python
-
-                # snippet taken from the NodeGraphQt.BaseNode class.
-
-                class BaseNode(NodeObject):
-
-                    def __init__(self, qgraphics_item=None):
-                        qgraphics_item = qgraphics_item or NodeItem
-                        super(BaseNode, self).__init__(qgraphics_views)
-
     """
 
-    # Unique node identifier domain. `eg.` ``"io.github.jchanvfx"``
     __identifier__ = 'nodeGraphQt.nodes'
+    """
+    Unique node identifier domain. eg. ``"io.github.jchanvfx"``
 
-    # Base node name.
+    .. important:: re-implement this attribute to provide a unique node type.
+    
+        .. code-block:: python
+            :linenos:
+    
+            from NodeGraphQt import NodeObject
+    
+            class ExampleNode(NodeObject):
+    
+                # unique node identifier domain.
+                __identifier__ = 'io.github.jchanvfx'
+    
+                def __init__(self):
+                    ...
+    
+    :return: node type domain.
+    :rtype: str
+    
+    :meta hide-value:
+    """
+
     NODE_NAME = None
+    """
+    Initial base node name.
+
+    .. important:: re-implement this attribute to provide a base node name.
+    
+        .. code-block:: python
+            :linenos:
+    
+            from NodeGraphQt import NodeObject
+    
+            class ExampleNode(NodeObject):
+    
+                # initial default node name.
+                NODE_NAME = 'Example Node'
+    
+                def __init__(self):
+                    ...
+    
+    :return: node name
+    :rtype: str
+    
+    :meta hide-value:
+    """
 
     def __init__(self, qgraphics_item=None):
         """
@@ -110,10 +142,10 @@ class NodeObject(Decoratable):#, metaclass=LogMethodCalls):
     def type_(cls):
         """
         Node type identifier followed by the class name.
-        `eg.` ``"com.chantacticvfx.NodeObject"``
+        `eg.` ``"nodeGraphQt.nodes.NodeObject"``
 
         Returns:
-            str: node type.
+            str: node type (``__identifier__.__className__``)
         """
         return cls.__identifier__ + '.' + cls.__name__
 
@@ -123,7 +155,7 @@ class NodeObject(Decoratable):#, metaclass=LogMethodCalls):
         The node unique id.
 
         Returns:
-            str: unique id string.
+            str: unique identifier string to the node.
         """
         return self.model.id
 
@@ -133,7 +165,7 @@ class NodeObject(Decoratable):#, metaclass=LogMethodCalls):
         The parent node graph.
 
         Returns:
-            NodeGraphQt.NodeGraph: node graph.
+            NodeGraphQt.NodeGraph: node graph instance.
         """
         return self._graph
 
@@ -399,6 +431,7 @@ class NodeObject(Decoratable):#, metaclass=LogMethodCalls):
             push_undo (bool): register the command to the undo stack. (default: True)
         """
 
+        # prevent signals from causing a infinite loop.
         if self.get_property(name) == value:
             return
 

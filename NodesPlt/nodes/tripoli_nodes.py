@@ -84,8 +84,28 @@ class tripoli_postpro():
             elif "sigma" in val:
                 self.all_data_sigma.append(data)
 
-        self.all_data_value = np.array(self.all_data_value).reshape((len(self.cell_x_coordinates), len(self.cell_y_coordinates), len(self.cell_z_coordinates)))
-        self.all_data_sigma = np.array(self.all_data_sigma).reshape((len(self.cell_x_coordinates), len(self.cell_y_coordinates), len(self.cell_z_coordinates)))
+        self.all_data_value = np.array(self.all_data_value)[0]
+        self.all_data_sigma = np.array(self.all_data_sigma)[0]
+
+        len_x = len(self.cell_x_coordinates)
+        len_y = len(self.cell_y_coordinates)
+        len_z = len(self.cell_z_coordinates)
+
+        # self.data_value = np.zeros([len_x, len_y, len_z])
+        # self.data_sigma = np.zeros([len_x, len_y, len_z])
+
+        # for i in range(len_x):
+        #     for j in range(len_y):
+        #         for k in range(len_z):
+        #             print(self.all_data_value[i * len_y * len_z + j * len_y + k])
+        #             self.data_value[i, j, k] = self.all_data_value[i * len_y * len_z + j * len_y + k]
+        #             self.data_sigma[i, j, k] = self.all_data_sigma[i * len_y * len_z + j * len_y + k]
+
+        self.data_value = self.all_data_value.reshape([len_z, len_y, len_x], order = "C")
+        self.data_sigma = self.all_data_sigma.reshape([len_z, len_y, len_x], order = "C")
+
+        self.data_value = np.transpose(self.data_value, (2, 1, 0))
+        self.data_sigma = np.transpose(self.data_sigma, (2, 1, 0))
 
         self.cell_x_coordinates = np.array(self.cell_x_coordinates)
         self.cell_y_coordinates = np.array(self.cell_y_coordinates)
@@ -164,8 +184,8 @@ class TripoliExtendedMeshNode(GenericNode):
 
         self.TP.read_data(self.get_property("Filename"))
 
-        self.get_output_property("Value Array").set_property(self.TP.all_data_value)
-        self.get_output_property("Sigma Array").set_property(self.TP.all_data_sigma)
+        self.get_output_property("Value Array").set_property(self.TP.data_value)
+        self.get_output_property("Sigma Array").set_property(self.TP.data_sigma)
 
         self.get_output_property("X bounds").set_property(self.TP.cell_x_bounds)
         self.get_output_property("Y bounds").set_property(self.TP.cell_y_bounds)
@@ -175,7 +195,7 @@ class TripoliExtendedMeshNode(GenericNode):
         self.get_output_property("Y centers").set_property(self.TP.cell_y_coordinates)
         self.get_output_property("Z centers").set_property(self.TP.cell_z_coordinates)
 
-        self.change_label("Size array", "Array shape "+str(self.TP.all_data_value.shape), False)
+        self.change_label("Size array", "Array shape "+str(self.TP.data_value.shape), False)
         self.change_label("Size X bounds" , "X bounds shape "+str(self.TP.cell_x_bounds.shape), False)
         self.change_label("Size Y bounds" , "Y bounds shape "+str(self.TP.cell_y_bounds.shape), False)
         self.change_label("Size Z bounds" , "Z bounds shape "+str(self.TP.cell_z_bounds.shape), False)

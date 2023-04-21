@@ -45,7 +45,7 @@ class pltWidget(NodeBaseWidget):
 
         self.input_arrays = []
 
-        self.plot_parameters= {"legend": False, "x_log":False, "y_log":False}
+        self.plot_parameters= {"legend": False, "x_log":False, "y_log":False, "color_bar":False}
 
         self.title = ""
 
@@ -54,16 +54,35 @@ class pltWidget(NodeBaseWidget):
 
         for element in self.input_arrays:
             if element['element_type'] == "plot":
-                print(element)
                 kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type"]}
-                print("______________________kwargs", kwargs_dict)
                 self.canvas.axes.plot(element['X'], element['Y'], **kwargs_dict)
+                
+            if element['element_type'] == "scatter":
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array"]}
+
+                if "Color array" in element:
+                    if type(element["Color array"]) == pd.DataFrame:
+                        kwargs_dict["c"] = element["Color array"].values.tolist()
+                    else:
+                        kwargs_dict["c"] = list(element["Color array"])
+
+                    print(kwargs_dict["c"])
+
+                    if not "cmap" in kwargs_dict:
+                        kwargs_dict["cmap"] = "viridis"
+                elif "Color" in element:
+                    kwargs_dict["c"] = element["Color"]
+
+                self.canvas.axes.scatter(element['X'], element['Y'], **kwargs_dict)
 
         if not self.title == "":
             self.canvas.title = self.title
 
         if self.plot_parameters["legend"]:
             self.canvas.axes.legend()
+
+        if self.plot_parameters["color_bar"]:
+            self.canvas.fig.colorbar()
             
         if self.plot_parameters["x_log"]:
             self.canvas.axes.set_xscale('log')
@@ -111,13 +130,8 @@ class PltElementNode(GenericNode):
     def update_from_input(self):
         properties_dict = {"element_type": self.element_type}
 
-        
-        print("____________input_properties ____________", self.input_properties)
-
         for input in self.input_properties:
             input_value = self.get_value_from_port(input)
-
-            print("____________testing input ____________", input, input_value)
 
             if input_value is not None:
                 properties_dict[input] = input_value.get_property()
@@ -129,12 +143,13 @@ class PltElementNode(GenericNode):
 
         self.change_label("Information", "", True)
 
+
 class PlotNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
 
     # initial default node name.
-    NODE_NAME = 'plot Input Plottable'
+    NODE_NAME = 'Plt Plot'
 
     def __init__(self):
         super(PlotNode, self).__init__()
@@ -147,10 +162,12 @@ class PlotNode(PltElementNode):
         self.add_custom_input('color', PortValueType.STRING)
 
         self.add_custom_input('linestyle', PortValueType.STRING)
-        self.add_custom_input('linewidth ', PortValueType.STRING)
+        self.add_custom_input('linewidth ', PortValueType.FLOAT)
         
         self.add_custom_input('marker', PortValueType.STRING)
-        self.add_custom_input('markersize', PortValueType.STRING)
+        self.add_custom_input('markersize', PortValueType.FLOAT)
+
+        self.add_custom_input('alpha', PortValueType.FLOAT)
 
         self.add_custom_output('Element', PortValueType.DICT)
 
@@ -190,6 +207,69 @@ class PlotNode(PltElementNode):
 
                     
 
+class ScatterNode(PltElementNode):
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Plt Scatter'
+
+    def __init__(self):
+        super(ScatterNode, self).__init__()
+
+        self.add_custom_input('X', PortValueType.PLOTTABLE)
+        self.add_custom_input('Y', PortValueType.PLOTTABLE)
+
+        self.add_custom_input('label', PortValueType.STRING)
+
+        self.add_custom_input('Color', PortValueType.STRING)
+        
+        self.add_custom_input('Color array', PortValueType.PLOTTABLE)
+        
+        self.add_custom_input('cmap', PortValueType.STRING)
+
+        self.add_custom_input('linestyle', PortValueType.STRING)
+        self.add_custom_input('linewidth ', PortValueType.FLOAT)
+        
+        self.add_custom_input('marker', PortValueType.STRING)
+        self.add_custom_input('markersize', PortValueType.FLOAT)
+
+        self.add_custom_output('Element', PortValueType.DICT)
+
+        self.add_label("Information")
+
+        self.element_type = "scatter"
+
+    def check_inputs(self):
+        input_Y = self.get_value_from_port("Y")
+
+        self.set_property("is_valid", input_Y is not None \
+                                            and input_Y.is_defined() \
+                                                and check_type(input_Y.get_property(), PortValueType.PLOTTABLE))
+
+        if input_Y is None:
+            self.change_label("Information", "Input Y is not defined.", True)
+        elif not input_Y.is_defined():
+            self.change_label("Information", "Input Y is not defined.", True)
+        elif not check_type(input_Y.get_property(), PortValueType.PLOTTABLE):
+            self.change_label("Information", "Input Y is not of the right type.", True)
+
+                    
+
+        for input in self.input_properties:
+            if not input == "Y":
+
+                input_value = self.get_value_from_port(input)
+
+                if input_value is not None:
+                    self.set_property("is_valid", input_value.is_defined() \
+                                                        and check_type(input_value.get_property(), self.input_properties[input].get_property_type()))
+
+                    if not input_value.is_defined():
+                        self.change_label("Information", "Input "+input+" is not defined.", True)
+                    elif not check_type(input_value.get_property(), self.input_properties[input].get_property_type()):
+                        self.change_label("Information", "Input "+input+" is not of the right type.", True)
+
 
 
 
@@ -218,6 +298,7 @@ class PltShowNode(GenericNode):
         self.add_checkbox("x_log", text='X log scale')
         self.add_checkbox("y_log", text='Y log scale')
         self.add_checkbox("legend", text='Legend')
+        self.add_checkbox("color_bar", text='Color bar')
 
         self.plot_widget = pltWidget(self.view, name="plot")
 
@@ -234,7 +315,8 @@ class PltShowNode(GenericNode):
 
             plot_parameters = {"legend":self.get_property("legend"),
                                     "x_log":self.get_property("x_log"),
-                                    "y_log":self.get_property("y_log")}
+                                    "y_log":self.get_property("y_log"),
+                                    "color_bar":self.get_property("y_log")}
 
             self.plot_widget.update_plot_list(self.input_arrays, plot_parameters)
 
@@ -254,6 +336,6 @@ class PltShowNode(GenericNode):
     def reset_outputs(self):
         super(PltShowNode, self).reset_outputs()
 
-        self.plot_widget.update_plot_list([], {"legend": False, "x_log":False, "y_log":False})
+        self.plot_widget.update_plot_list([], {"legend": False, "x_log":False, "y_log":False, "color_bar":False})
         self.change_label("Information", "", False)
 

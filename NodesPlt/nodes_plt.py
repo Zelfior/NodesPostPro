@@ -72,6 +72,7 @@ if __name__ == '__main__':
         #   Matplotlib nodes
         plt_node.PltShowNode,
         plt_node.PlotNode,
+        plt_node.ScatterNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,

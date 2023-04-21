@@ -61,6 +61,7 @@ class GetColumnNode(GenericNode):
             self.view.widgets["Column name"].add_items(list(self.get_value_from_port("Input DataFrame").get_property().columns))
 
         self.set_output_property('Output DataFrame', self.get_value_from_port("Input DataFrame").get_property()[self.get_property("Column name")].to_frame())
+        self.set_output_property('Selected column name', self.get_property("Column name"))
         
         self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output DataFrame").get_property())), False)
 

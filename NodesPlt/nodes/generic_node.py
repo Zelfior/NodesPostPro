@@ -16,7 +16,7 @@ class PortValueType(Enum):
     NP_ARRAY = 6
     PD_DATAFRAME = 7
     PLOTTABLE = 8
-    PLOT_ELEMENT = 9
+    DICT = 9
 
 """
     Color association with the port type enum
@@ -38,8 +38,8 @@ def get_color_from_enum(enum_value):
         return (255, 255, 255)
     elif enum_value == PortValueType.PLOTTABLE:
         return (255, 50, 50)
-    elif enum_value == PortValueType.PLOT_ELEMENT:
-        return (255, 50, 50)
+    elif enum_value == PortValueType.DICT:
+        return (150, 150, 50)
     
 """
     Checks if the given value type corresponds to the enum.
@@ -61,8 +61,8 @@ def check_type(value, enum_value):
         return type(value) == bool
     elif enum_value == PortValueType.PLOTTABLE:
         return type(value) in [list, np.ndarray, pd.DataFrame]
-    elif enum_value == PortValueType.PLOT_ELEMENT:
-        return type(value) in [list, np.ndarray, pd.DataFrame]
+    elif enum_value == PortValueType.DICT:
+        return type(value) == dict
     else:
         raise ValueError
     
@@ -109,7 +109,7 @@ class InformationLabelWidget(NodeBaseWidget):
         self.set_custom_widget(self.label_widget)
 
     def get_value(self):
-        return self.label_widget.text()
+        return self.label_widget.get_value()
 
     def set_value(self, value):
         return self.set_text(value)

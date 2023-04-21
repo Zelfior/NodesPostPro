@@ -43,24 +43,45 @@ class pltWidget(NodeBaseWidget):
         # set the custom widget.
         self.set_custom_widget(self.canvas)
 
-        self.to_plot = []
+        self.input_arrays = []
+
+        self.plot_parameters= {"legend": False, "x_log":False, "y_log":False}
 
         self.title = ""
 
-    def update_plot(self):
+    def update_plot(self, legend = False):
         self.canvas.axes.cla()  # clear the axes content
 
-        for element in self.to_plot:
-            if element['type'] == "plot":
-                self.canvas.axes.plot(element['x'], element['y'])
+        for element in self.input_arrays:
+            if element['element_type'] == "plot":
+                print(element)
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type"]}
+                print("______________________kwargs", kwargs_dict)
+                self.canvas.axes.plot(element['X'], element['Y'], **kwargs_dict)
 
         if not self.title == "":
             self.canvas.title = self.title
 
+        if self.plot_parameters["legend"]:
+            self.canvas.axes.legend()
+            
+        if self.plot_parameters["x_log"]:
+            self.canvas.axes.set_xscale('log')
+        else:   
+            self.canvas.axes.set_xscale('linear')
+            
+        if self.plot_parameters["y_log"]:
+            self.canvas.axes.set_yscale('log')
+        else:   
+            self.canvas.axes.set_yscale('linear')
+
         self.canvas.canvas.draw()  # actually draw the new content
 
-    def update_plot_list(self, array):
-        self.to_plot = array
+
+
+    def update_plot_list(self, array, plot_parameters):
+        self.input_arrays = array
+        self.plot_parameters = plot_parameters
 
         self.update_plot()
 
@@ -80,80 +101,33 @@ class pltWidget(NodeBaseWidget):
 
 
 
-
-
-
-class PlotElement():
-    def __init__(self, plot_type):
-        self.plot_type = plot_type
-
-        self.X = None
-        self.Y = None
-
-        self.defined = False
-
-        self.name = ""
-
-    """
-        Sets the contained value as none, and sets as not defined
-    """
-    def reset(self):
-        self.X = None
-        self.Y = None
-
-        self.defined = False
-        
-        self.name = ""
-
-    """
-        If the given value type correspond to the container enum, the value is updated and is set as defined
-    """
-    def set_property(self, value):
-        if check_type(value, self.enum_value):
-            self.countained_value = value
-            self.defined = True
-        else:
-            raise TypeError
-
-    """
-        Returns the contained value
-    """
-    def get_property(self):
-        return self.countained_value
-
-    """
-        Returns if the container is defined
-    """
-    def is_defined(self):
-        return self.defined
-
-    """
-        Returns the container type enum
-    """
-    def get_property_type(self):
-        return self.enum_value
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class PltElementNode(GenericNode):
 
     def __init__(self):
         super(PltElementNode, self).__init__()
 
+        self.element_type = "undefined"
+
+    def update_from_input(self):
+        properties_dict = {"element_type": self.element_type}
+
+        
+        print("____________input_properties ____________", self.input_properties)
+
+        for input in self.input_properties:
+            input_value = self.get_value_from_port(input)
+
+            print("____________testing input ____________", input, input_value)
+
+            if input_value is not None:
+                properties_dict[input] = input_value.get_property()
+
+        if not "X" in properties_dict:
+            properties_dict["X"] = list(range(len(properties_dict["Y"])))
+
+        self.set_output_property("Element", properties_dict)
+
+        self.change_label("Information", "", True)
 
 class PlotNode(PltElementNode):
     # unique node identifier.
@@ -178,17 +152,43 @@ class PlotNode(PltElementNode):
         self.add_custom_input('marker', PortValueType.STRING)
         self.add_custom_input('markersize', PortValueType.STRING)
 
-        self.add_custom_output('Plot Element', PortValueType.PLOT_ELEMENT)
+        self.add_custom_output('Element', PortValueType.DICT)
 
+        self.add_label("Information")
 
+        self.element_type = "plot"
 
+    def check_inputs(self):
+        input_Y = self.get_value_from_port("Y")
 
-    # def update_from_input(self):
+        self.set_property("is_valid", input_Y is not None \
+                                            and input_Y.is_defined() \
+                                                and check_type(input_Y.get_property(), PortValueType.PLOTTABLE))
 
+        if input_Y is None:
+            self.change_label("Information", "Input Y is not defined.", True)
+        elif not input_Y.is_defined():
+            self.change_label("Information", "Input Y is not defined.", True)
+        elif not check_type(input_Y.get_property(), PortValueType.PLOTTABLE):
+            self.change_label("Information", "Input Y is not of the right type.", True)
 
-    # def check_inputs(self):
+                    
 
+        for input in self.input_properties:
+            if not input == "Y":
 
+                input_value = self.get_value_from_port(input)
+
+                if input_value is not None:
+                    self.set_property("is_valid", input_value.is_defined() \
+                                                        and check_type(input_value.get_property(), self.input_properties[input].get_property_type()))
+
+                    if not input_value.is_defined():
+                        self.change_label("Information", "Input "+input+" is not defined.", True)
+                    elif not check_type(input_value.get_property(), self.input_properties[input].get_property_type()):
+                        self.change_label("Information", "Input "+input+" is not of the right type.", True)
+
+                    
 
 
 
@@ -205,7 +205,7 @@ class PltShowNode(GenericNode):
         super(PltShowNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input Plottable', PortValueType.PLOTTABLE, multi_input=True)
+        self.add_custom_input('Input Plottable', PortValueType.DICT, multi_input=True)
         
         self.add_custom_input('Title', PortValueType.STRING)
         
@@ -217,6 +217,7 @@ class PltShowNode(GenericNode):
         
         self.add_checkbox("x_log", text='X log scale')
         self.add_checkbox("y_log", text='Y log scale')
+        self.add_checkbox("legend", text='Legend')
 
         self.plot_widget = pltWidget(self.view, name="plot")
 
@@ -231,8 +232,11 @@ class PltShowNode(GenericNode):
         if not self.get_value_from_port("Input Plottable") == None:
             self.input_arrays = [element.get_property() for element in self.get_value_from_port("Input Plottable", multiple=True)]
 
-            self.plot_widget.update_plot_list([{'type':"plot", 'x':list(range(len(self.input_arrays[i]))), 'y':self.input_arrays[i]} for i in range(len(self.input_arrays))])
+            plot_parameters = {"legend":self.get_property("legend"),
+                                    "x_log":self.get_property("x_log"),
+                                    "y_log":self.get_property("y_log")}
 
+            self.plot_widget.update_plot_list(self.input_arrays, plot_parameters)
 
 
     def check_inputs(self):
@@ -240,7 +244,7 @@ class PltShowNode(GenericNode):
         
         self.set_property("is_valid", input_given is not None \
                                             and input_given.is_defined() \
-                                                and check_type(input_given.get_property(), PortValueType.PLOTTABLE))
+                                                and check_type(input_given.get_property(), PortValueType.DICT))
         
         if input_given is None or not input_given.is_defined():
                 self.change_label("Information", "Input not plugged to a defined plottable.", True)
@@ -248,8 +252,8 @@ class PltShowNode(GenericNode):
                 self.change_label("Information", "Plugged is not valid plottable.", True)
 
     def reset_outputs(self):
-        super(PltNode, self).reset_outputs()
+        super(PltShowNode, self).reset_outputs()
 
-        self.plot_widget.update_plot_list([])
+        self.plot_widget.update_plot_list([], {"legend": False, "x_log":False, "y_log":False})
         self.change_label("Information", "", False)
 

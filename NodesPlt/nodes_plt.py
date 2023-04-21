@@ -70,7 +70,8 @@ if __name__ == '__main__':
         numpy_nodes.SetAxisNode,
         
         #   Matplotlib nodes
-        plt_node.PltNode,
+        plt_node.PltShowNode,
+        plt_node.PlotNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,
@@ -89,11 +90,15 @@ if __name__ == '__main__':
     # # create node and set a custom icon.
     get_column_node = graph.create_node('Pandas.GetColumnNode')
 
-    plot_node = graph.create_node('Matplotlib.PltNode')
+    plot_node = graph.create_node('Matplotlib.PlotNode')
     plot_node.set_pos(400,0)
+
+    plot_show_node = graph.create_node('Matplotlib.PltShowNode')
+    plot_show_node.set_pos(800,0)
     
     read_file_node.set_output(0, get_column_node.input(0))
-    get_column_node.set_output(0, plot_node.input(0))
+    get_column_node.set_output(0, plot_node.input(1))
+    plot_node.set_output(0, plot_show_node.input(0))
     
     # n_basic_b.set_icon(
     #     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'star.png')

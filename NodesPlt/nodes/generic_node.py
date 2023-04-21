@@ -71,10 +71,10 @@ class LabelWidget(QtWidgets.QWidget):
     def __init__(self, parent=None, name=''):
         super(LabelWidget, self).__init__(parent)
 
-        self.label_widget = QtWidgets.QLabel('Information')
+        self.label_widget = QtWidgets.QLabel(name)
 
         layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setContentsMargins(5, 0, 5, 0)
         layout.addWidget(self.label_widget)
 
     def get_value(self):
@@ -95,16 +95,17 @@ class LabelWidget(QtWidgets.QWidget):
 
 
 class InformationLabelWidget(NodeBaseWidget):
-    def __init__(self, parent=None, name=''):
+    def __init__(self, parent=None, name='', label = False):
         super(InformationLabelWidget, self).__init__(parent)
 
         # set the name for node property.
-        self.set_name('Information widget')
+        self.set_name(name)
 
         # set the label above the widget.
-        # self.set_label('Custom Widget')
+        if label:
+            self.set_label(name)
 
-        self.label_widget = LabelWidget(name = 'Information')
+        self.label_widget = LabelWidget(name = name)
 
         self.set_custom_widget(self.label_widget)
 
@@ -189,11 +190,11 @@ class GenericNode(BaseNode):
         self.label_list = {}
 
 
-    def add_label(self, label_name):
+    def add_label(self, label_name, label = False):
         if label_name in self.label_list:
             raise ValueError("Label name already exists")
         else:
-            self.label_list[label_name] = InformationLabelWidget(self.view, name = label_name)
+            self.label_list[label_name] = InformationLabelWidget(self.view, name = label_name, label=label)
             # self.add_custom_widget(self.label_list[label_name])
             self.view.add_widget(self.label_list[label_name])
             self.view.draw_node()

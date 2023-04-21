@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 import pickle
+import sys
 
 
 class LoadNumpyNode(GenericNode):
@@ -27,6 +28,16 @@ class LoadNumpyNode(GenericNode):
         self.add_text_input('Filename', 'File name', 'example.pkl', tab='widgets')
 
         self.add_label("Information")
+        self.change_label("Information", "Load file to display size", False)
+
+        self.add_label("Python version", label=True)
+        self.change_label("Python version", str(sys.version).split("(")[0], False)
+        self.add_label("Numpy version", label=True)
+        self.change_label("Numpy version", str(np.__version__), False)
+        self.add_label("Pickle version", label=True)
+        self.change_label("Pickle version", str(pickle.format_version), False)
+
+        self.check_inputs()
 
 
     def check_inputs(self):
@@ -80,6 +91,14 @@ class LoadPandasNode(GenericNode):
         self.add_text_input('Filename', 'File name', 'example.pkl', tab='widgets')
 
         self.add_label("Information")
+        self.change_label("Information", "Load file to display size", False)
+
+        self.add_label("Python version", label=True)
+        self.change_label("Python version", str(sys.version).split("(")[0], False)
+        self.add_label("Pandas version", label=True)
+        self.change_label("Pandas version", str(pd.__version__), False)
+        self.add_label("Pickle version", label=True)
+        self.change_label("Pickle version", str(pickle.format_version), False)
 
         self.check_inputs()
 

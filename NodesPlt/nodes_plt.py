@@ -13,7 +13,7 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes, cast_nodes, pickle_nodes, numpy_nodes
+from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes, cast_nodes, pickle_nodes, numpy_nodes, tripoli_nodes
 
 if __name__ == '__main__':
 
@@ -76,7 +76,10 @@ if __name__ == '__main__':
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,
-        pickle_nodes.LoadPandasNode
+        pickle_nodes.LoadPandasNode,
+
+        #   Tripoli outputs
+        tripoli_nodes.TripoliExtendedMeshNode
     ])
 
     # show the node graph widget.

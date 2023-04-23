@@ -70,7 +70,7 @@ if __name__ == '__main__':
         numpy_nodes.SetAxisNode,
         numpy_nodes.NP_AddNode,
         numpy_nodes.NP_MultiplyFloatNode,
-        numpy_nodes.NP_Squeeze,
+        numpy_nodes.NP_SqueezeNode,
         
         #   Matplotlib nodes
         plt_node.PltFigureNode,
@@ -92,23 +92,130 @@ if __name__ == '__main__':
     graph_widget.resize(1100, 800)
     graph_widget.show()
 
+    current_height = 0.
+
+    """
+    
+        Exemple pandas/plot
+    
+    """
     # # create node with custom text color and disable it.
-    read_file_node = graph.create_node('Pandas.LoadFileNode', text_color='#feab20')
-    read_file_node.set_pos(-400,0)
+    read_file_node = graph.create_node('Pandas.LoadFileNode')#, text_color='#feab20')
+    read_file_node.set_pos(-400,current_height)
 
     # # create node and set a custom icon.
     get_column_node = graph.create_node('Pandas.GetColumnNode')
 
     plot_node = graph.create_node('Matplotlib.PlotNode')
-    plot_node.set_pos(400,0)
+    plot_node.set_pos(400,current_height)
 
     plot_show_node = graph.create_node('Matplotlib.PltFigureNode')
-    plot_show_node.set_pos(800,0)
+    plot_show_node.set_pos(800,current_height)
     
     read_file_node.set_output(0, get_column_node.input(0))
     get_column_node.set_output(0, plot_node.input(1))
     plot_node.set_output(0, plot_show_node.input(0))
     
+
+
+    """
+    
+        Exemple imshow
+    
+    """
+    current_height += 800
+
+    pickle_node = graph.create_node("Pickle.LoadNumpyNode")
+    pickle_node.set_pos(-400,current_height)
+
+    set_axis_1_node = graph.create_node("Numpy.SetAxisNode")
+    set_axis_1_node.set_pos(0,current_height)
+    
+    imshow_node = graph.create_node('Matplotlib.ImShowNode')
+    imshow_node.set_pos(400,current_height)
+
+    plot_show_node_2 = graph.create_node('Matplotlib.PltFigureNode')
+    plot_show_node_2.set_pos(800,current_height)
+
+    pickle_node.set_output(0, set_axis_1_node.input(0))
+    set_axis_1_node.axis_widget.set_value(1)
+    set_axis_1_node.set_output(0, imshow_node.input(0))
+    imshow_node.set_output(0, plot_show_node_2.input(0))
+    plot_show_node_2.set_property("color_bar", True)
+
+
+    """
+    
+        Exemple fill_between
+    
+    """
+    current_height += 1000
+    read_tripoli_node = graph.create_node("Tripoli.TripoliExtendedMeshNode")
+    read_tripoli_node.set_pos(-800,current_height)
+
+    squeeze_tripoli_node = graph.create_node("Numpy.NP_SqueezeNode")
+    squeeze_tripoli_node.set_pos(-400,current_height)
+
+    set_axis_2_1_node = graph.create_node("Numpy.SetAxisNode")
+    set_axis_2_1_node.set_pos(0,current_height)
+
+    fill_between_name = graph.create_node("Input.InputStringNode")
+    fill_between_name.set_pos(0,current_height - 100)
+    fill_between_name.set_property("Value", "Sigma")
+
+    set_axis_2_2_node = graph.create_node("Numpy.SetAxisNode")
+    set_axis_2_2_node.set_pos(0,current_height + 200)
+
+    set_axis_2_3_node = graph.create_node("Numpy.SetAxisNode")
+    set_axis_2_3_node.set_pos(0,current_height + 400)
+
+    plot_name = graph.create_node("Input.InputStringNode")
+    plot_name.set_pos(0,current_height + 550)
+    plot_name.set_property("Value", "Value")
+
+    alpha_value = graph.create_node("Input.InputFloatNode")
+    alpha_value.set_pos(0,current_height - 200)
+    alpha_value.set_property("Value", "0.2")
+    
+    fill_between_node = graph.create_node('Matplotlib.FillBetweenNode')
+    fill_between_node.set_pos(400,current_height)
+    
+    plot_2_node = graph.create_node('Matplotlib.PlotNode')
+    plot_2_node.set_pos(400,current_height+300)
+
+    plot_show_node_3 = graph.create_node('Matplotlib.PltFigureNode')
+    plot_show_node_3.set_pos(800,current_height)
+
+    read_tripoli_node.set_output(0, squeeze_tripoli_node.input(0))
+
+    squeeze_tripoli_node.set_output(0, set_axis_2_1_node.input(0))
+    squeeze_tripoli_node.set_output(0, set_axis_2_2_node.input(0))
+    squeeze_tripoli_node.set_output(0, set_axis_2_3_node.input(0))
+
+    set_axis_2_1_node.value_widget.set_value(59)
+    set_axis_2_2_node.value_widget.set_value(60)
+    set_axis_2_3_node.value_widget.set_value(61)
+
+    set_axis_2_1_node.set_output(0, fill_between_node.input(1))
+    set_axis_2_2_node.set_output(0, plot_2_node.input(1))
+    set_axis_2_3_node.set_output(0, fill_between_node.input(2))
+
+    read_tripoli_node.set_output(7, fill_between_node.input(0))
+    read_tripoli_node.set_output(7, plot_2_node.input(0))
+
+    alpha_value.set_output(0, fill_between_node.input(6))
+    plot_name.set_output(0, plot_2_node.input(2))
+    fill_between_name.set_output(0, fill_between_node.input(4))
+
+    plot_show_node_3.set_property("legend", True)
+
+
+    fill_between_node.set_output(0, plot_show_node_3.input(0))
+    plot_2_node.set_output(0, plot_show_node_3.input(0))
+
+
+
+
     # fit nodes to the viewer.
     graph.clear_selection()
     graph.fit_to_selection()

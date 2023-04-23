@@ -181,7 +181,7 @@ class NP_MultiplyFloatNode(GenericNode):
 
 
 
-class NP_Squeeze(GenericNode):
+class NP_SqueezeNode(GenericNode):
     """
     An example of a node with a embedded QLineEdit.
     """
@@ -193,7 +193,7 @@ class NP_Squeeze(GenericNode):
     NODE_NAME = 'Squeeze'
 
     def __init__(self):
-        super(NP_Squeeze, self).__init__()
+        super(NP_SqueezeNode, self).__init__()
 
         #   Create input port for input array
         self.add_custom_input('Input Array', PortValueType.NP_ARRAY)

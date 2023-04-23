@@ -4,6 +4,7 @@ from matplotlib.figure import Figure
 from Qt import QtWidgets
 
 import pandas as pd
+import numpy as np
 
 from nodes.generic_node import GenericNode, PortValueType, check_type
 from nodes.custom_widgets import IntSelector_Widget
@@ -75,6 +76,10 @@ class pltWidget(NodeBaseWidget):
             if element['element_type'] == "plot":
                 kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
                 self.canvas.axes.plot(element['X'], element['Y'], **kwargs_dict)
+                
+            if element['element_type'] == "fill_between":
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y1", "Y2", "element_type", "priority"]}
+                self.canvas.axes.fill_between(element['X'], element['Y1'], element['Y2'], **kwargs_dict)
                 
             elif element['element_type'] == "imshow":
                 kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
@@ -158,6 +163,13 @@ class pltWidget(NodeBaseWidget):
     def set_value(self, value):
         pass
 
+
+
+def are_plottable_compatible(plot1, plot2):
+    plot1 = np.squeeze(np.array(plot1))
+    plot2 = np.squeeze(np.array(plot2))
+
+    return plot1.shape == plot2.shape
 
 
 
@@ -247,12 +259,19 @@ class ImShowNode(GenericNode):
 
 
 
+
+
+
+
+
+
 class PltElementNode(GenericNode):
 
     def __init__(self):
         super(PltElementNode, self).__init__()
 
         self.element_type = "undefined"
+        self.y_name = 'Y'
 
     def update_from_input(self):
         properties_dict = {"element_type": self.element_type}
@@ -264,11 +283,25 @@ class PltElementNode(GenericNode):
                 properties_dict[input] = input_value.get_property()
 
         if not "X" in properties_dict:
-            properties_dict["X"] = list(range(len(properties_dict["Y"])))
+            properties_dict["X"] = list(range(len(properties_dict[self.y_name])))
 
         self.set_output_property("Element", properties_dict)
 
         self.change_label("Information", "", True)
+
+    def add_linestyle_combo(self):
+        self.add_combo_menu('linestyle', 'linestyle', items=['solid', 'dotted', 'dashed', 'dashdot'])
+
+
+
+
+
+
+
+
+
+
+
 
 
 class PlotNode(PltElementNode):
@@ -288,7 +321,7 @@ class PlotNode(PltElementNode):
 
         self.add_custom_input('color', PortValueType.STRING)
         
-        self.add_combo_menu('linestyle', 'linestyle', items=['solid', 'dotted', 'dashed', 'dashdot'])
+        self.add_linestyle_combo()
 
         self.add_custom_input('linewidth', PortValueType.FLOAT)
         
@@ -349,6 +382,144 @@ class PlotNode(PltElementNode):
         properties_dict['priority'] = int(self.priority_widget.get_value())
 
         self.set_output_property("Element", properties_dict)
+
+
+
+
+
+
+
+
+
+
+
+
+class FillBetweenNode(PltElementNode):
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Fill Between'
+
+    def __init__(self):
+        super(FillBetweenNode, self).__init__()
+
+        self.add_custom_input('X', PortValueType.PLOTTABLE)
+        self.add_custom_input('Y1', PortValueType.PLOTTABLE)
+        self.add_custom_input('Y2', PortValueType.PLOTTABLE)
+        self.add_custom_input('Where', PortValueType.PLOTTABLE)
+
+        self.add_custom_input('label', PortValueType.STRING)
+
+        self.add_custom_input('color', PortValueType.STRING)
+
+        # self.add_linestyle_combo()
+
+        # self.add_custom_input('linewidth', PortValueType.FLOAT)
+        
+        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
+        self.create_property("Priority", 0)
+        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
+        self.view.add_widget(self.priority_widget)
+        self.view.draw_node()
+        
+        self.priority_widget.set_range(0, 50)
+
+        self.add_custom_input('alpha', PortValueType.FLOAT)
+
+        self.add_custom_output('Element', PortValueType.DICT)
+
+        self.add_label("Information")
+
+        self.element_type = "fill_between"
+        self.y_name = 'Y1'
+
+    def check_inputs(self):
+        is_valid_x, message_x = self.is_input_valid("X")
+        is_valid_y1, message_y1 = self.is_input_valid("Y1")
+        is_valid_y2, message_y2 = self.is_input_valid("Y2")
+
+        self.set_property("is_valid", is_valid_x and is_valid_y1 and is_valid_y2)
+
+        if not is_valid_x:
+            self.change_label("Information", message_x, True)
+        elif not is_valid_y1:
+            self.change_label("Information", message_y1, True)
+        elif not is_valid_y2:
+            self.change_label("Information", message_y2, True)
+                    
+
+        if self.get_property("is_valid"):
+            if not are_plottable_compatible(self.get_value_from_port("X").get_property(), self.get_value_from_port("Y1").get_property()):
+                self.change_label("Information", "Inputs X and Y1 are not compatible", True)
+                self.set_property("is_valid", False)
+                
+            elif not are_plottable_compatible(self.get_value_from_port("X").get_property(), self.get_value_from_port("Y2").get_property()):
+                self.change_label("Information", "Inputs X and Y2 are not compatible", True)
+                self.set_property("is_valid", False)
+
+            elif self.get_value_from_port("Where") is not None:
+                if self.is_input_valid("Where")[0]:
+                    if not are_plottable_compatible(self.get_value_from_port("X").get_property(), self.get_value_from_port("Where").get_property()):
+                        self.change_label("Information", "Inputs X and Where are not compatible", True)
+                        self.set_property("is_valid", False)
+                    elif len(np.squeeze(np.array(self.get_value_from_port("X").get_property())).shape) > 1:
+                        self.change_label("Information", "Inputs X should be 1D", True)
+                        self.set_property("is_valid", False)
+                else:
+                    self.change_label("Information", self.is_input_valid("Where")[1], True)
+
+            elif len(np.squeeze(np.array(self.get_value_from_port("X").get_property())).shape) > 1:
+                self.change_label("Information", "Inputs X should be 1D", True)
+                self.set_property("is_valid", False)
+            elif len(np.squeeze(np.array(self.get_value_from_port("Y1").get_property())).shape) > 1:
+                self.change_label("Information", "Inputs Y1 should be 1D", True)
+                self.set_property("is_valid", False)
+            elif len(np.squeeze(np.array(self.get_value_from_port("Y2").get_property())).shape) > 1:
+                self.change_label("Information", "Inputs Y2 should be 1D", True)
+                self.set_property("is_valid", False)
+
+
+        for input in self.input_properties:
+            if not input in ["X", "Y2", "Y1", "Where"]:
+
+                input_value = self.get_value_from_port(input)
+
+                if input_value is not None:
+                    is_valid, message = self.is_input_valid(input)
+
+                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
+
+                    if not is_valid:
+                        self.change_label("Information", message, True)
+
+                   
+    def update_from_input(self):
+        super(FillBetweenNode, self).update_from_input()
+
+        properties_dict = self.get_output_property("Element").get_property()
+
+        for key in ["X", "Y1", "Y2"]:
+            properties_dict[key] = np.squeeze(np.array(properties_dict[key]))
+
+        if "Where" in properties_dict:
+            properties_dict["where"] = np.squeeze(np.array(properties_dict["Where"]))
+            del properties_dict["Where"]
+
+        properties_dict['priority'] = int(self.priority_widget.get_value())
+
+        self.set_output_property("Element", properties_dict)
+
+        print(properties_dict.keys())
+
+
+
+
+
+
+
+
+
 
 
 

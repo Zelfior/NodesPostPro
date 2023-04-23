@@ -70,12 +70,14 @@ if __name__ == '__main__':
         numpy_nodes.SetAxisNode,
         numpy_nodes.NP_AddNode,
         numpy_nodes.NP_MultiplyFloatNode,
+        numpy_nodes.NP_Squeeze,
         
         #   Matplotlib nodes
         plt_node.PltFigureNode,
         plt_node.PlotNode,
         plt_node.ScatterNode,
         plt_node.ImShowNode,
+        plt_node.FillBetweenNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,

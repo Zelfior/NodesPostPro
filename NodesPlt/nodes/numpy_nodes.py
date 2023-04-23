@@ -168,30 +168,53 @@ class NP_MultiplyFloatNode(GenericNode):
             self.change_label("Information", message_2, True)
 
 
-        # input_given_1 = self.get_value_from_port("Input Array")
-        # input_given_2 = self.get_value_from_port("Input float")
-        
-        # #   Checks if the Input DataFrame is:
-        # #       -   plugged
-        # #       -   defined (if the previous node has its outputs defined)
-        # #       -   is a numpy Array
-        # self.set_property("is_valid", input_given_1 is not None \
-        #                                     and input_given_1.is_defined() \
-        #                                         and input_given_1.get_property_type() == PortValueType.NP_ARRAY\
-        #                                and input_given_2 is not None \
-        #                                     and input_given_2.is_defined() \
-        #                                         and input_given_2.get_property_type() == PortValueType.FLOAT)
-        
-        # if input_given_1 is None or not input_given_1.is_defined():
-        #     self.change_label("Information", "Input 1 not plugged to valid Array.", True)
-        # elif not input_given_1.get_property_type() == PortValueType.NP_ARRAY:
-        #     self.change_label("Information", "Plugged port 1 is not a Array.", True)
-        # elif input_given_2 is None or not input_given_2.is_defined():
-        #     self.change_label("Information", "Input 2 not plugged to valid float.", True)
-        # elif not input_given_2.get_property_type() == PortValueType.FLOAT:
-        #     self.change_label("Information", "Plugged port 2 is not a float.", True)
-    
     def update_from_input(self):
         self.set_output_property('Output Array', self.get_value_from_port("Input Array").get_property() * float(self.get_value_from_port("Input float").get_property()))
+        
+        self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
+        
+
+
+
+
+
+
+
+
+class NP_Squeeze(GenericNode):
+    """
+    An example of a node with a embedded QLineEdit.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Numpy'
+
+    # initial default node name.
+    NODE_NAME = 'Squeeze'
+
+    def __init__(self):
+        super(NP_Squeeze, self).__init__()
+
+        #   Create input port for input array
+        self.add_custom_input('Input Array', PortValueType.NP_ARRAY)
+
+        #   Create output ports for :
+        #       The output array corresponding to the given axis value
+        self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
+
+        self.add_label("Information")
+
+
+    def check_inputs(self):        
+        is_valid_1, message_1 = self.is_input_valid("Input Array")
+
+        self.set_property("is_valid", is_valid_1)
+
+        if not is_valid_1:
+            self.change_label("Information", message_1, True)
+
+
+    def update_from_input(self):
+        self.set_output_property('Output Array', np.squeeze(self.get_value_from_port("Input Array").get_property()))
         
         self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)

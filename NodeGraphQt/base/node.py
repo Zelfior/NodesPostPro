@@ -1,30 +1,17 @@
 #!/usr/bin/python
 import functools
-
+import sys
 import pandas as pd
 from NodeGraphQt.base.commands import PropertyChangedCmd
 from NodeGraphQt.base.model import NodeModel
 from NodeGraphQt.constants import NodePropWidgetEnum
 
 
-def are_identical(dataframe_1:pd.DataFrame, dataframe_2:pd.DataFrame):
-    is_empty_1 = dataframe_1.empty
-    is_empty_2 = dataframe_2.empty
-
-    if is_empty_1 and is_empty_2:
-        return True
-    elif is_empty_2 != is_empty_1:
-        return False
-    else:
-        try:
-            return dataframe_1.equals(dataframe_2)
-        except:
-            return False
-
 def decorator(f, name):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
-        print(f.__name__, args, kwargs, name)
+        if "debug" in sys.argv:
+            print(f.__name__, args, kwargs, name)
         return f(*args, **kwargs)
     return wrapper
 

@@ -47,15 +47,41 @@ class pltWidget(NodeBaseWidget):
 
         self.title = ""
 
+    def sort_by_priority(self, array):
+        new_array = []
+
+        for element in array:
+            if len(new_array) == 0:
+                new_array.append(element)
+            else:
+                i = 0
+                while i < len(new_array) and new_array[i]["priority"] < element["priority"]:
+                    i += 1 
+                new_array.insert(i, element)
+
+        return new_array
+
+
     def update_plot(self, legend = False):
-        self.canvas.axes.cla()  # clear the axes content
+        self.canvas.fig.clear()  # clear the axes content
+        self.canvas.axes = self.canvas.fig.add_subplot(111)
+        # self.canvas.fig.gca().set_aspect(1.)
+
+        self.input_arrays = self.sort_by_priority(self.input_arrays)
+
+        mappables= []
 
         for element in self.input_arrays:
             if element['element_type'] == "plot":
                 kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
                 self.canvas.axes.plot(element['X'], element['Y'], **kwargs_dict)
                 
-            if element['element_type'] == "scatter":
+            elif element['element_type'] == "imshow":
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
+                kwargs_dict["aspect"] = "auto"
+                mappables.append(self.canvas.axes.imshow(element['Y'], **kwargs_dict))
+
+            elif element['element_type'] == "scatter":
                 kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority"]}
 
                 if "Color array" in element:
@@ -73,14 +99,35 @@ class pltWidget(NodeBaseWidget):
 
                 self.canvas.axes.scatter(element['X'], element['Y'], **kwargs_dict)
 
-        if not self.title == "":
-            self.canvas.title = self.title
+        print([[element, self.plot_parameters[element]] for element in self.plot_parameters if not type(self.plot_parameters[element]) == dict])
+
+        if "Title" in self.plot_parameters:
+            self.canvas.axes.set_title(self.plot_parameters["Title"])
+
+        if "X_min" in self.plot_parameters:
+            if "X_max" in self.plot_parameters:
+                self.canvas.axes.set_xlim((self.plot_parameters["X_min"], self.plot_parameters["X_max"]))
+            else:
+                self.canvas.axes.set_xlim((self.plot_parameters["X_min"], None))
+        elif "X_max" in self.plot_parameters:
+            self.canvas.axes.set_xlim((None, self.plot_parameters["X_max"]))
+
+        if "Y_min" in self.plot_parameters:
+            if "Y_max" in self.plot_parameters:
+                self.canvas.axes.set_ylim((self.plot_parameters["Y_min"], self.plot_parameters["Y_max"]))
+            else:
+                self.canvas.axes.set_ylim((self.plot_parameters["Y_min"], None))
+        elif "Y_max" in self.plot_parameters:
+            self.canvas.axes.set_ylim((None, self.plot_parameters["Y_max"]))
+
+
 
         if self.plot_parameters["legend"]:
             self.canvas.axes.legend()
 
         if self.plot_parameters["color_bar"]:
-            self.canvas.fig.colorbar()
+            if len(mappables) > 0:
+                self.canvas.fig.colorbar(mappables[0])
             
         if self.plot_parameters["x_log"]:
             self.canvas.axes.set_xscale('log')
@@ -117,6 +164,86 @@ class pltWidget(NodeBaseWidget):
 
 
 
+class ImShowNode(GenericNode):
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'ImShow'
+
+    def __init__(self):
+        super(ImShowNode, self).__init__()
+
+        # X, cmap=None, norm=None
+        # self.add_custom_input('X', PortValueType.PLOTTABLE)
+        self.add_custom_input('Y', PortValueType.PLOTTABLE)
+
+        self.add_custom_input('label', PortValueType.STRING)
+
+        self.add_combo_menu('norm', 'norm', items=["linear", "log", "symlog", "logit"])
+        
+        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
+        self.create_property("Priority", 0)
+        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
+        self.view.add_widget(self.priority_widget)
+        self.view.draw_node()
+        
+        self.priority_widget.set_range(0, 50)
+
+        self.add_custom_input('alpha', PortValueType.FLOAT)
+
+        self.add_custom_output('Element', PortValueType.DICT)
+
+        self.add_label("Information")
+
+        self.element_type = "imshow"
+
+    def check_inputs(self):
+        is_valid, message = self.is_input_valid("Y")
+
+        self.set_property("is_valid", is_valid)
+
+        if not is_valid:
+            self.change_label("Information", message, True)
+        else:
+            if len(self.get_value_from_port("Y").get_property().shape) != 2:
+                self.change_label("Information", "Y input should have 2 dimensions.", True)
+                self.set_property("is_valid", False)
+
+        for input in self.input_properties:
+            if not input == "Y":
+
+                input_value = self.get_value_from_port(input)
+
+                if input_value is not None:
+                    is_valid, message = self.is_input_valid(input)
+
+                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
+
+                    if not is_valid:
+                        self.change_label("Information", message, True)
+
+                   
+    def update_from_input(self):
+        
+        properties_dict = {"element_type": self.element_type}
+
+        for input in self.input_properties:
+            input_value = self.get_value_from_port(input)
+
+            if input_value is not None:
+                properties_dict[input] = input_value.get_property()
+
+        properties_dict['norm'] = self.get_property('norm')
+
+        properties_dict['priority'] = int(self.priority_widget.get_value())
+
+        self.set_output_property("Element", properties_dict)
+
+        self.change_label("Information", "", True)
+
+
+
 
 
 
@@ -149,7 +276,7 @@ class PlotNode(PltElementNode):
     __identifier__ = 'Matplotlib'
 
     # initial default node name.
-    NODE_NAME = 'Plt Plot'
+    NODE_NAME = 'Plot'
 
     def __init__(self):
         super(PlotNode, self).__init__()
@@ -230,7 +357,7 @@ class ScatterNode(PltElementNode):
     __identifier__ = 'Matplotlib'
 
     # initial default node name.
-    NODE_NAME = 'Plt Scatter'
+    NODE_NAME = 'Scatter'
 
     def __init__(self):
         super(ScatterNode, self).__init__()
@@ -328,7 +455,12 @@ class PltFigureNode(GenericNode):
             plot_parameters = {"legend":self.get_property("legend"),
                                     "x_log":self.get_property("x_log"),
                                     "y_log":self.get_property("y_log"),
-                                    "color_bar":self.get_property("y_log")}
+                                    "color_bar":self.get_property("color_bar")}
+
+            for input_ in self.input_properties:
+                if self.is_input_valid(input_)[0]:
+                    plot_parameters[input_] = self.get_value_from_port(input_).get_property()
+
 
             self.plot_widget.update_plot_list(self.input_arrays, plot_parameters)
 

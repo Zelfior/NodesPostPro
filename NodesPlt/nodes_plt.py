@@ -75,6 +75,7 @@ if __name__ == '__main__':
         plt_node.PltFigureNode,
         plt_node.PlotNode,
         plt_node.ScatterNode,
+        plt_node.ImShowNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,

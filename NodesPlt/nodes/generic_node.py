@@ -250,7 +250,7 @@ class GenericNode(BaseNode):
     """
         Get the value associated to the port to which the given input port is connected
     """
-    def get_value_from_port(self, port_name, multiple = False):
+    def get_value_from_port(self, port_name, multiple = False) -> Container:
         #   If the given port name is not correct, raises an error.
         if port_name in self.inputs().keys():
             #   If the port is not plugged, returns None

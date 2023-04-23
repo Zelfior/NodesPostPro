@@ -37,20 +37,18 @@ class GetColumnNode(GenericNode):
 
 
     def check_inputs(self):
-        input_given = self.get_value_from_port("Input DataFrame")
-        
         #   Checks if the Input DataFrame is:
         #       -   plugged
         #       -   defined (if the previous node has its outputs defined)
         #       -   is a pandas DataFrame
-        self.set_property("is_valid", input_given is not None \
-                                            and input_given.is_defined() \
-                                                and input_given.get_property_type() == PortValueType.PD_DATAFRAME)
         
-        if input_given is None or not input_given.is_defined():
-            self.change_label("Information", "Input not plugged to valid DataFrame.", True)
-        elif not input_given.get_property_type() == PortValueType.PD_DATAFRAME:
-            self.change_label("Information", "Plugged port is not a DataFrame.", True)
+        is_valid, message = self.is_input_valid("Input DataFrame")
+
+        self.set_property("is_valid", is_valid)
+
+        if not is_valid:
+            self.change_label("Information", message, True)
+
     
     def update_from_input(self):
         #   Called only if check_inputs returned True:

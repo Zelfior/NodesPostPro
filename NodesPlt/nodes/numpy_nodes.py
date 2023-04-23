@@ -1,82 +1,10 @@
-from NodeGraphQt import BaseNode, BaseNodeCircle
-from functools import wraps
 from nodes.generic_node import GenericNode, PortValueType
-from NodeGraphQt import BaseNode, NodeBaseWidget
-from Qt import QtWidgets
+from nodes.custom_widgets import IntSelector_Widget
 
 import numpy as np
-import os
 
 
 
-
-class IntSelectorWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None, name=''):
-        super(IntSelectorWidget, self).__init__(parent)
-
-        self.val_min = 0
-        self.val_max = 0
-
-        self.int_selector = QtWidgets.QSpinBox(self)
-        self.int_selector.setRange(self.val_min, self.val_max)
-        self.int_selector.setSingleStep(1)
-        self.int_selector.setValue(0)
-
-        layout = QtWidgets.QVBoxLayout(self)
-        layout.setContentsMargins(15, 0, 15, 0)
-        layout.addWidget(self.int_selector)
-
-
-    def set_range(self, val_min, val_max):
-        if self.get_value() > val_max:
-            self.set_value(val_max)
-        if self.get_value() < val_min:
-            self.set_value(val_min)
-
-        self.val_min = val_min
-        self.val_max = val_max
-
-        self.int_selector.setRange(val_min, val_max)
-
-    def get_value(self):
-        return self.int_selector.value()
-
-    def get_range(self):
-        return [self.val_min, self.val_max]
-
-    def set_value(self, value):
-        return self.int_selector.setValue(value)
-    
-
-
-class IntSelector_Widget(NodeBaseWidget):
-    def __init__(self, parent=None, name='', label=''):
-        super(IntSelector_Widget, self).__init__(parent)
-
-        # set the name for node property.
-        self.set_name(name)
-
-        # set the label above the widget.
-        self.set_label(label)
-
-        self.int_selector_widget = IntSelectorWidget(name = name)
-
-        self.int_selector_widget.int_selector.valueChanged.connect(self.on_value_changed)
-
-        self.set_custom_widget(self.int_selector_widget)
-
-    def get_value(self):
-        return self.int_selector_widget.get_value()
-
-    def get_range(self):
-        return self.int_selector_widget.get_range()
-
-    def set_range(self, val_min, val_max):
-        return self.int_selector_widget.set_range(val_min, val_max)
-        
-    def set_value(self, value):
-        return self.int_selector_widget.set_value(value)
-    
 
 class SetAxisNode(GenericNode):
     """
@@ -119,20 +47,13 @@ class SetAxisNode(GenericNode):
 
 
     def check_inputs(self):
-        input_given = self.get_value_from_port("Input Array")
         
-        #   Checks if the Input DataFrame is:
-        #       -   plugged
-        #       -   defined (if the previous node has its outputs defined)
-        #       -   is a numpy Array
-        self.set_property("is_valid", input_given is not None \
-                                            and input_given.is_defined() \
-                                                and input_given.get_property_type() == PortValueType.NP_ARRAY)
-        
-        if input_given is None or not input_given.is_defined():
-            self.change_label("Information", "Input not plugged to valid Array.", True)
-        elif not input_given.get_property_type() == PortValueType.NP_ARRAY:
-            self.change_label("Information", "Plugged port is not a Array.", True)
+        is_valid, message = self.is_input_valid("Input Array")
+
+        self.set_property("is_valid", is_valid)
+
+        if not is_valid:
+            self.change_label("Information", message, True)
     
     def update_from_input(self):
         if self.axis_widget.get_range()[-1] != len(self.get_value_from_port("Input Array").get_property().shape) - 1:
@@ -151,3 +72,126 @@ class SetAxisNode(GenericNode):
 
         self.axis_widget.set_range(0, 0)
         self.value_widget.set_range(0, 0)
+
+
+
+
+
+
+
+
+        
+class NP_AddNode(GenericNode):
+    """
+    An example of a node with a embedded QLineEdit.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Numpy'
+
+    # initial default node name.
+    NODE_NAME = 'Add'
+
+    def __init__(self):
+        super(NP_AddNode, self).__init__()
+
+        #   Create input port for input array
+        self.add_custom_input('Input Array 1', PortValueType.NP_ARRAY)
+        self.add_custom_input('Input Array 2', PortValueType.NP_ARRAY)
+
+        #   Create output ports for :
+        #       The output array corresponding to the given axis value
+        self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
+
+        self.add_label("Information")
+
+
+    def check_inputs(self):
+        input_given_1 = self.get_value_from_port("Input Array 1")
+        input_given_2 = self.get_value_from_port("Input Array 2")
+        
+        
+        is_valid_1, message_1 = self.is_input_valid("Input Array 1")
+        is_valid_2, message_2 = self.is_input_valid("Input Array 2")
+
+        self.set_property("is_valid", is_valid_1 and is_valid_2 and input_given_1.get_property().shape == input_given_2.get_property().shape)
+
+        if not is_valid_1:
+            self.change_label("Information", message_1, True)
+        elif not is_valid_2:
+            self.change_label("Information", message_2, True)
+        elif not input_given_1.get_property().shape == input_given_2.get_property().shape:
+            self.change_label("Information", "Input arrays shapes are different.", True)
+
+    
+    def update_from_input(self):
+        self.set_output_property('Output Array', self.get_value_from_port("Input Array 1").get_property() + self.get_value_from_port("Input Array 1").get_property())
+        
+        self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
+
+
+        
+class NP_MultiplyFloatNode(GenericNode):
+    """
+    An example of a node with a embedded QLineEdit.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Numpy'
+
+    # initial default node name.
+    NODE_NAME = 'Multiply float'
+
+    def __init__(self):
+        super(NP_MultiplyFloatNode, self).__init__()
+
+        #   Create input port for input array
+        self.add_custom_input('Input Array', PortValueType.NP_ARRAY)
+        self.add_custom_input('Input float', PortValueType.FLOAT)
+
+        #   Create output ports for :
+        #       The output array corresponding to the given axis value
+        self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
+
+        self.add_label("Information")
+
+
+    def check_inputs(self):        
+        is_valid_1, message_1 = self.is_input_valid("Input Array")
+        is_valid_2, message_2 = self.is_input_valid("Input float")
+
+        self.set_property("is_valid", is_valid_1 and is_valid_2)
+
+        if not is_valid_1:
+            self.change_label("Information", message_1, True)
+        elif not is_valid_2:
+            self.change_label("Information", message_2, True)
+
+
+        # input_given_1 = self.get_value_from_port("Input Array")
+        # input_given_2 = self.get_value_from_port("Input float")
+        
+        # #   Checks if the Input DataFrame is:
+        # #       -   plugged
+        # #       -   defined (if the previous node has its outputs defined)
+        # #       -   is a numpy Array
+        # self.set_property("is_valid", input_given_1 is not None \
+        #                                     and input_given_1.is_defined() \
+        #                                         and input_given_1.get_property_type() == PortValueType.NP_ARRAY\
+        #                                and input_given_2 is not None \
+        #                                     and input_given_2.is_defined() \
+        #                                         and input_given_2.get_property_type() == PortValueType.FLOAT)
+        
+        # if input_given_1 is None or not input_given_1.is_defined():
+        #     self.change_label("Information", "Input 1 not plugged to valid Array.", True)
+        # elif not input_given_1.get_property_type() == PortValueType.NP_ARRAY:
+        #     self.change_label("Information", "Plugged port 1 is not a Array.", True)
+        # elif input_given_2 is None or not input_given_2.is_defined():
+        #     self.change_label("Information", "Input 2 not plugged to valid float.", True)
+        # elif not input_given_2.get_property_type() == PortValueType.FLOAT:
+        #     self.change_label("Information", "Plugged port 2 is not a float.", True)
+    
+    def update_from_input(self):
+        self.set_output_property('Output Array', self.get_value_from_port("Input Array").get_property() * float(self.get_value_from_port("Input float").get_property()))
+        
+        self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)

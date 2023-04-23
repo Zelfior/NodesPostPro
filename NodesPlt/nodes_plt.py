@@ -68,9 +68,11 @@ if __name__ == '__main__':
 
         #   Numpy nodes
         numpy_nodes.SetAxisNode,
+        numpy_nodes.NP_AddNode,
+        numpy_nodes.NP_MultiplyFloatNode,
         
         #   Matplotlib nodes
-        plt_node.PltShowNode,
+        plt_node.PltFigureNode,
         plt_node.PlotNode,
         plt_node.ScatterNode,
         
@@ -97,62 +99,13 @@ if __name__ == '__main__':
     plot_node = graph.create_node('Matplotlib.PlotNode')
     plot_node.set_pos(400,0)
 
-    plot_show_node = graph.create_node('Matplotlib.PltShowNode')
+    plot_show_node = graph.create_node('Matplotlib.PltFigureNode')
     plot_show_node.set_pos(800,0)
     
     read_file_node.set_output(0, get_column_node.input(0))
     get_column_node.set_output(0, plot_node.input(1))
     plot_node.set_output(0, plot_show_node.input(0))
     
-    # n_basic_b.set_icon(
-    #     os.path.join(os.path.dirname(os.path.abspath(__file__)), 'star.png')
-    # )
-
-    # # create node with the custom port shapes.
-    # n_custom_ports = graph.create_node(
-    #     'nodes.custom.ports.CustomPortsNode', name='custom ports')
-
-    # # create node with the embedded QLineEdit widget.
-    # n_text_input = graph.create_node(
-    #     'nodes.widget.TextInputNode', name='text node', color='#0a1e20')
-
-    # # create node with the embedded QCheckBox widgets.
-    # n_checkbox = graph.create_node(
-    #     'nodes.widget.CheckboxNode', name='checkbox node')
-
-    # # create node with the QComboBox widget.
-    # n_combo_menu = graph.create_node(
-    #     'nodes.widget.DropdownMenuNode', name='combobox node')
-
-    # # crete node with the circular design.
-    # n_circle = graph.create_node(
-    #     'nodes.basic.CircleNode', name='circle node')
-
-    # # create group node.
-    # n_group = graph.create_node('nodes.group.MyGroupNode')
-
-    # make node connections.
-
-    # (connect nodes using the .set_output method)
-    # n_text_input.set_output(0, n_custom_ports.input(0))
-    # n_text_input.set_output(0, n_checkbox.input(0))
-    # n_text_input.set_output(0, n_combo_menu.input(0))
-    # # (connect nodes using the .set_input method)
-    # n_group.set_input(0, n_custom_ports.output(1))
-    # n_basic_b.set_input(2, n_checkbox.output(0))
-    # n_basic_b.set_input(2, n_combo_menu.output(1))
-    # (connect nodes using the .connect_to method from the port object)
-    # port = n_basic_a.input(0)
-    # port.connect_to(n_basic_b.output(0))
-
-    # auto layout nodes.
-    # graph.auto_layout_nodes()
-
-    # crate a backdrop node and wrap it around
-    # "custom port node" and "group node".
-    # n_backdrop = graph.create_node('Backdrop')
-    # n_backdrop.wrap_nodes([n_custom_ports, n_combo_menu])
-
     # fit nodes to the viewer.
     graph.clear_selection()
     graph.fit_to_selection()

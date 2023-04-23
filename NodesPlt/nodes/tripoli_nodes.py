@@ -91,16 +91,6 @@ class tripoli_postpro():
         len_y = len(self.cell_y_coordinates)
         len_z = len(self.cell_z_coordinates)
 
-        # self.data_value = np.zeros([len_x, len_y, len_z])
-        # self.data_sigma = np.zeros([len_x, len_y, len_z])
-
-        # for i in range(len_x):
-        #     for j in range(len_y):
-        #         for k in range(len_z):
-        #             print(self.all_data_value[i * len_y * len_z + j * len_y + k])
-        #             self.data_value[i, j, k] = self.all_data_value[i * len_y * len_z + j * len_y + k]
-        #             self.data_sigma[i, j, k] = self.all_data_sigma[i * len_y * len_z + j * len_y + k]
-
         self.data_value = self.all_data_value.reshape([len_z, len_y, len_x], order = "C")
         self.data_sigma = self.all_data_sigma.reshape([len_z, len_y, len_x], order = "C")
 

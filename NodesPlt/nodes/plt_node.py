@@ -3,12 +3,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from Qt import QtWidgets
 
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-import os
 
 from nodes.generic_node import GenericNode, PortValueType, check_type
+from nodes.custom_widgets import IntSelector_Widget
 
 class PltCanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -34,10 +32,10 @@ class pltWidget(NodeBaseWidget):
         super(pltWidget, self).__init__(parent)
 
         # set the name for node property.
-        self.set_name('my_widget')
+        self.set_name('Plot_Widget')
 
         # set the label above the widget.
-        self.set_label('Custom Widget')
+        # self.set_label('Custom Widget')
 
         self.canvas = PltCanvasWidget()
         # set the custom widget.
@@ -54,11 +52,11 @@ class pltWidget(NodeBaseWidget):
 
         for element in self.input_arrays:
             if element['element_type'] == "plot":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type"]}
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
                 self.canvas.axes.plot(element['X'], element['Y'], **kwargs_dict)
                 
             if element['element_type'] == "scatter":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array"]}
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority"]}
 
                 if "Color array" in element:
                     if type(element["Color array"]) == pd.DataFrame:
@@ -107,9 +105,11 @@ class pltWidget(NodeBaseWidget):
 
 
     def get_value(self):
-        widget = self.get_custom_widget()
+        # widget = self.get_custom_widget()
         return ''
 
+    def set_value(self, value):
+        pass
 
 
 
@@ -160,14 +160,25 @@ class PlotNode(PltElementNode):
         self.add_custom_input('label', PortValueType.STRING)
 
         self.add_custom_input('color', PortValueType.STRING)
-
-        self.add_custom_input('linestyle', PortValueType.STRING)
-        self.add_custom_input('linewidth ', PortValueType.FLOAT)
         
-        self.add_custom_input('marker', PortValueType.STRING)
+        self.add_combo_menu('linestyle', 'linestyle', items=['solid', 'dotted', 'dashed', 'dashdot'])
+
+        self.add_custom_input('linewidth', PortValueType.FLOAT)
+        
+        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
+        self.create_property("Priority", 0)
+        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
+        self.view.add_widget(self.priority_widget)
+        self.view.draw_node()
+        
+        self.priority_widget.set_range(0, 50)
+
+        self.add_combo_menu('marker', 'marker', items=["None", ".", ",", "o", "s", "D"])
+
         self.add_custom_input('markersize', PortValueType.FLOAT)
 
         self.add_custom_input('alpha', PortValueType.FLOAT)
+
 
         self.add_custom_output('Element', PortValueType.DICT)
 
@@ -176,19 +187,12 @@ class PlotNode(PltElementNode):
         self.element_type = "plot"
 
     def check_inputs(self):
-        input_Y = self.get_value_from_port("Y")
+        is_valid, message = self.is_input_valid("Y")
 
-        self.set_property("is_valid", input_Y is not None \
-                                            and input_Y.is_defined() \
-                                                and check_type(input_Y.get_property(), PortValueType.PLOTTABLE))
+        self.set_property("is_valid", is_valid)
 
-        if input_Y is None:
-            self.change_label("Information", "Input Y is not defined.", True)
-        elif not input_Y.is_defined():
-            self.change_label("Information", "Input Y is not defined.", True)
-        elif not check_type(input_Y.get_property(), PortValueType.PLOTTABLE):
-            self.change_label("Information", "Input Y is not of the right type.", True)
-
+        if not is_valid:
+            self.change_label("Information", message, True)
                     
 
         for input in self.input_properties:
@@ -197,15 +201,29 @@ class PlotNode(PltElementNode):
                 input_value = self.get_value_from_port(input)
 
                 if input_value is not None:
-                    self.set_property("is_valid", input_value.is_defined() \
-                                                        and check_type(input_value.get_property(), self.input_properties[input].get_property_type()))
+                    is_valid, message = self.is_input_valid(input)
 
-                    if not input_value.is_defined():
-                        self.change_label("Information", "Input "+input+" is not defined.", True)
-                    elif not check_type(input_value.get_property(), self.input_properties[input].get_property_type()):
-                        self.change_label("Information", "Input "+input+" is not of the right type.", True)
+                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
 
-                    
+                    if not is_valid:
+                        self.change_label("Information", message, True)
+
+                   
+    def update_from_input(self):
+        super(PlotNode, self).update_from_input()
+
+        properties_dict = self.get_output_property("Element").get_property()
+
+        properties_dict['linestyle'] = self.get_property('linestyle')
+
+        if self.get_property('marker') != "None":
+            properties_dict['marker'] = self.get_property('marker')
+
+        properties_dict['priority'] = int(self.priority_widget.get_value())
+
+        self.set_output_property("Element", properties_dict)
+
+
 
 class ScatterNode(PltElementNode):
     # unique node identifier.
@@ -228,7 +246,6 @@ class ScatterNode(PltElementNode):
         
         self.add_custom_input('cmap', PortValueType.STRING)
 
-        self.add_custom_input('linestyle', PortValueType.STRING)
         self.add_custom_input('linewidth ', PortValueType.FLOAT)
         
         self.add_custom_input('marker', PortValueType.STRING)
@@ -241,19 +258,12 @@ class ScatterNode(PltElementNode):
         self.element_type = "scatter"
 
     def check_inputs(self):
-        input_Y = self.get_value_from_port("Y")
+        is_valid, message = self.is_input_valid("Y")
 
-        self.set_property("is_valid", input_Y is not None \
-                                            and input_Y.is_defined() \
-                                                and check_type(input_Y.get_property(), PortValueType.PLOTTABLE))
+        self.set_property("is_valid", is_valid)
 
-        if input_Y is None:
-            self.change_label("Information", "Input Y is not defined.", True)
-        elif not input_Y.is_defined():
-            self.change_label("Information", "Input Y is not defined.", True)
-        elif not check_type(input_Y.get_property(), PortValueType.PLOTTABLE):
-            self.change_label("Information", "Input Y is not of the right type.", True)
-
+        if not is_valid:
+            self.change_label("Information", message, True)
                     
 
         for input in self.input_properties:
@@ -262,27 +272,26 @@ class ScatterNode(PltElementNode):
                 input_value = self.get_value_from_port(input)
 
                 if input_value is not None:
-                    self.set_property("is_valid", input_value.is_defined() \
-                                                        and check_type(input_value.get_property(), self.input_properties[input].get_property_type()))
+                    is_valid, message = self.is_input_valid(input)
 
-                    if not input_value.is_defined():
-                        self.change_label("Information", "Input "+input+" is not defined.", True)
-                    elif not check_type(input_value.get_property(), self.input_properties[input].get_property_type()):
-                        self.change_label("Information", "Input "+input+" is not of the right type.", True)
+                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
 
+                    if not is_valid:
+                        self.change_label("Information", message, True)
 
 
 
-class PltShowNode(GenericNode):
+
+class PltFigureNode(GenericNode):
 
     # unique node identifier.
     __identifier__ = 'Matplotlib'
 
     # initial default node name.
-    NODE_NAME = 'Show Plot'
+    NODE_NAME = 'Figure'
 
     def __init__(self):
-        super(PltShowNode, self).__init__()
+        super(PltFigureNode, self).__init__()
 
         # create input & output ports
         self.add_custom_input('Input Plottable', PortValueType.DICT, multi_input=True)
@@ -295,12 +304,15 @@ class PltShowNode(GenericNode):
         self.add_custom_input('Y_min', PortValueType.FLOAT)
         self.add_custom_input('Y_max', PortValueType.FLOAT)
         
+        self.add_custom_output('Figure', PortValueType.FIGURE)
+        
         self.add_checkbox("x_log", text='X log scale')
         self.add_checkbox("y_log", text='Y log scale')
         self.add_checkbox("legend", text='Legend')
         self.add_checkbox("color_bar", text='Color bar')
 
         self.plot_widget = pltWidget(self.view, name="plot")
+        self.create_property('Plot_Widget', None)
 
         self.view.add_widget(self.plot_widget)
         self.view.draw_node()
@@ -322,19 +334,17 @@ class PltShowNode(GenericNode):
 
 
     def check_inputs(self):
-        input_given = self.get_value_from_port("Input Plottable")
-        
-        self.set_property("is_valid", input_given is not None \
-                                            and input_given.is_defined() \
-                                                and check_type(input_given.get_property(), PortValueType.DICT))
-        
-        if input_given is None or not input_given.is_defined():
-                self.change_label("Information", "Input not plugged to a defined plottable.", True)
-        elif not check_type(input_given.get_property(), PortValueType.PLOTTABLE):
-                self.change_label("Information", "Plugged is not valid plottable.", True)
+        is_valid, message = self.is_input_valid("Input Plottable")
+
+        self.set_property("is_valid", is_valid)
+
+        if not is_valid:
+            self.change_label("Information", message, True)
+
+
 
     def reset_outputs(self):
-        super(PltShowNode, self).reset_outputs()
+        super(PltFigureNode, self).reset_outputs()
 
         self.plot_widget.update_plot_list([], {"legend": False, "x_log":False, "y_log":False, "color_bar":False})
         self.change_label("Information", "", False)

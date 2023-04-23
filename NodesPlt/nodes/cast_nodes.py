@@ -30,17 +30,13 @@ class GenericCastNode(GenericNode):
     
     
     def check_inputs(self):
-        input_given = self.get_value_from_port("Input")
         
-        self.set_property("is_valid", input_given is not None \
-                                            and input_given.is_defined() \
-                                                and input_given.get_property_type() == self.input_properties["Input"].get_property_type())
-    
-        if input_given is None or not input_given.is_defined():
-            self.change_label("Information", "Input not plugged to valid output.", True)
+        is_valid, message = self.is_input_valid("Input")
 
-        elif not input_given.get_property_type() == self.input_properties["Input"].get_property_type():
-            self.change_label("Information", "Plugged port is not of the right type.", True)
+        self.set_property("is_valid", is_valid)
+
+        if not is_valid:
+            self.change_label("Information", message, True)
 
 
     def update_from_input(self):
@@ -370,7 +366,8 @@ class DataFrameToArrayCastNode(GenericCastNode):
         output_value = self.get_value_from_port("Input").get_property().to_numpy()
         self.set_output_property('Output', output_value)
 
-        self.change_label("Information", str(output_value), False)
+        self.change_label("Information", str(output_value.shape), False)
+
         
         
 

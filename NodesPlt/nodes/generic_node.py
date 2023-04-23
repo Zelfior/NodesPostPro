@@ -1,8 +1,9 @@
-from NodeGraphQt import BaseNode, NodeBaseWidget
+from NodeGraphQt import BaseNode
 from enum import Enum
 import pandas as pd
 import numpy as np
-from Qt import QtWidgets
+from nodes.custom_widgets import InformationLabelWidget
+import matplotlib.pyplot as plt
 
 """
     All value type that can be exchanged between nodes
@@ -17,6 +18,7 @@ class PortValueType(Enum):
     PD_DATAFRAME = 7
     PLOTTABLE = 8
     DICT = 9
+    FIGURE = 9
 
 """
     Color association with the port type enum
@@ -40,6 +42,9 @@ def get_color_from_enum(enum_value):
         return (255, 50, 50)
     elif enum_value == PortValueType.DICT:
         return (150, 150, 50)
+    elif enum_value == PortValueType.FIGURE:
+        return (0, 0, 0)
+    
     
 """
     Checks if the given value type corresponds to the enum.
@@ -63,65 +68,11 @@ def check_type(value, enum_value):
         return type(value) in [list, np.ndarray, pd.DataFrame]
     elif enum_value == PortValueType.DICT:
         return type(value) == dict
+    elif enum_value == PortValueType.FIGURE:
+        return type(value) in [plt.Figure, plt.axis]
     else:
         raise ValueError
     
-
-class LabelWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None, name=''):
-        super(LabelWidget, self).__init__(parent)
-
-        self.label_widget = QtWidgets.QLabel(name)
-
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(5, 0, 5, 0)
-        layout.addWidget(self.label_widget)
-
-    def get_value(self):
-        return self.label_widget.text()
-
-    def set_value(self, value):
-        return self.label_widget.setText(value)
-    
-    def clear(self):
-        self.label_widget.clear()
-    
-    def setText(self, label_value):
-        self.label_widget.setText(label_value)
-    
-    def update(self):
-        self.label_widget.update()
-
-
-
-class InformationLabelWidget(NodeBaseWidget):
-    def __init__(self, parent=None, name='', label = False):
-        super(InformationLabelWidget, self).__init__(parent)
-
-        # set the name for node property.
-        self.set_name(name)
-
-        # set the label above the widget.
-        if label:
-            self.set_label(name)
-
-        self.label_widget = LabelWidget(name = name)
-
-        self.set_custom_widget(self.label_widget)
-
-    def get_value(self):
-        return self.label_widget.get_value()
-
-    def set_value(self, value):
-        return self.set_text(value)
-    
-    def set_text(self, label_value, color):
-        self.label_widget.clear()
-        self.label_widget.setText(label_value)
-        self.label_widget.setStyleSheet("color: "+color)
-        self.label_widget.update()
-
-
 
 class Container():
     """
@@ -171,7 +122,6 @@ class Container():
 
 
 
-
 """
     Generic node class that embed the value transmission functions
 """
@@ -190,6 +140,26 @@ class GenericNode(BaseNode):
         self.label_list = {}
 
 
+    def is_input_valid(self, input_name):
+        value = self.get_value_from_port(input_name)
+
+        is_valid = value is not None \
+                        and value.is_defined() \
+                            and check_type(value.get_property(), self.input_properties[input_name].get_property_type())
+
+        message = ""
+
+        if value is None:
+            message = input_name+" is not defined."
+
+        elif not value.is_defined():
+            message = input_name+" is not defined."
+
+        elif not check_type(value.get_property(), self.input_properties[input_name].get_property_type()):
+            message = input_name+" is not of the right type."
+
+        return is_valid, message     
+
     def add_label(self, label_name, label = False):
         if label_name in self.label_list:
             raise ValueError("Label name already exists")
@@ -199,9 +169,12 @@ class GenericNode(BaseNode):
             self.view.add_widget(self.label_list[label_name])
             self.view.draw_node()
 
+            self.create_property(label_name, "")
+
 
     def change_label(self, label_name, label_value, error):
         if label_name in self.label_list:
+            self.set_property(label_name, label_value)
             if error:
                 self.label_list[label_name].set_text(label_value, 'red')
             else:
@@ -215,7 +188,7 @@ class GenericNode(BaseNode):
             Starts the node output property update process when a property is changed if the property is not "is_valid" and if the node is not resetting (prevents infinite loops)
     """
     def set_property(self, name, value, push_undo=True):
-        if name in ["is_valid", "color"]:
+        if name in ["is_valid", "color"] or name in self.label_list:
             super(GenericNode, self).set_property(name, value, push_undo=push_undo)
         elif ( not name in self.output_type_list ) or ( check_type(value, self.output_type_list[name]) ):
             super(GenericNode, self).set_property(name, value, push_undo=push_undo)

@@ -1,124 +1,7 @@
 from NodeGraphQt import BaseNode
-from enum import Enum
-import pandas as pd
-import numpy as np
 from nodes.custom_widgets import InformationLabelWidget
-import matplotlib.pyplot as plt
 
-"""
-    All value type that can be exchanged between nodes
-"""
-class PortValueType(Enum):
-    FLOAT = 1
-    INTEGER = 2
-    STRING = 3
-    BOOL = 4
-    LIST = 5
-    NP_ARRAY = 6
-    PD_DATAFRAME = 7
-    PLOTTABLE = 8
-    DICT = 9
-    FIGURE = 9
-
-"""
-    Color association with the port type enum
-"""
-def get_color_from_enum(enum_value):
-    if enum_value == PortValueType.FLOAT:
-        return (255, 0, 0)
-    elif enum_value == PortValueType.INTEGER:
-        return (0, 255, 0)
-    elif enum_value == PortValueType.STRING:
-        return (0, 0, 255)
-    elif enum_value == PortValueType.LIST:
-        return (100, 0, 255)
-    elif enum_value == PortValueType.NP_ARRAY:
-        return (0, 100, 255)
-    elif enum_value == PortValueType.PD_DATAFRAME:
-        return (100, 100, 255)
-    elif enum_value == PortValueType.BOOL:
-        return (255, 255, 255)
-    elif enum_value == PortValueType.PLOTTABLE:
-        return (255, 50, 50)
-    elif enum_value == PortValueType.DICT:
-        return (150, 150, 50)
-    elif enum_value == PortValueType.FIGURE:
-        return (0, 0, 0)
-    
-    
-"""
-    Checks if the given value type corresponds to the enum.
-"""
-def check_type(value, enum_value):
-    if enum_value == PortValueType.FLOAT:
-        return type(value) == float
-    elif enum_value == PortValueType.INTEGER:
-        return type(value) == int
-    elif enum_value == PortValueType.STRING:
-        return type(value) == str
-    elif enum_value == PortValueType.LIST:
-        return type(value) == list
-    elif enum_value == PortValueType.NP_ARRAY:
-        return type(value) == np.ndarray
-    elif enum_value == PortValueType.PD_DATAFRAME:
-        return type(value) == pd.DataFrame
-    elif enum_value == PortValueType.BOOL:
-        return type(value) == bool
-    elif enum_value == PortValueType.PLOTTABLE:
-        return type(value) in [list, np.ndarray, pd.DataFrame]
-    elif enum_value == PortValueType.DICT:
-        return type(value) == dict
-    elif enum_value == PortValueType.FIGURE:
-        return type(value) in [plt.Figure, plt.axis]
-    else:
-        raise ValueError
-    
-
-class Container():
-    """
-        The countainer is initialized empty and undefined
-    """
-    def __init__(self, enum_value:PortValueType):
-        self.countained_value = None
-        self.enum_value = enum_value
-        self.defined = False
-        self.name = ""
-
-    """
-        Sets the contained value as none, and sets as not defined
-    """
-    def reset(self):
-        self.countained_value = None
-        self.defined = False
-        self.name = ""
-
-    """
-        If the given value type correspond to the container enum, the value is updated and is set as defined
-    """
-    def set_property(self, value):
-        if check_type(value, self.enum_value):
-            self.countained_value = value
-            self.defined = True
-        else:
-            raise TypeError
-
-    """
-        Returns the contained value
-    """
-    def get_property(self):
-        return self.countained_value
-
-    """
-        Returns if the container is defined
-    """
-    def is_defined(self):
-        return self.defined
-
-    """
-        Returns the container type enum
-    """
-    def get_property_type(self):
-        return self.enum_value
+from nodes.container import *
 
 
 
@@ -126,14 +9,16 @@ class Container():
     Generic node class that embed the value transmission functions
 """
 class GenericNode(BaseNode):
-    def __init__(self):
+    def __init__(self, to_update = False):
         super(GenericNode, self).__init__()
 
         self.output_type_list = {"is_valid": PortValueType.BOOL}
 
         self.create_property("is_valid", False)
 
-        self.is_reseting = False
+        self.property_to_update = []
+
+        self.to_update = True
 
         self.output_properties = {}
         self.input_properties = {}
@@ -188,13 +73,10 @@ class GenericNode(BaseNode):
             Starts the node output property update process when a property is changed if the property is not "is_valid" and if the node is not resetting (prevents infinite loops)
     """
     def set_property(self, name, value, push_undo=True):
-        if name in ["is_valid", "color"] or name in self.label_list:
-            super(GenericNode, self).set_property(name, value, push_undo=push_undo)
-        elif ( not name in self.output_type_list ) or ( check_type(value, self.output_type_list[name]) ):
-            super(GenericNode, self).set_property(name, value, push_undo=push_undo)
+        super(GenericNode, self).set_property(name, value, push_undo=push_undo)
 
-            if not self.is_reseting:
-                self.update_values()
+        if name in self.property_to_update:
+            self.update_values()
 
         
     """
@@ -228,23 +110,20 @@ class GenericNode(BaseNode):
     """
     def update_values(self):
 
-        self.check_inputs()
+        if self.to_update:
+            self.check_inputs()
 
-        if self.get_property("is_valid"):
-            self.is_reseting = True
-            self.set_valid_color()
-            self.is_reseting = False
+            if self.get_property("is_valid"):
+                self.set_valid_color()
 
-            self.update_from_input()
-        else:
-            self.is_reseting = True
-            self.set_invalid_color()
-            self.reset_outputs()
-            self.is_reseting = False
+                self.update_from_input()
+            else:
+                self.set_invalid_color()
+                self.reset_outputs()
 
-        self.view.draw_node()
-        self.update()
-        self.propagate()
+            self.view.draw_node()
+            self.update()
+            self.propagate()
 
 
     """
@@ -347,7 +226,7 @@ class GenericNode(BaseNode):
         if output_name in self.output_properties:
             return self.output_properties[output_name]
         else:
-            raise ValueError
+            raise ValueError("Given output property doesn't exist: "+str(output_name))
 
     """
         Updates the output container value if the given port name exists
@@ -356,7 +235,7 @@ class GenericNode(BaseNode):
         if output_name in self.output_properties:
             self.output_properties[output_name].set_property(value)
         else:
-            raise ValueError
+            raise ValueError("Given output property doesn't exist: "+str(output_name))
 
     """
         Changes the node to red as its inputs are invalid
@@ -369,3 +248,10 @@ class GenericNode(BaseNode):
     """
     def set_valid_color(self):
         self.set_property('color', (13, 18, 23, 255))
+
+
+    """
+        Tells if the current is to update
+    """
+    def set_to_update(self, value:bool):
+        self.to_update = value

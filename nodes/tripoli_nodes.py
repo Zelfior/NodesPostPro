@@ -147,6 +147,8 @@ class TripoliExtendedMeshNode(GenericNode):
         self.add_label("Size Z centers")
 
         self.TP = tripoli_postpro()
+        
+        self.property_to_update.append("Filename")
 
 
     def check_inputs(self):

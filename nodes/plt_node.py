@@ -176,6 +176,15 @@ def are_plottable_compatible(plot1, plot2):
 
 
 
+
+
+
+
+
+
+
+
+
 class ImShowNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -209,6 +218,9 @@ class ImShowNode(GenericNode):
         self.add_label("Information")
 
         self.element_type = "imshow"
+
+        self.property_to_update.append("norm")
+        self.property_to_update.append("Priority")
 
     def check_inputs(self):
         is_valid, message = self.is_input_valid("Y")
@@ -346,6 +358,10 @@ class PlotNode(PltElementNode):
 
         self.element_type = "plot"
 
+        self.property_to_update.append("Priority")
+        self.property_to_update.append("marker")
+        self.property_to_update.append("linestyle")
+
     def check_inputs(self):
         is_valid, message = self.is_input_valid("Y")
 
@@ -414,8 +430,6 @@ class FillBetweenNode(PltElementNode):
         self.add_custom_input('color', PortValueType.STRING)
 
         # self.add_linestyle_combo()
-
-        # self.add_custom_input('linewidth', PortValueType.FLOAT)
         
         self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
         self.create_property("Priority", 0)
@@ -433,6 +447,8 @@ class FillBetweenNode(PltElementNode):
 
         self.element_type = "fill_between"
         self.y_name = 'Y1'
+
+        self.property_to_update.append("Priority")
 
     def check_inputs(self):
         is_valid_x, message_x = self.is_input_valid("X")
@@ -546,7 +562,16 @@ class ScatterNode(PltElementNode):
 
         self.add_custom_input('linewidth ', PortValueType.FLOAT)
         
-        self.add_custom_input('marker', PortValueType.STRING)
+        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
+        self.create_property("Priority", 0)
+        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
+        self.view.add_widget(self.priority_widget)
+        self.view.draw_node()
+        
+        self.priority_widget.set_range(0, 50)
+
+        self.add_combo_menu('marker', 'marker', items=["None", ".", ",", "o", "s", "D"])
+        
         self.add_custom_input('markersize', PortValueType.FLOAT)
 
         self.add_custom_output('Element', PortValueType.DICT)
@@ -554,6 +579,10 @@ class ScatterNode(PltElementNode):
         self.add_label("Information")
 
         self.element_type = "scatter"
+
+        self.property_to_update.append("Priority")
+        self.property_to_update.append("marker")
+
 
     def check_inputs(self):
         is_valid, message = self.is_input_valid("Y")
@@ -576,6 +605,34 @@ class ScatterNode(PltElementNode):
 
                     if not is_valid:
                         self.change_label("Information", message, True)
+
+
+    def update_from_input(self):
+        super(ScatterNode, self).update_from_input()
+
+        properties_dict = self.get_output_property("Element").get_property()
+
+        if self.get_property('marker') != "None":
+            properties_dict['marker'] = self.get_property('marker')
+
+        properties_dict['priority'] = int(self.priority_widget.get_value())
+
+        self.set_output_property("Element", properties_dict)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -618,6 +675,11 @@ class PltFigureNode(GenericNode):
         self.plot_widget.update_plot()
         
         self.add_label("Information")
+        
+        self.property_to_update.append("x_log")
+        self.property_to_update.append("y_log")
+        self.property_to_update.append("legend")
+        self.property_to_update.append("color_bar")
 
     def update_from_input(self):
         if not self.get_value_from_port("Input Plottable") == None:

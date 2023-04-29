@@ -111,6 +111,9 @@ if __name__ == '__main__':
 
     plot_show_node = graph.create_node('Matplotlib.PltFigureNode')
     plot_show_node.set_pos(800,current_height)
+
+    for node in graph.all_nodes():
+        node.set_to_update(False)
     
     read_file_node.set_output(0, get_column_node.input(0))
     get_column_node.set_output(0, plot_node.input(1))
@@ -136,6 +139,9 @@ if __name__ == '__main__':
 
     plot_show_node_2 = graph.create_node('Matplotlib.PltFigureNode')
     plot_show_node_2.set_pos(800,current_height)
+
+    for node in graph.all_nodes():
+        node.set_to_update(False)
 
     pickle_node.set_output(0, set_axis_1_node.input(0))
     set_axis_1_node.axis_widget.set_value(1)
@@ -186,6 +192,12 @@ if __name__ == '__main__':
     plot_show_node_3 = graph.create_node('Matplotlib.PltFigureNode')
     plot_show_node_3.set_pos(800,current_height)
 
+
+    for node in graph.all_nodes():
+        node.set_to_update(False)
+
+
+
     read_tripoli_node.set_output(0, squeeze_tripoli_node.input(0))
 
     squeeze_tripoli_node.set_output(0, set_axis_2_1_node.input(0))
@@ -214,6 +226,9 @@ if __name__ == '__main__':
     plot_2_node.set_output(0, plot_show_node_3.input(0))
 
 
+    for node in graph.all_nodes():
+        node.set_to_update(True)
+        node.update_values()
 
 
     # fit nodes to the viewer.
@@ -236,21 +251,21 @@ if __name__ == '__main__':
     graph.node_double_clicked.connect(display_properties_bin)
 
     # create a nodes tree widget.
-    nodes_tree = NodesTreeWidget(node_graph=graph)
-    nodes_tree.set_category_label('nodeGraphQt.nodes', 'Builtin Nodes')
-    nodes_tree.set_category_label('nodes.custom.ports', 'Custom Port Nodes')
-    nodes_tree.set_category_label('nodes.widget', 'Widget Nodes')
-    nodes_tree.set_category_label('nodes.basic', 'Basic Nodes')
-    nodes_tree.set_category_label('nodes.group', 'Group Nodes')
+    # nodes_tree = NodesTreeWidget(node_graph=graph)
+    # nodes_tree.set_category_label('nodeGraphQt.nodes', 'Builtin Nodes')
+    # nodes_tree.set_category_label('nodes.custom.ports', 'Custom Port Nodes')
+    # nodes_tree.set_category_label('nodes.widget', 'Widget Nodes')
+    # nodes_tree.set_category_label('nodes.basic', 'Basic Nodes')
+    # nodes_tree.set_category_label('nodes.group', 'Group Nodes')
     # nodes_tree.show()
 
     # create a node palette widget.
-    nodes_palette = NodesPaletteWidget(node_graph=graph)
-    nodes_palette.set_category_label('nodeGraphQt.nodes', 'Builtin Nodes')
-    nodes_palette.set_category_label('nodes.custom.ports', 'Custom Port Nodes')
-    nodes_palette.set_category_label('nodes.widget', 'Widget Nodes')
-    nodes_palette.set_category_label('nodes.basic', 'Basic Nodes')
-    nodes_palette.set_category_label('nodes.group', 'Group Nodes')
+    # nodes_palette = NodesPaletteWidget(node_graph=graph)
+    # nodes_palette.set_category_label('nodeGraphQt.nodes', 'Builtin Nodes')
+    # nodes_palette.set_category_label('nodes.custom.ports', 'Custom Port Nodes')
+    # nodes_palette.set_category_label('nodes.widget', 'Widget Nodes')
+    # nodes_palette.set_category_label('nodes.basic', 'Basic Nodes')
+    # nodes_palette.set_category_label('nodes.group', 'Group Nodes')
     # nodes_palette.show()
 
     app.exec_()

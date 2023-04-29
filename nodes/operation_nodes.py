@@ -46,6 +46,8 @@ class MultiplyNode(GenericNode):
         
         # create the QComboBox menu.
         self.add_text_input('Value', 'Multiply by', '1', tab='widgets')
+
+        self.property_to_update.append("Value")
         
 
     def check_inputs(self):

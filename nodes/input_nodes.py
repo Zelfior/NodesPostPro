@@ -30,6 +30,8 @@ class InputFloatNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value')
 
+        self.property_to_update.append("Value")
+
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
         self.set_property("is_valid",is_float(self.get_property("Value")))
@@ -61,6 +63,8 @@ class InputIntegerNode(GenericNode):
 
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value')
+
+        self.property_to_update.append("Value")
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
@@ -96,6 +100,8 @@ class InputStringNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value')
 
+        self.property_to_update.append("Value")
+
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
         self.set_property("is_valid", True)
@@ -127,6 +133,8 @@ class InputBooleanNode(GenericNode):
 
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value')
+
+        self.property_to_update.append("Value")
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float

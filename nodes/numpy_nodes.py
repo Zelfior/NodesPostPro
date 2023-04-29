@@ -45,6 +45,9 @@ class SetAxisNode(GenericNode):
 
         self.add_label("Information")
 
+        self.property_to_update.append("Axis")
+        self.property_to_update.append("Value")
+
 
     def check_inputs(self):
         

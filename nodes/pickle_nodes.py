@@ -39,6 +39,8 @@ class LoadNumpyNode(GenericNode):
 
         self.check_inputs()
 
+        self.property_to_update.append("Filename")
+
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if a file is present at the given path
@@ -101,6 +103,8 @@ class LoadPandasNode(GenericNode):
         self.change_label("Pickle version", str(pickle.format_version), False)
 
         self.check_inputs()
+
+        self.property_to_update.append("Filename")
 
 
     def check_inputs(self):

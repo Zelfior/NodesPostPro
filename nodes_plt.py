@@ -78,6 +78,7 @@ if __name__ == '__main__':
         plt_node.ScatterNode,
         plt_node.ImShowNode,
         plt_node.FillBetweenNode,
+        plt_node.HistNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,

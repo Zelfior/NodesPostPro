@@ -95,8 +95,6 @@ class pltWidget(NodeBaseWidget):
                     else:
                         kwargs_dict["c"] = list(element["Color array"])
 
-                    print(kwargs_dict["c"])
-
                     if not "cmap" in kwargs_dict:
                         kwargs_dict["cmap"] = "viridis"
                 elif "Color" in element:
@@ -104,7 +102,11 @@ class pltWidget(NodeBaseWidget):
 
                 self.canvas.axes.scatter(element['X'], element['Y'], **kwargs_dict)
 
-        print([[element, self.plot_parameters[element]] for element in self.plot_parameters if not type(self.plot_parameters[element]) == dict])
+            elif element['element_type'] == "hist":
+                kwargs_dict = {key:element[key] for key in element if key not in ["X", "element_type", "priority"]}
+                self.canvas.axes.hist(element['X'], **kwargs_dict)
+                
+        # print([[element, self.plot_parameters[element]] for element in self.plot_parameters if not type(self.plot_parameters[element]) == dict])
 
         if "Title" in self.plot_parameters:
             self.canvas.axes.set_title(self.plot_parameters["Title"])
@@ -526,9 +528,6 @@ class FillBetweenNode(PltElementNode):
 
         self.set_output_property("Element", properties_dict)
 
-        print(properties_dict.keys())
-
-
 
 
 
@@ -635,6 +634,152 @@ class ScatterNode(PltElementNode):
 
 
 
+class HistNode(GenericNode):
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Hist'
+
+    def __init__(self):
+        super(HistNode, self).__init__()
+
+        # X, cmap=None, norm=None
+        # self.add_custom_input('X', PortValueType.PLOTTABLE)
+        self.add_custom_input('X', PortValueType.PLOTTABLE)
+        self.add_custom_input('Bins', PortValueType.INTEGER)
+        self.add_custom_input('Weight', PortValueType.PLOTTABLE)
+
+        self.add_custom_input('X min', PortValueType.FLOAT)
+        self.add_custom_input('X max', PortValueType.FLOAT)
+
+        self.add_custom_input('color', PortValueType.STRING)
+
+        self.add_checkbox("density", text='Density')
+        self.add_checkbox("cumulative", text='Cumulative')
+        self.add_checkbox("log", text='Log')
+
+        self.add_custom_input('label', PortValueType.STRING)
+
+        self.add_combo_menu('histtype', 'histtype', items=['bar', 'barstacked', 'step', 'stepfilled'])
+        
+        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
+        self.create_property("Priority", 0)
+        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
+        self.view.add_widget(self.priority_widget)
+        self.view.draw_node()
+        
+        self.priority_widget.set_range(0, 50)
+
+        self.add_custom_input('alpha', PortValueType.FLOAT)
+
+        self.add_custom_output('Element', PortValueType.DICT)
+
+        self.add_label("Information")
+
+        self.element_type = "hist"
+
+        self.property_to_update.append("density")
+        self.property_to_update.append("cumulative")
+        self.property_to_update.append("log")
+        self.property_to_update.append("histtype")
+        self.property_to_update.append("Priority")
+
+    def check_inputs(self):
+        is_valid, message = self.is_input_valid("X")
+
+        self.set_property("is_valid", is_valid)
+
+        if not is_valid:
+            self.change_label("Information", message, True)
+
+
+        for input in self.input_properties:
+            if not input == "Y":
+
+                input_value = self.get_value_from_port(input)
+
+                if input_value is not None:
+                    is_valid, message = self.is_input_valid(input)
+
+                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
+
+                    if not is_valid:
+                        self.change_label("Information", message, True)
+
+        if is_valid and self.is_input_valid("Weight")[0]:
+            if np.squeeze(np.array(self.get_value_from_port("X").get_property())).shape != \
+                np.squeeze(np.array(self.get_value_from_port("Weight").get_property())).shape:
+                    self.set_property("is_valid", False)
+                    self.change_label("Information", "Arrays X and Weight should have the same shape.", True)
+
+                   
+    def update_from_input(self):
+        
+        properties_dict = {"element_type": self.element_type}
+
+        for input in self.input_properties:
+            input_value = self.get_value_from_port(input)
+
+            if input_value is not None:
+                properties_dict[input] = input_value.get_property()
+
+        properties_dict['histtype'] = self.get_property('histtype')
+        properties_dict['density'] = self.get_property('density')
+        properties_dict['cumulative'] = self.get_property('cumulative')
+        properties_dict['log'] = self.get_property('log')
+
+        if "Weight" in properties_dict:
+            properties_dict["weights"] = properties_dict["Weight"]
+            del properties_dict["Weight"]
+
+        if "Bins" in properties_dict:
+            properties_dict["bins"] = properties_dict["Bins"]
+            del properties_dict["Bins"]
+
+        if "X min" in properties_dict:
+            if "X max" in properties_dict:
+                properties_dict["range"] = [properties_dict["X min"], properties_dict["X max"]]
+                del properties_dict["X max"]
+            else:
+                properties_dict["range"] = [properties_dict["X min"], max(np.array(properties_dict["X"]).flatten())]
+            del properties_dict["X min"]
+
+        elif "X max" in properties_dict:
+            properties_dict["range"] = [min(np.array(properties_dict["X"]).flatten()), properties_dict["X max"]]
+            del properties_dict["X max"]
+
+        properties_dict['priority'] = int(self.priority_widget.get_value())
+
+        self.set_output_property("Element", properties_dict)
+
+        self.change_label("Information", "", True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class PltFigureNode(GenericNode):
@@ -695,6 +840,7 @@ class PltFigureNode(GenericNode):
                     plot_parameters[input_] = self.get_value_from_port(input_).get_property()
 
 
+            print("Updating plot")
             self.plot_widget.update_plot_list(self.input_arrays, plot_parameters)
 
 

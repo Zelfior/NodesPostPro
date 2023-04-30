@@ -3,6 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 """
     All value type that can be exchanged between nodes
 """
@@ -67,7 +69,7 @@ def check_type(value, enum_value):
     elif enum_value == PortValueType.DICT:
         return type(value) == dict
     elif enum_value == PortValueType.FIGURE:
-        return type(value) in [plt.Figure, plt.axis]
+        return type(value) in [Figure, Axes]
     else:
         raise ValueError
     

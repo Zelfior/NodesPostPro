@@ -1,6 +1,7 @@
 from NodeGraphQt import NodeBaseWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 from Qt import QtWidgets
 
 import pandas as pd
@@ -9,16 +10,55 @@ import numpy as np
 from nodes.generic_node import GenericNode, PortValueType, check_type
 from nodes.custom_widgets import IntSelector_Widget
 
+
+def plot_element_on_axis(figure : Figure, axis : Axes, element):
+
+    if element['element_type'] == "plot":
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
+        return axis.plot(element['X'], element['Y'], **kwargs_dict)
+        
+    elif element['element_type'] == "fill_between":
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y1", "Y2", "element_type", "priority"]}
+        return axis.fill_between(element['X'], element['Y1'], element['Y2'], **kwargs_dict)
+        
+    elif element['element_type'] == "imshow":
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
+        kwargs_dict["aspect"] = "auto"
+        return axis.imshow(element['Y'], **kwargs_dict)
+
+    elif element['element_type'] == "scatter":
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority"]}
+
+        if "Color array" in element:
+            if type(element["Color array"]) == pd.DataFrame:
+                kwargs_dict["c"] = element["Color array"].values.tolist()
+            else:
+                kwargs_dict["c"] = list(element["Color array"])
+
+            if not "cmap" in kwargs_dict:
+                kwargs_dict["cmap"] = "viridis"
+        elif "Color" in element:
+            kwargs_dict["c"] = element["Color"]
+
+        return axis.scatter(element['X'], element['Y'], **kwargs_dict)
+
+    elif element['element_type'] == "hist":
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "element_type", "priority"]}
+        return axis.hist(element['X'], **kwargs_dict)
+                
+
+
 class PltCanvasWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(PltCanvasWidget, self).__init__(parent)
-        self.fig = Figure(figsize=(5, 5), dpi=100)
+        self.fig = Figure(figsize=(6, 6))#, dpi=100)
         self.canvas = FigureCanvasQTAgg(self.fig)
         self.axes = self.fig.add_subplot(111)
+        self.twinx_axes = None
 
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.canvas)
+        self.layout_ = QtWidgets.QHBoxLayout(self)
+        self.layout_.setContentsMargins(-5, -5, -5, -5)
+        self.layout_.addWidget(self.canvas)
 
 
     def get_value(self):
@@ -35,20 +75,21 @@ class pltWidget(NodeBaseWidget):
         # set the name for node property.
         self.set_name('Plot_Widget')
 
-        # set the label above the widget.
-        # self.set_label('Custom Widget')
-
         self.canvas = PltCanvasWidget()
         # set the custom widget.
         self.set_custom_widget(self.canvas)
 
-        self.input_arrays = []
+        self.input_arrays_1 = []
+        self.input_arrays_2 = []
 
         self.plot_parameters= {"legend": False, "x_log":False, "y_log":False, "color_bar":False}
 
         self.title = ""
 
     def sort_by_priority(self, array):
+        if array == None:
+            return None
+        
         new_array = []
 
         for element in array:
@@ -63,50 +104,33 @@ class pltWidget(NodeBaseWidget):
         return new_array
 
 
-    def update_plot(self, legend = False):
+    def update_plot(self):
         self.canvas.fig.clear()  # clear the axes content
         self.canvas.axes = self.canvas.fig.add_subplot(111)
+        self.canvas.twinx_axes = None
         # self.canvas.fig.gca().set_aspect(1.)
 
-        self.input_arrays = self.sort_by_priority(self.input_arrays)
+        self.input_arrays_1 = self.sort_by_priority(self.input_arrays_1)
+        self.input_arrays_2 = self.sort_by_priority(self.input_arrays_2)
 
         mappables= []
 
-        for element in self.input_arrays:
-            if element['element_type'] == "plot":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
-                self.canvas.axes.plot(element['X'], element['Y'], **kwargs_dict)
+        if self.input_arrays_1 is not None:
+            for element in self.input_arrays_1:
+                el = plot_element_on_axis(self.canvas.fig, self.canvas.axes, element)
+
+                if element['element_type'] == "imshow":
+                    mappables.append(el)
                 
-            if element['element_type'] == "fill_between":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y1", "Y2", "element_type", "priority"]}
-                self.canvas.axes.fill_between(element['X'], element['Y1'], element['Y2'], **kwargs_dict)
+        if self.input_arrays_2 is not None:
+            self.canvas.twinx_axes = self.canvas.axes.twinx()
+
+            for element in self.input_arrays_2:
+                el = plot_element_on_axis(self.canvas.fig, self.canvas.twinx_axes, element)
+
+                if element['element_type'] == "imshow":
+                    mappables.append(el)
                 
-            elif element['element_type'] == "imshow":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
-                kwargs_dict["aspect"] = "auto"
-                mappables.append(self.canvas.axes.imshow(element['Y'], **kwargs_dict))
-
-            elif element['element_type'] == "scatter":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority"]}
-
-                if "Color array" in element:
-                    if type(element["Color array"]) == pd.DataFrame:
-                        kwargs_dict["c"] = element["Color array"].values.tolist()
-                    else:
-                        kwargs_dict["c"] = list(element["Color array"])
-
-                    if not "cmap" in kwargs_dict:
-                        kwargs_dict["cmap"] = "viridis"
-                elif "Color" in element:
-                    kwargs_dict["c"] = element["Color"]
-
-                self.canvas.axes.scatter(element['X'], element['Y'], **kwargs_dict)
-
-            elif element['element_type'] == "hist":
-                kwargs_dict = {key:element[key] for key in element if key not in ["X", "element_type", "priority"]}
-                self.canvas.axes.hist(element['X'], **kwargs_dict)
-                
-        # print([[element, self.plot_parameters[element]] for element in self.plot_parameters if not type(self.plot_parameters[element]) == dict])
 
         if "Title" in self.plot_parameters:
             self.canvas.axes.set_title(self.plot_parameters["Title"])
@@ -128,9 +152,26 @@ class pltWidget(NodeBaseWidget):
             self.canvas.axes.set_ylim((None, self.plot_parameters["Y_max"]))
 
 
+        if "X label" in self.plot_parameters:
+            self.canvas.axes.set_xlabel(self.plot_parameters["X label"])
+            
+        if "Y label 1" in self.plot_parameters:
+            if self.input_arrays_1 is not None:
+                self.canvas.axes.set_ylabel(self.plot_parameters["Y label 1"])
+            
+        if "Y label 2" in self.plot_parameters:
+            if self.canvas.twinx_axes is not None:
+                self.canvas.twinx_axes.set_ylabel(self.plot_parameters["Y label 2"])
+
+
 
         if self.plot_parameters["legend"]:
-            self.canvas.axes.legend()
+            if self.canvas.twinx_axes != None:
+                h1, l1 = self.canvas.axes.get_legend_handles_labels()
+                h2, l2 = self.canvas.twinx_axes.get_legend_handles_labels()
+                self.canvas.axes.legend(handles=h1+h2, labels=l1+l2)
+            else:
+                self.canvas.axes.legend()
 
         if self.plot_parameters["color_bar"]:
             if len(mappables) > 0:
@@ -146,12 +187,15 @@ class pltWidget(NodeBaseWidget):
         else:   
             self.canvas.axes.set_yscale('linear')
 
+        self.canvas.fig.tight_layout()
         self.canvas.canvas.draw()  # actually draw the new content
 
 
 
-    def update_plot_list(self, array, plot_parameters):
-        self.input_arrays = array
+
+    def update_plot_list(self, array_1, array_2, plot_parameters):
+        self.input_arrays_1 = array_1
+        self.input_arrays_2 = array_2
         self.plot_parameters = plot_parameters
 
         self.update_plot()
@@ -794,7 +838,8 @@ class PltFigureNode(GenericNode):
         super(PltFigureNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input Plottable', PortValueType.DICT, multi_input=True)
+        self.add_custom_input('Input Plottable 1', PortValueType.DICT, multi_input=True)
+        self.add_custom_input('Input Plottable 2', PortValueType.DICT, multi_input=True)
         
         self.add_custom_input('Title', PortValueType.STRING)
         
@@ -803,6 +848,10 @@ class PltFigureNode(GenericNode):
         
         self.add_custom_input('Y_min', PortValueType.FLOAT)
         self.add_custom_input('Y_max', PortValueType.FLOAT)
+        
+        self.add_custom_input('X label', PortValueType.STRING)
+        self.add_custom_input('Y label 1', PortValueType.STRING)
+        self.add_custom_input('Y label 2', PortValueType.STRING)
         
         self.add_custom_output('Figure', PortValueType.FIGURE)
         
@@ -826,9 +875,20 @@ class PltFigureNode(GenericNode):
         self.property_to_update.append("legend")
         self.property_to_update.append("color_bar")
 
+        self.update()
+
     def update_from_input(self):
-        if not self.get_value_from_port("Input Plottable") == None:
-            self.input_arrays = [element.get_property() for element in self.get_value_from_port("Input Plottable", multiple=True)]
+        if not self.get_value_from_port("Input Plottable 1") == None or not self.get_value_from_port("Input Plottable 2") == None:
+
+            if self.get_value_from_port("Input Plottable 1", multiple=True) == None:
+                self.input_arrays_1 = None
+            else:
+                self.input_arrays_1 = [element.get_property() for element in self.get_value_from_port("Input Plottable 1", multiple=True)]
+                
+            if self.get_value_from_port("Input Plottable 2", multiple=True) == None:
+                self.input_arrays_2 = None
+            else:
+                self.input_arrays_2 = [element.get_property() for element in self.get_value_from_port("Input Plottable 2", multiple=True)]
 
             plot_parameters = {"legend":self.get_property("legend"),
                                     "x_log":self.get_property("x_log"),
@@ -841,22 +901,36 @@ class PltFigureNode(GenericNode):
 
 
             print("Updating plot")
-            self.plot_widget.update_plot_list(self.input_arrays, plot_parameters)
+            self.plot_widget.update_plot_list(self.input_arrays_1, self.input_arrays_2, plot_parameters)
 
 
     def check_inputs(self):
-        is_valid, message = self.is_input_valid("Input Plottable")
+        if not self.get_value_from_port("Input Plottable 1") == None:
+            is_valid, message = self.is_input_valid("Input Plottable 1")
 
-        self.set_property("is_valid", is_valid)
+            self.set_property("is_valid", is_valid)
 
-        if not is_valid:
-            self.change_label("Information", message, True)
+            if not is_valid:
+                self.change_label("Information", message, True)
+
+        if not self.get_value_from_port("Input Plottable 2") == None:
+            
+            is_valid, message = self.is_input_valid("Input Plottable 2")
+
+            self.set_property("is_valid", is_valid)
+
+            if not is_valid:
+                self.change_label("Information", message, True)
+
+        if self.get_value_from_port("Input Plottable 1") == None and self.get_value_from_port("Input Plottable 2") == None:
+            self.set_property("is_valid", False)
+            self.change_label("Information", "No input plottable given", True)
 
 
 
     def reset_outputs(self):
         super(PltFigureNode, self).reset_outputs()
 
-        self.plot_widget.update_plot_list([], {"legend": False, "x_log":False, "y_log":False, "color_bar":False})
+        self.plot_widget.update_plot_list(None, None, {"legend": False, "x_log":False, "y_log":False, "color_bar":False})
         self.change_label("Information", "", False)
 

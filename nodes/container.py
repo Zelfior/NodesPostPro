@@ -18,7 +18,7 @@ class PortValueType(Enum):
     PD_DATAFRAME = 7
     PLOTTABLE = 8
     DICT = 9
-    FIGURE = 9
+    FIGURE = 10
 
 """
     Color association with the port type enum
@@ -69,9 +69,9 @@ def check_type(value, enum_value):
     elif enum_value == PortValueType.DICT:
         return type(value) == dict
     elif enum_value == PortValueType.FIGURE:
-        return type(value) in [Figure, Axes]
+        return type(value) == PltContainer
     else:
-        raise ValueError
+        raise ValueError()
     
 
 class Container():
@@ -100,7 +100,7 @@ class Container():
             self.countained_value = value
             self.defined = True
         else:
-            raise TypeError
+            raise TypeError("Requested type: "+str(self.enum_value)+", found: "+str(type(value)))
 
     """
         Returns the contained value
@@ -120,3 +120,27 @@ class Container():
     def get_property_type(self):
         return self.enum_value
 
+
+
+
+class PltContainer:
+    """
+        The countainer is initialized empty and undefined
+    """
+    def __init__(self, fig, axes, parameters):
+        self.fig = fig
+        self.axes = axes
+        self.parameters = parameters
+
+    """
+        Returns the contained value
+    """
+    def get_property(self, property_name:str):
+        if property_name == "Figure":
+            return self.fig
+        elif property_name == "Axes":
+            return self.axes
+        elif property_name == "Parameters":
+            return self.parameters
+        else:
+            raise ValueError("Given property name does not exist: "+property_name)

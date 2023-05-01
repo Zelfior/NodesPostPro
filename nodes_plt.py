@@ -79,6 +79,7 @@ if __name__ == '__main__':
         plt_node.ImShowNode,
         plt_node.FillBetweenNode,
         plt_node.HistNode,
+        plt_node.SaveFigureNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,
@@ -127,7 +128,7 @@ if __name__ == '__main__':
         Exemple imshow
     
     """
-    current_height += 800
+    current_height += 1000
 
     pickle_node = graph.create_node("Pickle.LoadNumpyNode")
     pickle_node.set_pos(-400,current_height)
@@ -141,6 +142,13 @@ if __name__ == '__main__':
     plot_show_node_2 = graph.create_node('Matplotlib.PltFigureNode')
     plot_show_node_2.set_pos(800,current_height)
 
+    save_file_name = graph.create_node('Input.InputStringNode')
+    save_file_name.set_pos(1700,current_height+100)
+    save_file_name.set_property("Value", "figure.png")
+
+    save_file_node = graph.create_node('Matplotlib.SaveFigureNode')
+    save_file_node.set_pos(2000,current_height)
+
     for node in graph.all_nodes():
         node.set_to_update(False)
 
@@ -149,6 +157,8 @@ if __name__ == '__main__':
     set_axis_1_node.set_output(0, imshow_node.input(0))
     imshow_node.set_output(0, plot_show_node_2.input(0))
     plot_show_node_2.set_property("color_bar", True)
+    plot_show_node_2.set_output(0, save_file_node.input(0))
+    save_file_name.set_output(0, save_file_node.input(1))
 
 
     """
@@ -156,7 +166,7 @@ if __name__ == '__main__':
         Exemple fill_between
     
     """
-    current_height += 1000
+    current_height += 1200
     read_tripoli_node = graph.create_node("Tripoli.TripoliExtendedMeshNode")
     read_tripoli_node.set_pos(-800,current_height)
 

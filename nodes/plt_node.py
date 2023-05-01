@@ -4,11 +4,16 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from Qt import QtWidgets
 
+from NodeGraphQt.widgets.node_widgets import _NodeGroupBox
+
 import pandas as pd
 import numpy as np
+import os
 
 from nodes.generic_node import GenericNode, PortValueType, check_type
 from nodes.custom_widgets import IntSelector_Widget
+from nodes.cast_nodes import is_float
+from nodes.container import PltContainer
 
 
 def plot_element_on_axis(figure : Figure, axis : Axes, element):
@@ -49,9 +54,9 @@ def plot_element_on_axis(figure : Figure, axis : Axes, element):
 
 
 class PltCanvasWidget(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, width = 6, height = 6, parent=None):
         super(PltCanvasWidget, self).__init__(parent)
-        self.fig = Figure(figsize=(6, 6))#, dpi=100)
+        self.fig = Figure(figsize=(width, height))
         self.canvas = FigureCanvasQTAgg(self.fig)
         self.axes = self.fig.add_subplot(111)
         self.twinx_axes = None
@@ -62,8 +67,18 @@ class PltCanvasWidget(QtWidgets.QWidget):
 
 
     def get_value(self):
-        widget = self.get_custom_widget()
         return ''
+    
+    def update_figure(self, width, height):
+        self.fig.clear()
+        self.axes = self.fig.add_subplot(111)
+        self.twinx_axes = None
+
+        self.fig.set_figwidth(width)
+        self.fig.set_figheight(height)
+
+        self.canvas.adjustSize()
+
 
 
 
@@ -105,10 +120,21 @@ class pltWidget(NodeBaseWidget):
 
 
     def update_plot(self):
-        self.canvas.fig.clear()  # clear the axes content
-        self.canvas.axes = self.canvas.fig.add_subplot(111)
-        self.canvas.twinx_axes = None
-        # self.canvas.fig.gca().set_aspect(1.)
+
+        
+        if "width" in self.plot_parameters:
+            self.canvas.update_figure(int(self.plot_parameters["width"]), int(self.plot_parameters["height"]))
+
+            #   On reset le custom widget du canvas pour qu'il prenne en compte la nouvelle taille
+            group = _NodeGroupBox(self._label)
+            group.add_node_widget(self.canvas)
+            self.setWidget(group)
+
+        else:
+            self.canvas.fig.clear()  # clear the axes content
+
+            self.canvas.axes = self.canvas.fig.add_subplot(111)
+            self.canvas.twinx_axes = None
 
         self.input_arrays_1 = self.sort_by_priority(self.input_arrays_1)
         self.input_arrays_2 = self.sort_by_priority(self.input_arrays_2)
@@ -203,7 +229,6 @@ class pltWidget(NodeBaseWidget):
 
 
     def get_value(self):
-        # widget = self.get_custom_widget()
         return ''
 
     def set_value(self, value):
@@ -860,6 +885,9 @@ class PltFigureNode(GenericNode):
         self.add_checkbox("legend", text='Legend')
         self.add_checkbox("color_bar", text='Color bar')
 
+        self.add_text_input("canvas_width", "Width", "6")
+        self.add_text_input("canvas_height", "Height", "6")
+
         self.plot_widget = pltWidget(self.view, name="plot")
         self.create_property('Plot_Widget', None)
 
@@ -874,6 +902,8 @@ class PltFigureNode(GenericNode):
         self.property_to_update.append("y_log")
         self.property_to_update.append("legend")
         self.property_to_update.append("color_bar")
+        self.property_to_update.append("canvas_height")
+        self.property_to_update.append("canvas_width")
 
         self.update()
 
@@ -894,6 +924,9 @@ class PltFigureNode(GenericNode):
                                     "x_log":self.get_property("x_log"),
                                     "y_log":self.get_property("y_log"),
                                     "color_bar":self.get_property("color_bar")}
+            
+            plot_parameters["width"] = self.get_property("canvas_width")
+            plot_parameters["height"] = self.get_property("canvas_height")
 
             for input_ in self.input_properties:
                 if self.is_input_valid(input_)[0]:
@@ -903,6 +936,9 @@ class PltFigureNode(GenericNode):
             print("Updating plot")
             self.plot_widget.update_plot_list(self.input_arrays_1, self.input_arrays_2, plot_parameters)
 
+            self.set_output_property("Figure", PltContainer(self.plot_widget.canvas.fig,
+                                                            self.plot_widget.canvas.canvas,
+                                                            plot_parameters))
 
     def check_inputs(self):
         if not self.get_value_from_port("Input Plottable 1") == None:
@@ -926,6 +962,14 @@ class PltFigureNode(GenericNode):
             self.set_property("is_valid", False)
             self.change_label("Information", "No input plottable given", True)
 
+        if not is_float(self.get_property("canvas_height")):
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Given height should be a float", True)
+
+        if not is_float(self.get_property("canvas_width")):
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Given width should be a float", True)
+
 
 
     def reset_outputs(self):
@@ -934,3 +978,62 @@ class PltFigureNode(GenericNode):
         self.plot_widget.update_plot_list(None, None, {"legend": False, "x_log":False, "y_log":False, "color_bar":False})
         self.change_label("Information", "", False)
 
+
+
+class SaveFigureNode(GenericNode):
+
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Save Figure'
+
+    def __init__(self):
+        super(SaveFigureNode, self).__init__()
+
+        # create input & output ports
+        self.add_custom_input('Input Figure', PortValueType.FIGURE)
+
+        self.add_custom_input('File name', PortValueType.STRING)
+
+        self.add_text_input("canvas_dpi", "DPI", "100")
+        
+        self.add_label("Information")
+        
+        self.property_to_update.append("canvas_dpi")
+
+        self.update()
+
+    def update_from_input(self):
+        print("Saving figure at path :", os.path.abspath(self.get_value_from_port("File name").get_property()))
+
+        figure = self.get_value_from_port("Input Figure").get_property().get_property("Figure")
+
+        figure.savefig(os.path.abspath(self.get_value_from_port("File name").get_property()), dpi=int(self.get_property("canvas_dpi")))
+
+    def check_inputs(self):
+
+        is_valid_1, message_1 = self.is_input_valid("Input Figure")
+
+        self.set_property("is_valid", is_valid_1)
+
+        if not is_valid_1:
+            self.change_label("Information", message_1, True)
+            
+
+        is_valid_1, message_1 = self.is_input_valid("File name")
+
+        self.set_property("is_valid", is_valid_1)
+
+        if not is_valid_1:
+            self.change_label("Information", message_1, True)
+        else:
+            abs_path = os.path.dirname(os.path.abspath(self.get_value_from_port("File name").get_property()))
+
+            if not os.path.isdir(abs_path):
+                self.set_property("is_valid", False)
+                self.change_label("Information", "Given path folder does not exist", True)
+
+        if not is_float(self.get_property("canvas_dpi")):
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Given DPI should be a float", True)

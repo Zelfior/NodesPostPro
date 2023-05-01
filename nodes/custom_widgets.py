@@ -149,3 +149,63 @@ class IntSelector_Widget(NodeBaseWidget):
     def set_value(self, value):
         return self.int_selector_widget.set_value(value)
     
+
+
+
+
+
+
+
+
+
+
+
+    
+"""
+
+
+
+
+
+
+"""
+class ButtonWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None, name=''):
+        super(ButtonWidget, self).__init__(parent)
+
+        self.button_widget = QtWidgets.QPushButton(name)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setContentsMargins(5, 0, 5, 0)
+        layout.addWidget(self.button_widget)
+
+    def get_value(self):
+        return True
+
+    def set_value(self, value):
+        pass
+    
+
+class ButtonNodeWidget(NodeBaseWidget):
+    def __init__(self, parent=None, name='', label = False):
+        super(ButtonNodeWidget, self).__init__(parent)
+
+        # set the name for node property.
+        self.set_name(name)
+
+        # set the label above the widget.
+        if label:
+            self.set_label(name)
+
+        self.button_widget = ButtonWidget(name = name)
+
+        self.set_custom_widget(self.button_widget)
+
+    def get_value(self):
+        return True
+
+    def set_value(self, value):
+        pass
+    
+    def set_link(self, function):
+        self.button_widget.button_widget.clicked.connect(function)

@@ -1006,10 +1006,14 @@ class SaveFigureNode(GenericNode):
 
     def update_from_input(self):
         print("Saving figure at path :", os.path.abspath(self.get_value_from_port("File name").get_property()))
+        self.change_label("Information", "", False)
 
         figure = self.get_value_from_port("Input Figure").get_property().get_property("Figure")
 
-        figure.savefig(os.path.abspath(self.get_value_from_port("File name").get_property()), dpi=int(self.get_property("canvas_dpi")))
+        try:
+            figure.savefig(os.path.abspath(self.get_value_from_port("File name").get_property()), dpi=int(self.get_property("canvas_dpi")))
+        except Exception as e:
+            self.change_label("Information", str(e), True)
 
     def check_inputs(self):
 

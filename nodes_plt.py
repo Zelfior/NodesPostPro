@@ -13,7 +13,16 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, read_file_nodes, get_column_nodes, plt_node, input_nodes, cast_nodes, pickle_nodes, numpy_nodes, tripoli_nodes
+from nodes import operation_nodes, \
+                    read_file_nodes, \
+                    get_column_nodes, \
+                    plt_node, \
+                    input_nodes, \
+                    cast_nodes, \
+                    pickle_nodes, \
+                    numpy_nodes, \
+                    tripoli_nodes, \
+                    iterator_nodes
 
 if __name__ == '__main__':
 
@@ -58,6 +67,9 @@ if __name__ == '__main__':
         cast_nodes.DataFrameToArrayCastNode,
         cast_nodes.ArrayToDataFrameCastNode,
 
+        #   Iterators
+        iterator_nodes.ExternalNode,
+
         #   Operation nodes
         operation_nodes.MultiplyNode,
         operation_nodes.GetAverageNode,
@@ -87,6 +99,7 @@ if __name__ == '__main__':
 
         #   Tripoli outputs
         tripoli_nodes.TripoliExtendedMeshNode
+        
     ])
 
     # show the node graph widget.

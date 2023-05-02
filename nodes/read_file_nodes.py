@@ -26,8 +26,6 @@ class LoadFileNode(GenericNode):
 
         self.add_label("Information")
 
-        self.property_to_update.append("Filename")
-
 
     def check_inputs(self):
         print("File found", os.path.isfile(self.get_property("Filename")))

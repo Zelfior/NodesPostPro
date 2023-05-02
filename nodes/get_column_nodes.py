@@ -35,8 +35,6 @@ class GetColumnNode(GenericNode):
         self.add_label("Information")
         self.change_label("Information", "No information", False)
 
-        self.property_to_update.append("Column name")
-
     def check_inputs(self):
         #   Checks if the Input DataFrame is:
         #       -   plugged

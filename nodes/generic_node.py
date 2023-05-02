@@ -1,5 +1,5 @@
 from NodeGraphQt import BaseNode
-from nodes.custom_widgets import InformationLabelWidget
+from nodes.custom_widgets import *
 
 from nodes.container import *
 
@@ -255,3 +255,52 @@ class GenericNode(BaseNode):
     """
     def set_to_update(self, value:bool):
         self.to_update = value
+
+
+
+    def add_combo_menu(self, name, label, items=[]):
+        super(GenericNode, self).add_combo_menu(name, label, items=items)
+
+        self.property_to_update.append(name)
+
+    def add_text_input(self, name, label, default, tab = None):
+        super(GenericNode, self).add_text_input(name, label, default, tab = tab)
+
+        self.property_to_update.append(name)
+
+
+    def add_int_selector(self, name, label):
+
+        int_selector = IntSelector_Widget(self.view, name=name, label=label)
+
+        self.create_property(name, 0)
+
+        int_selector.value_changed.connect(lambda k, v: self.set_property(k, v))
+
+        self.view.add_widget(int_selector)
+        self.view.draw_node()
+
+        self.property_to_update.append(name)
+
+        return int_selector
+
+    def add_button_widget(self, name):
+
+        button = ButtonNodeWidget(self.view, name=name)
+        self.create_property(name, 0)
+
+        self.view.add_widget(button)
+        self.view.draw_node()
+
+        return button
+
+    def add_checkbox(self, name, text=''):
+
+        super(GenericNode, self).add_checkbox(name, text=text)
+        self.property_to_update.append(name)
+
+    """
+
+    """
+    def add_twin_input(self, name:str, type_enum:PortValueType):
+        pass

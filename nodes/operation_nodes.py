@@ -1,29 +1,6 @@
 from NodeGraphQt import BaseNode
 from nodes.generic_node import GenericNode, PortValueType
 
-class DropdownMenuNode(BaseNode):
-    """
-    An example node with a embedded added QCombobox menu.
-    """
-
-    # unique node identifier.
-    __identifier__ = 'nodes.widget'
-
-    # initial default node name.
-    NODE_NAME = 'menu'
-
-    def __init__(self):
-        super(DropdownMenuNode, self).__init__()
-
-        # create input & output ports
-        self.add_input('in 1')
-        self.add_output('out 1')
-        self.add_output('out 2')
-
-        # create the QComboBox menu.
-        items = ['item 1', 'item 2', 'item 3']
-        self.add_combo_menu('my_menu', 'Menu Test', items=items)
-
 
 class MultiplyNode(GenericNode):
     """
@@ -47,7 +24,6 @@ class MultiplyNode(GenericNode):
         # create the QComboBox menu.
         self.add_text_input('Value', 'Multiply by', '1', tab='widgets')
 
-        self.property_to_update.append("Value")
         
 
     def check_inputs(self):

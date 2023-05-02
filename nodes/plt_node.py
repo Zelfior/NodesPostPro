@@ -274,12 +274,7 @@ class ImShowNode(GenericNode):
 
         self.add_combo_menu('norm', 'norm', items=["linear", "log", "symlog", "logit"])
         
-        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
-        self.create_property("Priority", 0)
-        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-        self.view.add_widget(self.priority_widget)
-        self.view.draw_node()
-        
+        self.priority_widget = self.add_int_selector(name="Priority", label='Priority')
         self.priority_widget.set_range(0, 50)
 
         self.add_custom_input('alpha', PortValueType.FLOAT)
@@ -290,8 +285,6 @@ class ImShowNode(GenericNode):
 
         self.element_type = "imshow"
 
-        self.property_to_update.append("norm")
-        self.property_to_update.append("Priority")
 
     def check_inputs(self):
         is_valid, message = self.is_input_valid("Y")
@@ -408,12 +401,7 @@ class PlotNode(PltElementNode):
 
         self.add_custom_input('linewidth', PortValueType.FLOAT)
         
-        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
-        self.create_property("Priority", 0)
-        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-        self.view.add_widget(self.priority_widget)
-        self.view.draw_node()
-        
+        self.priority_widget = self.add_int_selector("Priority", 'Priority')
         self.priority_widget.set_range(0, 50)
 
         self.add_combo_menu('marker', 'marker', items=["None", ".", ",", "o", "s", "D"])
@@ -429,9 +417,6 @@ class PlotNode(PltElementNode):
 
         self.element_type = "plot"
 
-        self.property_to_update.append("Priority")
-        self.property_to_update.append("marker")
-        self.property_to_update.append("linestyle")
 
     def check_inputs(self):
         is_valid, message = self.is_input_valid("Y")
@@ -500,14 +485,8 @@ class FillBetweenNode(PltElementNode):
 
         self.add_custom_input('color', PortValueType.STRING)
 
-        # self.add_linestyle_combo()
         
-        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
-        self.create_property("Priority", 0)
-        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-        self.view.add_widget(self.priority_widget)
-        self.view.draw_node()
-        
+        self.priority_widget = self.add_int_selector("Priority", 'Priority')
         self.priority_widget.set_range(0, 50)
 
         self.add_custom_input('alpha', PortValueType.FLOAT)
@@ -518,8 +497,6 @@ class FillBetweenNode(PltElementNode):
 
         self.element_type = "fill_between"
         self.y_name = 'Y1'
-
-        self.property_to_update.append("Priority")
 
     def check_inputs(self):
         is_valid_x, message_x = self.is_input_valid("X")
@@ -630,12 +607,7 @@ class ScatterNode(PltElementNode):
 
         self.add_custom_input('linewidth ', PortValueType.FLOAT)
         
-        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
-        self.create_property("Priority", 0)
-        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-        self.view.add_widget(self.priority_widget)
-        self.view.draw_node()
-        
+        self.priority_widget = self.add_int_selector("Priority", 'Priority')        
         self.priority_widget.set_range(0, 50)
 
         self.add_combo_menu('marker', 'marker', items=["None", ".", ",", "o", "s", "D"])
@@ -647,9 +619,6 @@ class ScatterNode(PltElementNode):
         self.add_label("Information")
 
         self.element_type = "scatter"
-
-        self.property_to_update.append("Priority")
-        self.property_to_update.append("marker")
 
 
     def check_inputs(self):
@@ -732,12 +701,7 @@ class HistNode(GenericNode):
 
         self.add_combo_menu('histtype', 'histtype', items=['bar', 'barstacked', 'step', 'stepfilled'])
         
-        self.priority_widget = IntSelector_Widget(self.view, name="Priority", label='Priority')
-        self.create_property("Priority", 0)
-        self.priority_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-        self.view.add_widget(self.priority_widget)
-        self.view.draw_node()
-        
+        self.priority_widget = self.add_int_selector("Priority", 'Priority')        
         self.priority_widget.set_range(0, 50)
 
         self.add_custom_input('alpha', PortValueType.FLOAT)
@@ -747,12 +711,6 @@ class HistNode(GenericNode):
         self.add_label("Information")
 
         self.element_type = "hist"
-
-        self.property_to_update.append("density")
-        self.property_to_update.append("cumulative")
-        self.property_to_update.append("log")
-        self.property_to_update.append("histtype")
-        self.property_to_update.append("Priority")
 
     def check_inputs(self):
         is_valid, message = self.is_input_valid("X")
@@ -890,22 +848,12 @@ class PltFigureNode(GenericNode):
 
         self.plot_widget = pltWidget(self.view, name="plot")
         self.create_property('Plot_Widget', None)
-
         self.view.add_widget(self.plot_widget)
         self.view.draw_node()
 
         self.plot_widget.update_plot()
         
         self.add_label("Information")
-        
-        self.property_to_update.append("x_log")
-        self.property_to_update.append("y_log")
-        self.property_to_update.append("legend")
-        self.property_to_update.append("color_bar")
-        self.property_to_update.append("canvas_height")
-        self.property_to_update.append("canvas_width")
-
-        self.update()
 
     def update_from_input(self):
         if not self.get_value_from_port("Input Plottable 1") == None or not self.get_value_from_port("Input Plottable 2") == None:
@@ -999,10 +947,6 @@ class SaveFigureNode(GenericNode):
         self.add_text_input("canvas_dpi", "DPI", "100")
         
         self.add_label("Information")
-        
-        self.property_to_update.append("canvas_dpi")
-
-        self.update()
 
     def update_from_input(self):
         print("Saving figure at path :", os.path.abspath(self.get_value_from_port("File name").get_property()))

@@ -28,7 +28,7 @@ class InputFloatNode(GenericNode):
         self.add_custom_output('Output Value', PortValueType.FLOAT)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Value', 'Value')
+        self.add_text_input('Value', 'Value', "")
 
         self.property_to_update.append("Value")
 
@@ -62,7 +62,7 @@ class InputIntegerNode(GenericNode):
         self.add_custom_output('Output Value', PortValueType.INTEGER)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Value', 'Value')
+        self.add_text_input('Value', 'Value', "")
 
         self.property_to_update.append("Value")
 
@@ -98,7 +98,7 @@ class InputStringNode(GenericNode):
         self.add_custom_output('Output Value', PortValueType.STRING)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Value', 'Value')
+        self.add_text_input('Value', 'Value', "")
 
         self.property_to_update.append("Value")
 
@@ -132,7 +132,7 @@ class InputBooleanNode(GenericNode):
         self.add_custom_output('Output Value', PortValueType.BOOL)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Value', 'Value')
+        self.add_text_input('Value', 'Value', "")
 
         self.property_to_update.append("Value")
 

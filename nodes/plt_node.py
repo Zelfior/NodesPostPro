@@ -1027,7 +1027,7 @@ class SaveFigureNode(GenericNode):
 
         is_valid_1, message_1 = self.is_input_valid("File name")
 
-        self.set_property("is_valid", is_valid_1)
+        self.set_property("is_valid", self.get_property("is_valid") and is_valid_1)
 
         if not is_valid_1:
             self.change_label("Information", message_1, True)

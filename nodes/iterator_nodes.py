@@ -25,21 +25,12 @@ class ExternalNode(GenericNode):
 
         self.add_custom_output('i', PortValueType.INTEGER)
 
-        
-
-        self.button = ButtonNodeWidget(self.view, name="Execute")#, label='Axis to set')
-        self.create_property("Execute", 0)
+        self.button = self.add_button_widget(name="Execute")
         self.button.set_link(self.clicked_function)
-
-        self.view.add_widget(self.button)
-        self.view.draw_node()
 
         self.add_label("Information")
         self.change_label("Information", "No information", False)
 
-        self.property_to_update.append("Min")
-        self.property_to_update.append("Max")
-        self.property_to_update.append("Step")
 
     def check_inputs(self):
         

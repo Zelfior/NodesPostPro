@@ -29,24 +29,10 @@ class SetAxisNode(GenericNode):
 
         #   Create the QComboBox menu to select the desired column.
 
-        self.axis_widget = IntSelector_Widget(self.view, name="Axis", label='Axis to set')
-        self.value_widget = IntSelector_Widget(self.view, name="Value", label='Axis value')
-
-        self.create_property("Axis", 0)
-        self.create_property("Value", 0)
-
-        self.axis_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-        self.value_widget.value_changed.connect(lambda k, v: self.set_property(k, v))
-
-        self.view.add_widget(self.axis_widget)
-        self.view.draw_node()
-        self.view.add_widget(self.value_widget)
-        self.view.draw_node()
+        self.axis_widget = self.add_int_selector("Axis", 'Axis to set')
+        self.value_widget = self.add_int_selector("Value",'Axis value')
 
         self.add_label("Information")
-
-        self.property_to_update.append("Axis")
-        self.property_to_update.append("Value")
 
 
     def check_inputs(self):

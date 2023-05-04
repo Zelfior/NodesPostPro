@@ -134,7 +134,9 @@ class TripoliExtendedMeshNode(GenericNode):
         self.add_custom_output('Z centers', PortValueType.NP_ARRAY)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Filename', 'File name', 'exemple_value.general', tab='widgets')
+        file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        example_path = os.path.join(file_path,'exemple_value.general')
+        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
 
         self.add_label("Size array")

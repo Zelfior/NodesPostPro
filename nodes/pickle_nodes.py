@@ -25,7 +25,9 @@ class LoadNumpyNode(GenericNode):
         self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Filename', 'File name', 'example.pkl', tab='widgets')
+        file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        example_path = os.path.join(file_path,'example.pkl')
+        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
         self.add_label("Information")
         self.change_label("Information", "Load file to display size", False)
@@ -88,7 +90,9 @@ class LoadPandasNode(GenericNode):
         self.add_custom_output('Output DataFrame', PortValueType.PD_DATAFRAME)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Filename', 'File name', 'example.pkl', tab='widgets')
+        file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        example_path = os.path.join(file_path,'example.pkl')
+        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
         self.add_label("Information")
         self.change_label("Information", "Load file to display size", False)

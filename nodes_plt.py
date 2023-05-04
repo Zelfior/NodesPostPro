@@ -37,7 +37,14 @@ if __name__ == '__main__':
     graph = NodeGraph()
 
     # set up context menu for the node graph.
-    graph.set_context_menu_from_file('hotkeys/hotkeys.json')
+
+    file_path = os.path.dirname(os.path.realpath(__file__))
+    hotkey_path = os.path.join(file_path,'hotkeys','hotkeys.json')
+    current_path = os.getcwd()
+    print("Loading hotkey:",hotkey_path)
+    os.chdir(file_path)
+    graph.set_context_menu_from_file(hotkey_path)
+    os.chdir(current_path)
 
     # registered example nodes.
     graph.register_nodes([

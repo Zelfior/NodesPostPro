@@ -22,7 +22,9 @@ class LoadFileNode(GenericNode):
         self.add_custom_output('Output DataFrame', PortValueType.PD_DATAFRAME)
 
         #   create QLineEdit text input widget for the file path
-        self.add_text_input('Filename', 'File name', 'test.csv', tab='widgets')
+        file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+        example_path = os.path.join(file_path,'test.csv')
+        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
         self.add_label("Information")
 

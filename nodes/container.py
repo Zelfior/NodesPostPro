@@ -71,7 +71,7 @@ def check_type(value, enum_value):
     elif enum_value == PortValueType.FIGURE:
         return type(value) == PltContainer
     else:
-        raise ValueError()
+        raise ValueError("PortValueType "+str(enum_value)+" not implemented")
     
 
 class Container():

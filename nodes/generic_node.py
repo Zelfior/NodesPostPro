@@ -3,6 +3,24 @@ from nodes.custom_widgets import *
 
 from nodes.container import *
 
+import random
+
+def check_cast_type_from_string(name:str, enum_type:PortValueType):
+    if enum_type == PortValueType.FLOAT:
+        try:
+            float(name)
+            return True
+        except ValueError:
+            return False
+    elif enum_type == PortValueType.INTEGER:
+        return name.lstrip("-").isdigit()
+    elif enum_type == PortValueType.BOOL:
+        return name.lower().replace(" ", "") in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.']
+    elif enum_type == PortValueType.STRING:
+        return True
+    else:
+        raise ValueError("Given enum type was not implemented : "+str(enum_type))
+
 
 
 """
@@ -23,7 +41,11 @@ class GenericNode(BaseNode):
         self.output_properties = {}
         self.input_properties = {}
         self.label_list = {}
+        self.twin_inputs = []
 
+        self.check_seed = -1
+
+        # self.graph.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
     def is_input_valid(self, input_name):
         value = self.get_value_from_port(input_name)
@@ -86,6 +108,12 @@ class GenericNode(BaseNode):
     def on_input_connected(self, in_port, out_port):
         super(GenericNode, self).on_input_connected(in_port, out_port)
 
+        new_seed = random.randint(0, 500000)
+        while new_seed == self.check_seed:
+            new_seed = random.randint(0, 500000)
+
+        self.check_seed = new_seed
+
         self.update_values()
 
 
@@ -96,6 +124,12 @@ class GenericNode(BaseNode):
     def on_input_disconnected(self, in_port, out_port):
         super(GenericNode, self).on_input_disconnected(in_port, out_port)
 
+        new_seed = random.randint(0, 500000)
+        while new_seed == self.check_seed:
+            new_seed = random.randint(0, 500000)
+
+        self.check_seed = new_seed
+        
         self.update_values()
 
 
@@ -113,6 +147,8 @@ class GenericNode(BaseNode):
         if self.to_update:
             self.check_inputs()
 
+            self.check_children_loop(self.check_seed)
+
             if self.get_property("is_valid"):
                 self.set_valid_color()
 
@@ -123,7 +159,9 @@ class GenericNode(BaseNode):
 
             self.view.draw_node()
             self.update()
+            self.update_twin_inputs()
             self.propagate()
+            
 
 
     """
@@ -300,7 +338,115 @@ class GenericNode(BaseNode):
         self.property_to_update.append(name)
 
     """
+        widget_type : "TEXT", "INT_SELECTOR"
+    """
+    def add_twin_input(self, name:str, type_enum:PortValueType, widget_type:str='TEXT', default = ""):
+
+        if not type_enum in [PortValueType.BOOL,
+                                PortValueType.INTEGER,
+                                PortValueType.FLOAT,
+                                PortValueType.STRING]:
+            raise ValueError("Given twin input must be castable from string, received type: "+str(type_enum))
+
+        self.add_custom_input(name, type_enum)
+        if widget_type == "TEXT":
+            self.add_text_input(name, name, default)
+        elif widget_type == "INT_SELECTOR":
+            self.add_int_selector(name, name)
+
+
+        self.add_label(name+"_label")
+
+        self.label_list[name+"_label"].setVisible(False)
+
+        self.twin_inputs.append(name)
+
+
+    def is_twin_input_valid(self, name:str):
+        if not name in self.twin_inputs:
+            raise ValueError(name+" is not in the twin inputs list.")
+
+        is_port_valid, message = self.is_input_valid(name)
+
+        if is_port_valid:
+            return is_port_valid, message
+
+        else:
+            if check_cast_type_from_string(self.get_property(name), self.input_properties[name].get_property_type()):
+                return True, ""
+            else:
+                return False, "Input "+ name + " is not valid."
+
+    def get_twin_input(self, name:str) -> Container:
+        if not name in self.twin_inputs:
+            raise ValueError(name+" is not in the twin inputs list.")
+        
+        is_port_valid, message = self.is_input_valid(name)
+
+        if is_port_valid:
+            return self.get_value_from_port(name)
+        else:
+            container = Container(self.input_properties[name].get_property_type())
+
+            print(self.input_properties[name].get_property_type())
+            
+            if self.input_properties[name].get_property_type() == PortValueType.INTEGER:
+                container.set_property(int(self.get_property(name)))
+            elif self.input_properties[name].get_property_type() == PortValueType.FLOAT:
+                container.set_property(float(self.get_property(name)))
+            elif self.input_properties[name].get_property_type() == PortValueType.BOOL:
+                container.set_property(bool(self.get_property(name)))
+            else:
+                container.set_property(self.get_property(name))
+            return container
+
+    def update_twin_inputs(self):
+        for name in self.twin_inputs:
+            is_port_valid, message = self.is_input_valid(name)
+
+            if is_port_valid:
+                self.get_widget(name).setVisible(False)
+                self.label_list[name+"_label"].setVisible(True)
+                self.change_label(name+"_label", name+" : "+str(self.get_value_from_port(name).get_property()), False)
+            else:
+                self.get_widget(name).setVisible(True)
+                self.label_list[name+"_label"].setVisible(False)
+
+
+        
+
+        
+
 
     """
-    def add_twin_input(self, name:str, type_enum:PortValueType):
-        pass
+        Checks if there is a loop in the graph, untested as NodeGraphQt seems to be loop proof.
+    
+    """
+    def check_children_loop(self, seed_id):
+
+        list_children = []
+
+        if self.check_seed != seed_id:
+            self.check_seed = seed_id
+
+            
+            for output_id in self.output_type_list:
+                for connected_id in range(len(self.output(output_id).connected_ports())):
+                    found_children = self.output(output_id).connected_ports()[connected_id].node().check_children_loop()
+
+                    for child in found_children:
+                        if not child in list_children:
+                            list_children.append(child)
+
+            if self.name in list_children:
+                self.set_property("is_valid", False)
+
+                if "Information" in self.label_list:
+                    self.change_label("Information", "Nodes link loop found.", True)
+                else:
+                    if len(list(self.label_list.keys())) > 0:
+                        self.change_label(list(self.label_list.keys())[0], "Nodes link loop found.", True)               
+                
+                self.output(output_id).connected_ports()[connected_id].node().check_children_loop()
+
+        return list_children

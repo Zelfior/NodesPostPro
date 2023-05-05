@@ -1,13 +1,5 @@
-from nodes.generic_node import GenericNode, PortValueType
+from nodes.generic_node import GenericNode, PortValueType, check_cast_type_from_string
 
-
-
-def is_float(string):
-    try:
-        float(string)
-        return True
-    except ValueError:
-        return False
     
 
 class InputFloatNode(GenericNode):
@@ -30,11 +22,11 @@ class InputFloatNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value', "")
 
-        self.property_to_update.append("Value")
+        
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
-        self.set_property("is_valid",is_float(self.get_property("Value")))
+        self.set_property("is_valid",check_cast_type_from_string(self.get_property("Value"), PortValueType.FLOAT))
     
 
     def update_from_input(self):
@@ -64,11 +56,11 @@ class InputIntegerNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value', "")
 
-        self.property_to_update.append("Value")
+        
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
-        self.set_property("is_valid",self.get_property("Value").lstrip("-").isdigit())
+        self.set_property("is_valid",check_cast_type_from_string(self.get_property("Value"), PortValueType.INTEGER))
     
 
     def update_from_input(self):
@@ -100,7 +92,7 @@ class InputStringNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value', "")
 
-        self.property_to_update.append("Value")
+        
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
@@ -134,12 +126,12 @@ class InputBooleanNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         self.add_text_input('Value', 'Value', "")
 
-        self.property_to_update.append("Value")
+        
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
-        self.set_property("is_valid",self.get_property("Value").lower().replace(" ", "") in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.'])
-    
+        self.set_property("is_valid",check_cast_type_from_string(self.get_property("Value"), PortValueType.BOOL))
+
 
     def update_from_input(self):
         #   Called only if check_inputs returned True:

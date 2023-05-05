@@ -824,7 +824,8 @@ class PltFigureNode(GenericNode):
         self.add_custom_input('Input Plottable 1', PortValueType.DICT, multi_input=True)
         self.add_custom_input('Input Plottable 2', PortValueType.DICT, multi_input=True)
         
-        self.add_custom_input('Title', PortValueType.STRING)
+        self.add_twin_input('Title', PortValueType.STRING)
+        # self.add_custom_input('Title', PortValueType.STRING)
         
         self.add_custom_input('X_min', PortValueType.FLOAT)
         self.add_custom_input('X_max', PortValueType.FLOAT)
@@ -880,6 +881,8 @@ class PltFigureNode(GenericNode):
                 if self.is_input_valid(input_)[0]:
                     plot_parameters[input_] = self.get_value_from_port(input_).get_property()
 
+            if self.get_twin_input("Title").get_property() != "":
+                plot_parameters["Title"] = self.get_twin_input("Title").get_property()
 
             print("Updating plot")
             self.plot_widget.update_plot_list(self.input_arrays_1, self.input_arrays_2, plot_parameters)

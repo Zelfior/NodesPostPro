@@ -14,15 +14,15 @@ from NodeGraphQt import (
 
 # import example nodes from the "example_nodes" package
 from nodes import operation_nodes, \
-                    read_file_nodes, \
-                    get_column_nodes, \
+                    pandas_nodes, \
                     plt_node, \
                     input_nodes, \
                     cast_nodes, \
                     pickle_nodes, \
                     numpy_nodes, \
                     tripoli_nodes, \
-                    iterator_nodes
+                    iterator_nodes, \
+                    random_nodes
 
 if __name__ == '__main__':
 
@@ -82,8 +82,9 @@ if __name__ == '__main__':
         operation_nodes.GetAverageNode,
 
         #   Pandas nodes
-        read_file_nodes.LoadFileNode,
-        get_column_nodes.GetColumnNode,
+        pandas_nodes.LoadFileNode,
+        pandas_nodes.GetColumnNode,
+        pandas_nodes.GetColumnSelectorNode,
 
         #   Numpy nodes
         numpy_nodes.SetAxisNode,
@@ -105,7 +106,12 @@ if __name__ == '__main__':
         pickle_nodes.LoadPandasNode,
 
         #   Tripoli outputs
-        tripoli_nodes.TripoliExtendedMeshNode
+        tripoli_nodes.TripoliExtendedMeshNode,
+
+
+        #   Random nodes
+        random_nodes.RandomUniformNode,
+        random_nodes.RandomIntegerNode
         
     ])
 
@@ -126,7 +132,7 @@ if __name__ == '__main__':
     read_file_node.set_pos(-400,current_height)
 
     # # create node and set a custom icon.
-    get_column_node = graph.create_node('Pandas.GetColumnNode')
+    get_column_node = graph.create_node('Pandas.GetColumnSelectorNode')
 
     plot_node = graph.create_node('Matplotlib.PlotNode')
     plot_node.set_pos(400,current_height)

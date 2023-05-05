@@ -207,3 +207,45 @@ class NP_SqueezeNode(GenericNode):
         self.set_output_property('Output Array', np.squeeze(self.get_value_from_port("Input Array").get_property()))
         
         self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
+
+        
+class NP_FlattenNode(GenericNode):
+    """
+    An example of a node with a embedded QLineEdit.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Numpy'
+
+    # initial default node name.
+    NODE_NAME = 'Flatten'
+
+    def __init__(self):
+        super(NP_FlattenNode, self).__init__()
+
+        #   Create input port for input array
+        self.add_custom_input('Input Array', PortValueType.NP_ARRAY)
+
+        #   Create output ports for :
+        #       The output array corresponding to the given axis value
+        self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
+
+        self.add_label("Information")
+
+
+    def check_inputs(self):        
+        is_valid_1, message_1 = self.is_input_valid("Input Array")
+
+        self.set_property("is_valid", is_valid_1)
+
+        if not is_valid_1:
+            self.change_label("Information", message_1, True)
+
+        
+    def update_from_input(self):
+        self.set_output_property('Output Array', self.get_value_from_port("Input Array").get_property().flatten())
+        
+        self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
+
+
+

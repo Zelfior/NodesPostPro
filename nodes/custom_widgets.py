@@ -2,7 +2,8 @@ from NodeGraphQt import BaseNode, NodeBaseWidget
 from enum import Enum
 import pandas as pd
 import numpy as np
-from Qt import QtWidgets
+from Qt import QtWidgets, QtCore
+
 
 
 
@@ -20,8 +21,10 @@ class LabelWidget(QtWidgets.QWidget):
         super(LabelWidget, self).__init__(parent)
 
         self.label_widget = QtWidgets.QLabel(name)
+        self.label_widget.setAlignment(QtCore.Qt.AlignCenter)
 
         layout = QtWidgets.QHBoxLayout(self)
+        layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
         layout.setContentsMargins(5, 0, 5, 0)
         layout.addWidget(self.label_widget)
 
@@ -39,6 +42,9 @@ class LabelWidget(QtWidgets.QWidget):
     
     def update(self):
         self.label_widget.update()
+
+    def set_visible(self, visible):
+        self.label_widget.setVisible(visible)
 
 
 

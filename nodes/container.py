@@ -44,6 +44,8 @@ def get_color_from_enum(enum_value):
         return (150, 150, 50)
     elif enum_value == PortValueType.FIGURE:
         return (0, 0, 0)
+    else:
+        raise ValueError("No color defined for PortValueType "+str(enum_value))
     
     
 """
@@ -71,8 +73,34 @@ def check_type(value, enum_value):
     elif enum_value == PortValueType.FIGURE:
         return type(value) == PltContainer
     else:
-        raise ValueError("PortValueType "+str(enum_value)+" not implemented")
+        raise ValueError("PortValueType "+str(enum_value)+" not implemented in function check_type")
     
+"""
+    Checks if the size/shape of two elements are equivalent.
+"""
+def are_comparable(value1, value2, enum_value):
+    if enum_value == PortValueType.FLOAT:
+        return check_type(value1, enum_value) and check_type(value2, enum_value)
+    elif enum_value == PortValueType.INTEGER:
+        return check_type(value1, enum_value) and check_type(value2, enum_value)
+    elif enum_value == PortValueType.STRING:
+        return check_type(value1, enum_value) and check_type(value2, enum_value)
+    elif enum_value == PortValueType.LIST:
+        return check_type(value1, enum_value) and check_type(value2, enum_value) and len(value1) == len(value2)
+    elif enum_value == PortValueType.NP_ARRAY:
+        return check_type(value1, enum_value) and check_type(value2, enum_value) and value1.shape == value2.shape
+    elif enum_value == PortValueType.PD_DATAFRAME:
+        return check_type(value1, enum_value) and check_type(value2, enum_value) and value1.shape == value2.shape
+    elif enum_value == PortValueType.BOOL:
+        return check_type(value1, enum_value) and check_type(value2, enum_value)
+    elif enum_value == PortValueType.PLOTTABLE:
+        return check_type(value1, enum_value) and check_type(value2, enum_value) and value1.shape == value2.shape
+    elif enum_value == PortValueType.DICT:
+        return check_type(value1, enum_value) and check_type(value2, enum_value) and list(value1.keys()) == list(value2.keys())
+    elif enum_value == PortValueType.FIGURE:
+        return type(value1) == PltContainer and type(value2) == PltContainer
+    else:
+        raise ValueError("PortValueType "+str(enum_value)+" not implemented in function are_comparable")
 
 class Container():
     """
@@ -80,9 +108,12 @@ class Container():
     """
     def __init__(self, enum_value:PortValueType):
         self.countained_value = None
+        self.iterated_contained_value = None
+
         self.enum_value = enum_value
         self.defined = False
         self.name = ""
+        self.iterated = False
 
     """
         Sets the contained value as none, and sets as not defined
@@ -90,6 +121,7 @@ class Container():
     def reset(self):
         self.countained_value = None
         self.defined = False
+        self.iterated = False
         self.name = ""
 
     """
@@ -101,6 +133,39 @@ class Container():
             self.defined = True
         else:
             raise TypeError("Requested type: "+str(self.enum_value)+", found: "+str(type(value)))
+
+    """
+        Sets iterated property if valid.
+    """
+    def set_iterated_property(self, value, check_comparable = True):
+        if not type(value) == list:
+            raise TypeError("")
+
+        if len(value) == 0:
+            raise ValueError("Received an empty iterated value.")
+
+        first_element = value[0]
+
+        if not check_type(first_element, self.enum_value):
+            raise TypeError("Given first element is not of the right type.")
+
+        for i in range(1, len(value)):
+            if not check_type(value[i], self.enum_value):
+                raise TypeError("Element "+str(i)+" is not of the right type.")
+            
+            if check_comparable:
+                if not are_comparable(first_element, value[i], self.enum_value):
+                    raise TypeError("Element "+str(i)+" is not comparable with the first element.")
+
+        self.iterated_contained_value = value
+        self.iterated = True
+        self.defined = True
+
+    """
+        Returns the iterated property
+    """
+    def get_iterated_property(self):
+        return self.iterated_contained_value
 
     """
         Returns the contained value
@@ -119,6 +184,18 @@ class Container():
     """
     def get_property_type(self):
         return self.enum_value
+    
+    """ 
+        Returns if the container contains internal iterated value
+    """
+    def is_iterated(self):
+        return self.iterated
+    
+    """
+        Sets the container iterated
+    """
+    def set_iterated(self, value:bool):
+        self.is_iterated = value
 
 
 

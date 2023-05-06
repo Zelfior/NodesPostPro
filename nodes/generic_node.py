@@ -269,9 +269,12 @@ class GenericNode(BaseNode):
     """
         Updates the output container value if the given port name exists
     """
-    def set_output_property(self, output_name, value):
+    def set_output_property(self, output_name, value, iterated):
         if output_name in self.output_properties:
-            self.output_properties[output_name].set_property(value)
+            if iterated:
+                self.output_properties[output_name].set_iterated_property(value)
+            else:
+                self.output_properties[output_name].set_property(value)
         else:
             raise ValueError("Given output property doesn't exist: "+str(output_name))
 
@@ -286,7 +289,6 @@ class GenericNode(BaseNode):
     """
     def set_valid_color(self):
         self.set_property('color', (13, 18, 23, 255))
-
 
     """
         Tells if the current is to update

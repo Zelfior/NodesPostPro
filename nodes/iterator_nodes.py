@@ -54,7 +54,7 @@ class ExternalNode(GenericNode):
             self.set_property("is_valid", True)
     
     def update_from_input(self):
-        self.set_output_property('i', int(self.get_property("Min")))
+        self.set_output_property('i', int(self.get_property("Min")), False)
         
         self.change_label("Information", "Values count: "+str(len(list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))))), False)
 
@@ -63,7 +63,7 @@ class ExternalNode(GenericNode):
             self.set_output_property('i', i)
             self.propagate()
 
-        self.set_output_property('i', int(self.get_property("Min")))
+        self.set_output_property('i', int(self.get_property("Min")), False)
 
 
 
@@ -92,7 +92,6 @@ class InternalNode(GenericNode):
 
 
     def check_inputs(self):
-        
         if not self.get_property("Min").isdigit():
             self.set_property("is_valid", False)
             self.change_label("Information", "Given minimum should be an integer.", True)
@@ -113,6 +112,7 @@ class InternalNode(GenericNode):
             self.set_property("is_valid", True)
     
     def update_from_input(self):
-        self.set_output_property('i', int(self.get_property("Min")))
+        self.set_output_property('i', list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))), True)
         
         self.change_label("Information", "Values count: "+str(len(list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))))), False)
+        

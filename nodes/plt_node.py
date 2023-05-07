@@ -339,8 +339,7 @@ class ImShowNode(GenericNode):
 
 
 
-
-
+#   TODO internal iterator
 class PltElementNode(GenericNode):
 
     def __init__(self):
@@ -361,7 +360,7 @@ class PltElementNode(GenericNode):
         if not "X" in properties_dict:
             properties_dict["X"] = list(range(len(properties_dict[self.y_name])))
 
-        self.set_output_property("Element", properties_dict)
+        self.set_output_property("Element", properties_dict, False)
 
         self.change_label("Information", "", True)
 
@@ -380,6 +379,7 @@ class PltElementNode(GenericNode):
 
 
 
+#   TODO internal iterator
 class PlotNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -453,7 +453,7 @@ class PlotNode(PltElementNode):
 
         properties_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict)
+        self.set_output_property("Element", properties_dict, False)
 
 
 
@@ -466,6 +466,7 @@ class PlotNode(PltElementNode):
 
 
 
+#   TODO internal iterator
 class FillBetweenNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -572,7 +573,7 @@ class FillBetweenNode(PltElementNode):
 
         properties_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict)
+        self.set_output_property("Element", properties_dict, False)
 
 
 
@@ -584,6 +585,7 @@ class FillBetweenNode(PltElementNode):
 
 
 
+#   TODO internal iterator
 class ScatterNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -654,7 +656,7 @@ class ScatterNode(PltElementNode):
 
         properties_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict)
+        self.set_output_property("Element", properties_dict, False)
 
 
 
@@ -672,6 +674,7 @@ class ScatterNode(PltElementNode):
 
 
 
+#   TODO internal iterator
 class HistNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -778,7 +781,7 @@ class HistNode(GenericNode):
 
         properties_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict)
+        self.set_output_property("Element", properties_dict, False)
 
         self.change_label("Information", "", True)
 
@@ -809,6 +812,7 @@ class HistNode(GenericNode):
 
 
 
+#   TODO internal iterator
 class PltFigureNode(GenericNode):
 
     # unique node identifier.
@@ -889,7 +893,7 @@ class PltFigureNode(GenericNode):
 
             self.set_output_property("Figure", PltContainer(self.plot_widget.canvas.fig,
                                                             self.plot_widget.canvas.canvas,
-                                                            plot_parameters))
+                                                            plot_parameters), False)
 
     def check_inputs(self):
         if not self.get_value_from_port("Input Plottable 1") == None:

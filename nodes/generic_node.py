@@ -50,9 +50,20 @@ class GenericNode(BaseNode):
     def is_input_valid(self, input_name):
         value = self.get_value_from_port(input_name)
 
-        is_valid = value is not None \
-                        and value.is_defined() \
-                            and check_type(value.get_property(), self.input_properties[input_name].get_property_type())
+        if value is not None:
+            is_iterated = value.is_iterated()
+        else:
+            is_iterated = False
+
+        if is_iterated:
+            is_valid = value is not None \
+                            and value.is_defined() \
+                                and check_type(value.get_iterated_property()[0], self.input_properties[input_name].get_property_type())
+
+        else:
+            is_valid = value is not None \
+                            and value.is_defined() \
+                                and check_type(value.get_property(), self.input_properties[input_name].get_property_type())
 
         message = ""
 
@@ -62,8 +73,11 @@ class GenericNode(BaseNode):
         elif not value.is_defined():
             message = input_name+" is not defined."
 
-        elif not check_type(value.get_property(), self.input_properties[input_name].get_property_type()):
+        elif not is_iterated and not check_type(value.get_property(), self.input_properties[input_name].get_property_type()):
             message = input_name+" is not of the right type."
+
+        elif is_iterated and not check_type(value.get_property()[0], self.input_properties[input_name].get_property_type()):
+            message = input_name+" iterator is not of the right type."
 
         return is_valid, message     
 
@@ -391,7 +405,7 @@ class GenericNode(BaseNode):
             container = Container(self.input_properties[name].get_property_type())
 
             print(self.input_properties[name].get_property_type())
-            
+
             if self.input_properties[name].get_property_type() == PortValueType.INTEGER:
                 container.set_property(int(self.get_property(name)))
             elif self.input_properties[name].get_property_type() == PortValueType.FLOAT:

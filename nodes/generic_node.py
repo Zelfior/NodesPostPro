@@ -260,7 +260,7 @@ class GenericNode(BaseNode):
     """
         Returns if the output container if the given port name exists
     """
-    def get_output_property(self, output_name):
+    def get_output_property(self, output_name) -> Container:
         if output_name in self.output_properties:
             return self.output_properties[output_name]
         else:

@@ -90,7 +90,7 @@ def are_comparable(value1, value2, enum_value):
     elif enum_value == PortValueType.NP_ARRAY:
         return check_type(value1, enum_value) and check_type(value2, enum_value) and value1.shape == value2.shape
     elif enum_value == PortValueType.PD_DATAFRAME:
-        return check_type(value1, enum_value) and check_type(value2, enum_value) and value1.shape == value2.shape
+        return check_type(value1, enum_value) and check_type(value2, enum_value) and value1.shape == value2.shape and value1.columns == value2.columns
     elif enum_value == PortValueType.BOOL:
         return check_type(value1, enum_value) and check_type(value2, enum_value)
     elif enum_value == PortValueType.PLOTTABLE:
@@ -131,6 +131,7 @@ class Container():
         if check_type(value, self.enum_value):
             self.countained_value = value
             self.defined = True
+            self.iterated = False
         else:
             raise TypeError("Requested type: "+str(self.enum_value)+", found: "+str(type(value)))
 

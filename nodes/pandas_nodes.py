@@ -99,6 +99,7 @@ class GetColumnSelectorNode(GenericNode):
         #       -   defined (if the previous node has its outputs defined)
         #       -   is a pandas DataFrame
         
+
         is_valid, message = self.is_input_valid("Input DataFrame")
 
         self.set_property("is_valid", is_valid)

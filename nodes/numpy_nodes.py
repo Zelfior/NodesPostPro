@@ -36,7 +36,7 @@ class SetAxisNode(GenericNode):
 
 
     def check_inputs(self):
-        
+
         is_valid, message = self.is_input_valid("Input Array")
 
         self.set_property("is_valid", is_valid)

@@ -58,15 +58,15 @@ def draw_triangle_port(color, painter, rect, info):
     color = QtGui.QColor(color)
     # mouse over port color.
     if info['hovered']:
-        #color = QtGui.QColor(14, 45, 59)
+        color = QtGui.QColor(*info['color'])
         border_color = QtGui.QColor(136, 255, 35)
     # port connected color.
     elif info['connected']:
-        #color = QtGui.QColor(195, 60, 60)
+        color = QtGui.QColor(*info['color'])
         border_color = QtGui.QColor(200, 130, 70)
     # default port color
     else:
-        #color = QtGui.QColor(*info['color'])
+        color = QtGui.QColor(*info['color'])
         border_color = QtGui.QColor(*info['border_color'])
 
     pen = QtGui.QPen(border_color, 1.8)
@@ -97,19 +97,20 @@ def draw_square_port(color, painter, rect, info):
             }
     """
     painter.save()
-    color = QtGui.QColor(color)
+    #color = QtGui.QColor(color)
 
+    info['color'] = color
     # mouse over port color.
     if info['hovered']:
-        #color = QtGui.QColor(14, 45, 59)
+        color = QtGui.QColor(*info['color'])
         border_color = QtGui.QColor(136, 255, 35, 255)
     # port connected color.
     elif info['connected']:
-        #color = QtGui.QColor(195, 60, 60)
+        color = QtGui.QColor(*info['color'])
         border_color = QtGui.QColor(200, 130, 70)
     # default port color
     else:
-        #color = QtGui.QColor(*info['color'])
+        color = QtGui.QColor(*info['color'])
         border_color = QtGui.QColor(*info['border_color'])
 
     pen = QtGui.QPen(border_color, 1.8)
@@ -275,9 +276,9 @@ class GenericNode(BaseNode):
                     for port in self.view.inputs: 
                         if port.name == property_name:
                             if self.input_properties[port.name].is_iterated():
-                                port.set_painter(functools.partial(draw_triangle_port, color=get_color_from_enum(self.input_properties[port.name].get_property_type())))
+                                port.set_painter(functools.partial(draw_triangle_port, get_color_from_enum(self.input_properties[port.name].get_property_type())))
                             else:
-                                port.set_painter(functools.partial(draw_square_port, color=get_color_from_enum(self.input_properties[port.name].get_property_type())))
+                                port.set_painter(functools.partial(draw_square_port, get_color_from_enum(self.input_properties[port.name].get_property_type())))
 
             else:
                 self.set_invalid_color()
@@ -364,7 +365,7 @@ class GenericNode(BaseNode):
     """
     def add_custom_input(self, input_name, type_enum, multi_input=False):
         self.create_input_property(input_name, type_enum)
-        self.add_input(input_name, color=get_color_from_enum(type_enum), multi_input=multi_input, painter_func=draw_square_port)
+        self.add_input(input_name, color=get_color_from_enum(type_enum), multi_input=multi_input, painter_func=functools.partial(draw_square_port, get_color_from_enum(self.input_properties[input_name].get_property_type())))
 
         
     """
@@ -372,7 +373,7 @@ class GenericNode(BaseNode):
     """
     def add_custom_output(self, output_name, type_enum):
         self.create_output_property(output_name, type_enum)
-        self.add_output(output_name, color=get_color_from_enum(type_enum), painter_func=draw_square_port)
+        self.add_output(output_name, color=get_color_from_enum(type_enum), painter_func=functools.partial(draw_square_port, get_color_from_enum(self.output_properties[output_name].get_property_type())))
 
         self.output_type_list[output_name] = type_enum
 

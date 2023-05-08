@@ -66,7 +66,7 @@ class LoadNumpyNode(GenericNode):
     def update_from_input(self):
         #   Called only if check_inputs returned True:
         #       we set in the "Output Array" output the array associated to the given path
-        self.get_output_property("Output Array").set_property(self.data)
+        self.set_output_property("Output Array", self.data, False)
         
         self.change_label("Information", "Array shape : "+str(self.data.shape), False)
 
@@ -88,6 +88,7 @@ class LoadPandasNode(GenericNode):
 
         #   create output port for the read dataframe
         self.add_custom_output('Output DataFrame', PortValueType.PD_DATAFRAME)
+        self.add_custom_output('Columns names', PortValueType.LIST)
 
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -131,7 +132,8 @@ class LoadPandasNode(GenericNode):
     def update_from_input(self):
         #   Called only if check_inputs returned True:
         #       we set in the "Output DataFrame" output the dataframe associated to the given path
-        self.get_output_property("Output DataFrame").set_property(self.data)
+        self.set_output_property("Output DataFrame", self.data, False)
+        self.set_output_property("Columns names", self.get_output_property("Output DataFrame").get_property().columns, False)
         
         column_count = len(self.get_output_property("Output DataFrame").get_property().columns)
         lines_count = len(self.get_output_property("Output DataFrame").get_property())

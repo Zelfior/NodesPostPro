@@ -55,7 +55,6 @@ def draw_triangle_port(color, painter, rect, info):
     transform.translate(rect.center().x(), rect.center().y())
     port_poly = transform.map(triangle)
 
-    color = QtGui.QColor(color)
     # mouse over port color.
     if info['hovered']:
         color = QtGui.QColor(*info['color'])
@@ -146,6 +145,8 @@ class GenericNode(BaseNode):
         self.check_seed = -1
 
         self.is_iterated_compatible = False
+        self.has_iterators = False
+        self.iterator_length = -1
 
         # self.graph.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
@@ -157,8 +158,8 @@ class GenericNode(BaseNode):
         else:
             is_iterated = False
 
-        if is_iterated and not self.is_iterated_compatible:
-            return False, "Current node not compatible with iterated inputs."
+        #if is_iterated and not self.is_iterated_compatible:
+        #    return False, "Current node not compatible with iterated inputs."
         
         if is_iterated:
             is_valid = value is not None \
@@ -181,7 +182,7 @@ class GenericNode(BaseNode):
         elif not is_iterated and not check_type(value.get_property(), self.input_properties[input_name].get_property_type()):
             message = input_name+" is not of the right type."
 
-        elif is_iterated and not check_type(value.get_property()[0], self.input_properties[input_name].get_property_type()):
+        elif is_iterated and not check_type(value.get_iterated_property()[0], self.input_properties[input_name].get_property_type()):
             message = input_name+" iterator is not of the right type."
 
         return is_valid, message     
@@ -250,7 +251,60 @@ class GenericNode(BaseNode):
         
         self.update_values()
 
+    def repaint_ports(self):
+        for property_name in self.input_properties:
+            for port in self.view.inputs: 
+                if port.name == property_name:
+                    if self.input_properties[port.name].is_iterated():
+                        port.set_painter(functools.partial(draw_triangle_port, get_color_from_enum(self.input_properties[port.name].get_property_type())))
+                    else:
+                        port.set_painter(functools.partial(draw_square_port, get_color_from_enum(self.input_properties[port.name].get_property_type())))
+                    
+        for property_name in self.output_properties:
+            for port in self.view.outputs: 
+                if port.name == property_name:
+                    if self.output_properties[port.name].is_iterated():
+                        port.set_painter(functools.partial(draw_triangle_port, get_color_from_enum(self.output_properties[port.name].get_property_type())))
+                    else:
+                        port.set_painter(functools.partial(draw_square_port, get_color_from_enum(self.output_properties[port.name].get_property_type())))
+                    
 
+    def check_iterators(self):
+        self.has_iterators = False
+        self.iterator_length = -1
+        
+        for input_ in self.input_properties:
+            if self.get_value_from_port(input_) is not None:
+                self.has_iterators |= self.get_value_from_port(input_).is_iterated()
+
+
+        if self.has_iterators and not self.is_iterated_compatible:
+            self.set_property("is_valid", False)
+
+            if "Information" in self.label_list:
+                self.change_label("Information", self.NODE_NAME+" node is not iterator compatible.", True)
+            else:
+                if len(list(self.label_list.keys())) > 0:
+                    self.change_label(list(self.label_list.keys())[0], self.NODE_NAME+" node is not iterator compatible.", True) 
+
+        elif self.has_iterators:
+            for input_ in self.input_properties:
+                if self.get_value_from_port(input_) is not None:
+                    if self.get_value_from_port(input_).is_iterated():
+                        if self.iterator_length == -1:
+                            self.iterator_length = len(self.get_value_from_port(input_).get_iterated_property())
+                        elif len(self.get_value_from_port(input_).get_iterated_property()) != self.iterator_length:
+                            self.set_property("is_valid", False)
+                            
+                            if "Information" in self.label_list:
+                                self.change_label("Information", "Given iterators have different length", True)
+                            else:
+                                if len(list(self.label_list.keys())) > 0:
+                                    self.change_label(list(self.label_list.keys())[0], "Given iterators have different length", True) 
+
+                            break
+
+            
     """
         Node output property update process:
             Checks the inputs to know if they match the expectation to compute the outputs. The result is stored in the property "is_valid".
@@ -261,9 +315,14 @@ class GenericNode(BaseNode):
                 -   Resets the node outputs
     """
     def update_values(self):
-
         if self.to_update:
-            self.check_inputs()
+            self.set_property("is_valid", True)
+
+            self.check_iterators()
+
+            if self.get_property("is_valid"):
+                self.check_inputs()
+
 
             self.check_children_loop(self.check_seed)
 
@@ -272,19 +331,14 @@ class GenericNode(BaseNode):
 
                 self.update_from_input()
 
-                for property_name in self.input_properties:
-                    for port in self.view.inputs: 
-                        if port.name == property_name:
-                            if self.input_properties[port.name].is_iterated():
-                                port.set_painter(functools.partial(draw_triangle_port, get_color_from_enum(self.input_properties[port.name].get_property_type())))
-                            else:
-                                port.set_painter(functools.partial(draw_square_port, get_color_from_enum(self.input_properties[port.name].get_property_type())))
+                self.repaint_ports()
 
             else:
                 self.set_invalid_color()
                 self.reset_outputs()
 
             self.view.draw_node()
+            self.view.update()
             self.update()
             self.update_twin_inputs()
             self.propagate()
@@ -297,6 +351,7 @@ class GenericNode(BaseNode):
 
 
     """
+        TODO : change length with iterators
         Get the value associated to the port to which the given input port is connected
     """
     def get_value_from_port(self, port_name, multiple = False) -> Container:
@@ -359,7 +414,12 @@ class GenericNode(BaseNode):
         for output_name in self.outputs():
             self.output_properties[output_name].reset()
     
-    
+        self.has_iterators = False
+        self.iterator_length = -1
+
+        self.repaint_ports()
+
+
     """
         Add an input node and create its empty container
     """
@@ -522,8 +582,6 @@ class GenericNode(BaseNode):
         else:
             container = Container(self.input_properties[name].get_property_type())
 
-            print(self.input_properties[name].get_property_type())
-
             if self.input_properties[name].get_property_type() == PortValueType.INTEGER:
                 container.set_property(int(self.get_property(name)))
             elif self.input_properties[name].get_property_type() == PortValueType.FLOAT:
@@ -532,6 +590,11 @@ class GenericNode(BaseNode):
                 container.set_property(bool(self.get_property(name)))
             else:
                 container.set_property(self.get_property(name))
+
+            if self.has_iterators:
+                contained_value = container.get_property()
+                container.set_iterated_property([contained_value]*self.iterator_length)
+
             return container
 
     def update_twin_inputs(self):
@@ -541,7 +604,10 @@ class GenericNode(BaseNode):
             if is_port_valid:
                 self.get_widget(name).setVisible(False)
                 self.label_list[name+"_label"].setVisible(True)
-                self.change_label(name+"_label", name+" : "+str(self.get_value_from_port(name).get_property()), False)
+                if self.has_iterators:
+                    self.change_label(name+"_label", name+" : "+str(self.get_value_from_port(name).get_iterated_property()[0]), False)
+                else:
+                    self.change_label(name+"_label", name+" : "+str(self.get_value_from_port(name).get_property()), False)
             else:
                 self.get_widget(name).setVisible(True)
                 self.label_list[name+"_label"].setVisible(False)

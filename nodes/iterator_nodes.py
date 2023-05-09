@@ -90,6 +90,7 @@ class InternalNode(GenericNode):
         self.add_label("Information")
         self.change_label("Information", "No information", False)
 
+        self.update_values()
 
     def check_inputs(self):
         if not self.get_property("Min").isdigit():

@@ -395,8 +395,42 @@ class GenericNode(BaseNode):
         Compute the outputs and store them in their containers.
     """
     def update_from_input(self):
-        raise NotImplementedError
+        if self.has_iterators:
+            output_dicts = []
+
+            for i in range(self.iterator_length):
+                input_dict = {}
+                
+                for input in self.input_properties:
+                    input_dict[input] = self.get_value_from_port(input).get_iterated_property()[i]
+                
+                output_dicts.append(self.update_function(input_dict))
+
+            if len(output_dicts) > 0:
+                for output in output_dicts[0]:
+                    if not output.startswith("__message__"):
+                        self.set_output_property(output, [output_dicts[i][output] for i in range(self.iterator_length)], True)
+                    else:
+                        self.change_label(output.replace("__message__",""), str(output_dicts[0][output])+" x "+str(self.iterator_length), False)
+ 
+
+        else:
+            input_dict = {}
+
+            for input in self.input_properties:
+                input_dict[input] = self.get_value_from_port(input).get_property()
+            
+            output_dict = self.update_function(input_dict)
+
+            for output in output_dict:
+                if not output.startswith("__message__"):
+                    self.set_output_property(output, output_dict[output], False)
+                else:
+                    self.change_label(output.replace("__message__",""), output_dict[output], False)
+            
     
+    def update_function(self, input_dict):
+        raise NotImplementedError("Neither update_from_input nor update_function defined for node : \""+self.NODE_NAME+"\"")
 
     """
         Calls the update_values function of all of the node children

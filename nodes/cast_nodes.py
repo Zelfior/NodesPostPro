@@ -39,11 +39,6 @@ class GenericCastNode(GenericNode):
             self.change_label("Information", message, True)
 
 
-    def update_from_input(self):
-        raise NotImplementedError
-
-
-
 
 
 
@@ -137,12 +132,18 @@ class IntegerToFloatCastNode(GenericCastNode):
         self.add_custom_output('Output', PortValueType.FLOAT)
                                
         self.add_label("Information")
-        
-    def update_from_input(self):
-        output_value = float(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
 
-        self.change_label("Information", str(output_value), False)
+        self.is_iterated_compatible = True
+        
+    def update_function(self, input_dict):
+        output_dict = {}
+        
+        output_dict["Output"] = float(input_dict["Input"])
+
+        output_dict["__message__Information"] = str(float(input_dict["Input"]))
+
+        return output_dict
+
         
 class IntegerToStringCastNode(GenericCastNode):
     # initial default node name.

@@ -117,3 +117,49 @@ class InternalNode(GenericNode):
         
         self.change_label("Information", "Values count: "+str(len(list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))))), False)
         
+
+        
+class InteratorListNode(GenericNode):
+    # unique node identifier.
+    __identifier__ = 'Iterator'
+
+    # initial default node name.
+    NODE_NAME = 'Iterated to list'
+
+
+    def __init__(self):
+        super(InternalNode, self).__init__()
+        self.add_custom_input("Input", PortValueType.ANY)
+
+        self.add_custom_output('Output', PortValueType.INTEGER)
+
+        self.add_label("Information")
+        self.change_label("Information", "No information", False)
+
+        self.update_values()
+
+    def check_inputs(self):
+        if not self.get_property("Min").isdigit():
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Given minimum should be an integer.", True)
+        
+        elif not self.get_property("Max").isdigit():
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Given maximum should be an integer.", True)
+        
+        elif not self.get_property("Step").isdigit():
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Given step should be an integer.", True)
+
+        elif int(self.get_property("Min")) > int(self.get_property("Max")):
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Min should be lower than max.", True)
+
+        else:
+            self.set_property("is_valid", True)
+    
+    def update_from_input(self):
+        self.set_output_property('i', list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))), True)
+        
+        self.change_label("Information", "Values count: "+str(len(list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))))), False)
+        

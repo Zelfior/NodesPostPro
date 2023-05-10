@@ -147,6 +147,36 @@
     ]
   },
   {
+    "type":"menu",
+    "label":"&Examples",
+    "items":[
+      {
+        "type":"command",
+        "label":"Read CSV",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"load_read_csv"
+      },
+      {
+        "type":"command",
+        "label":"Pickle, Imshow and SaveFig",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"pickle_imshow_savefig"
+      },
+      {
+        "type":"command",
+        "label":"Tripoli and Fill Between",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"tripoli_fill_between"
+      },
+      {
+        "type":"command",
+        "label":"Internal iterator and Random",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"internal_iterator_random"
+      }
+    ]
+  },
+  {
     "type":"separator"
   },
   {

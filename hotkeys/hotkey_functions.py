@@ -4,6 +4,7 @@
 # menu command functions
 # ------------------------------------------------------------------------------
 
+import os
 
 def zoom_in(graph):
     """
@@ -254,3 +255,29 @@ def toggle_node_search(graph):
     show/hide the node search widget.
     """
     graph.toggle_node_search()
+
+def load_example(graph, example_file_name):
+    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "examples", example_file_name)
+    
+    if file_path:
+        graph.load_session(file_path)
+
+    graph.clear_selection()
+    graph.fit_to_selection()
+    
+    for node in graph.all_nodes():
+        node.set_to_update(True)
+        node.update_values()
+
+
+def load_read_csv(graph):
+    load_example(graph, "read_csv.json")
+
+def pickle_imshow_savefig(graph):
+    load_example(graph, "pickle_imshow_save.json")
+
+def tripoli_fill_between(graph):
+    load_example(graph, "tripoli_fill_between.json")
+    
+def internal_iterator_random(graph):
+    load_example(graph, "internal_iterator_random.json")

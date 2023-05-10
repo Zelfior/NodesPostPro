@@ -138,7 +138,7 @@ class TripoliExtendedMeshNode(GenericNode):
         
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        example_path = os.path.join(file_path,'exemple_value.general')
+        example_path = os.path.join(file_path, 'example_files','exemple_value.general')
         self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
 

@@ -54,7 +54,7 @@ class SetAxisNode(GenericNode):
 
             self.set_output_property('Output Array', [np.take(self.get_value_from_port("Input Array").get_iterated_property()[i], self.value_widget.get_value(), self.axis_widget.get_value()) for i in range(len(self.get_value_from_port("Input Array")))], True)
             
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape), False)
+            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape) + " x "+ str(self.iterator_length), False)
 
         else:
             if self.axis_widget.get_range()[-1] != len(self.get_value_from_port("Input Array").get_property().shape) - 1:
@@ -263,7 +263,7 @@ class NP_SqueezeNode(GenericNode):
 
             self.set_output_property('Output Array', [np.squeeze(self.get_value_from_port("Input Array").get_iterated_property()[i]) for i in range(len(self.get_value_from_port("Input Array").get_iterated_property()))], True)
             
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape), False)
+            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape) + " x "+ str(self.iterator_length), False)
         
         else:
             self.set_output_property('Output Array', np.squeeze(self.get_value_from_port("Input Array").get_property()), False)
@@ -292,6 +292,8 @@ class NP_FlattenNode(GenericNode):
         #       The output array corresponding to the given axis value
         self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
 
+        self.is_iterated_compatible = True
+
         self.add_label("Information")
 
 
@@ -309,7 +311,7 @@ class NP_FlattenNode(GenericNode):
 
             self.set_output_property('Output Array', [self.get_value_from_port("Input Array").get_iterated_property()[i].flatten() for i in range(len(self.get_value_from_port("Input Array").get_iterated_property()))], True)
             
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape), False)
+            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape) + " x "+ str(self.iterator_length), False)
         
         else:
             self.set_output_property('Output Array', self.get_value_from_port("Input Array").get_property().flatten(), False)

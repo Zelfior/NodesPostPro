@@ -43,7 +43,6 @@
       "custom":{
         "is_valid":true,
         "Browse file":true,
-        "Filename":"C:\\Users\\tm787802\\Desktop\\NodesPostPro\\example.pkl",
         "Information":"Array shape : (50, 60, 70)",
         "Python version":"3.8.6 ",
         "Numpy version":"1.24.2",

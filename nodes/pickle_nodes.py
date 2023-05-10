@@ -29,7 +29,7 @@ class LoadNumpyNode(GenericNode):
 
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        example_path = os.path.join(file_path,'example.pkl')
+        example_path = os.path.join(file_path, 'example_files','example.pkl')
         self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
         self.add_label("Information")
@@ -98,7 +98,7 @@ class LoadPandasNode(GenericNode):
         self.button.set_link(self.get_file_name)
 
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        example_path = os.path.join(file_path,'example.pkl')
+        example_path = os.path.join(file_path, 'example_files','example.pkl')
         self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
         self.add_label("Information")

@@ -27,7 +27,7 @@ class LoadFileNode(GenericNode):
         self.button.set_link(self.get_file_name)
 
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-        example_path = os.path.join(file_path,'test.csv')
+        example_path = os.path.join(file_path, 'example_files', 'test.csv')
         self.add_text_input('Filename', 'File name', example_path, tab='widgets')
 
         self.add_label("Information")

@@ -19,6 +19,7 @@ class PortValueType(Enum):
     PLOTTABLE = 8
     DICT = 9
     FIGURE = 10
+    ANY = 11
 
 """
     Color association with the port type enum
@@ -44,6 +45,8 @@ def get_color_from_enum(enum_value):
         return (150, 150, 50)
     elif enum_value == PortValueType.FIGURE:
         return (0, 0, 0)
+    elif enum_value == PortValueType.ANY:
+        return (122, 122, 122)
     else:
         raise ValueError("No color defined for PortValueType "+str(enum_value))
     
@@ -72,6 +75,8 @@ def check_type(value, enum_value):
         return type(value) == dict
     elif enum_value == PortValueType.FIGURE:
         return type(value) == PltContainer
+    elif enum_value == PortValueType.ANY:
+        return value is not None
     else:
         raise ValueError("PortValueType "+str(enum_value)+" not implemented in function check_type")
     
@@ -99,6 +104,14 @@ def are_comparable(value1, value2, enum_value):
         return check_type(value1, enum_value) and check_type(value2, enum_value) and list(value1.keys()) == list(value2.keys())
     elif enum_value == PortValueType.FIGURE:
         return type(value1) == PltContainer and type(value2) == PltContainer
+    elif enum_value == PortValueType.ANY:
+        same_type = (type(value1) == type(value2))
+        if same_type:
+            for enum_val in PortValueType:
+                if not enum_val == PortValueType.ANY:
+                    if check_type(value1, enum_val):
+                        return are_comparable(value1, value2, enum_val)                
+        return False
     else:
         raise ValueError("PortValueType "+str(enum_value)+" not implemented in function are_comparable")
 

@@ -128,38 +128,48 @@ class InteratorListNode(GenericNode):
 
 
     def __init__(self):
-        super(InternalNode, self).__init__()
+        super(InteratorListNode, self).__init__()
         self.add_custom_input("Input", PortValueType.ANY)
 
-        self.add_custom_output('Output', PortValueType.INTEGER)
+        self.add_custom_output('Output', PortValueType.LIST)
 
         self.add_label("Information")
         self.change_label("Information", "No information", False)
 
         self.update_values()
+        self.is_iterated_compatible = True
 
     def check_inputs(self):
-        if not self.get_property("Min").isdigit():
-            self.set_property("is_valid", False)
-            self.change_label("Information", "Given minimum should be an integer.", True)
         
-        elif not self.get_property("Max").isdigit():
-            self.set_property("is_valid", False)
-            self.change_label("Information", "Given maximum should be an integer.", True)
-        
-        elif not self.get_property("Step").isdigit():
-            self.set_property("is_valid", False)
-            self.change_label("Information", "Given step should be an integer.", True)
+        value = self.get_value_from_port("Input")
 
-        elif int(self.get_property("Min")) > int(self.get_property("Max")):
-            self.set_property("is_valid", False)
-            self.change_label("Information", "Min should be lower than max.", True)
+        if value is not None:
+            is_iterated = value.is_iterated()
+
+            if is_iterated:
+                if value.is_defined():
+                    self.set_property("is_valid", True)
+                    self.change_label("Information", "", True)
+
+                else:
+                    self.set_property("is_valid", False)
+                    self.change_label("Information", "Plugged input is not defined.", True)
+
+            else:
+                self.set_property("is_valid", False)
+                self.change_label("Information", "Plugged input is not iterated.", True)
 
         else:
-            self.set_property("is_valid", True)
+            self.set_property("is_valid", False)
+            self.change_label("Information", "Plugged input is not defined.", True)
+            return
+
     
     def update_from_input(self):
-        self.set_output_property('i', list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))), True)
+        self.set_output_property('Output', self.get_value_from_port("Input").get_iterated_property(), False)
         
-        self.change_label("Information", "Values count: "+str(len(list(range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step")))))), False)
+        if len(self.get_output_property("Output").get_property()) == 0:
+            self.change_label("Information", "List length: "+str(len(self.get_output_property("Output").get_property())), False)
+        else:
+            self.change_label("Information", "List length: "+str(len(self.get_output_property("Output").get_property()))+"\nType: "+str(type(self.get_output_property("Output").get_property()[0])), False)
         

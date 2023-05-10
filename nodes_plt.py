@@ -77,6 +77,7 @@ if __name__ == '__main__':
         #   Iterators
         iterator_nodes.ExternalNode,
         iterator_nodes.InternalNode,
+        iterator_nodes.InteratorListNode,
 
         #   Operation nodes
         operation_nodes.MultiplyNode,

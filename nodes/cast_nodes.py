@@ -25,19 +25,13 @@ class GenericCastNode(GenericNode):
     def __init__(self):
         super(GenericCastNode, self).__init__()
 
-    def cast_function(self, input):
-        raise NotImplementedError
-    
-    
-    def check_inputs(self):
+        self.is_iterated_compatible = True
+
+    def check_function(self, input_dict):
         
         is_valid, message = self.is_input_valid("Input")
 
-        self.set_property("is_valid", is_valid)
-
-        if not is_valid:
-            self.change_label("Information", message, True)
-
+        return is_valid, message, "Information"
 
 
 
@@ -62,11 +56,14 @@ class FloatToIntegerCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = int(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = int(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
         
 class FloatToStringCastNode(GenericCastNode):
     # initial default node name.
@@ -81,11 +78,14 @@ class FloatToStringCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = str(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = str(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
         
 class FloatToBooleanCastNode(GenericCastNode):
     # initial default node name.
@@ -100,13 +100,28 @@ class FloatToBooleanCastNode(GenericCastNode):
         
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = bool(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = bool(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
 
         
+
+
+    def check_function(self, input_dict):
+        is_valid, message, label_name = super(FloatToBooleanCastNode, self).check_function(input_dict)
+
+        if is_valid:
+            if not str(input_dict["Input"]) in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.']:
+                is_valid = False
+                message = "Input is not a boolean."
+
+        return is_valid, message, label_name
+
 
 
 
@@ -140,7 +155,7 @@ class IntegerToFloatCastNode(GenericCastNode):
         
         output_dict["Output"] = float(input_dict["Input"])
 
-        output_dict["__message__Information"] = str(float(input_dict["Input"]))
+        output_dict["__message__Information"] = str(output_dict["Output"])
 
         return output_dict
 
@@ -158,11 +173,14 @@ class IntegerToStringCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = str(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = str(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
         
 class IntegerToBooleanCastNode(GenericCastNode):
     # initial default node name.
@@ -177,15 +195,28 @@ class IntegerToBooleanCastNode(GenericCastNode):
         
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = bool(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = bool(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
 
 
 
 
+    
+    def check_function(self, input_dict):
+        is_valid, message, label_name = super(IntegerToBooleanCastNode, self).check_function(input_dict)
+
+        if is_valid:
+            if not str(input_dict["Input"]) in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.']:
+                is_valid = False
+                message = "Input is not a boolean."
+
+        return is_valid, message, label_name
 
 
 
@@ -208,17 +239,24 @@ class StringToFloatCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_inputs(self):
-        super(StringToFloatCastNode, self).check_inputs()
+    def check_function(self, input_dict):
+        is_valid, message, label_name = super(StringToFloatCastNode, self).check_inputs(input_dict)
 
-        if self.get_property("is_valid"):
-            self.set_property("is_valid",  is_float(self.get_value_from_port("Input").get_property()))
+        if is_valid:
+            if not is_float(input_dict("Input")):
+                is_valid = False
+                message = "Input is not a float."
+
+        return is_valid, message, label_name
     
-    def update_from_input(self):
-        output_value = float(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = float(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
         
 class StringToIntegerCastNode(GenericCastNode):
     # initial default node name.
@@ -234,17 +272,24 @@ class StringToIntegerCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_inputs(self):
-        super(StringToIntegerCastNode, self).check_inputs()
+    def check_function(self, input_dict):
+        is_valid, message, label_name = super(StringToIntegerCastNode, self).check_function(input_dict)
 
-        if self.get_property("is_valid"):
-            self.set_property("is_valid",  self.get_value_from_port("Input").get_property().lstrip("-").isdigit())
+        if is_valid:
+            if not input_dict["Input"].lstrip("-").isdigit():
+                is_valid = False
+                message = "Input is not an integer."
 
-    def update_from_input(self):
-        output_value = int(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+        return is_valid, message, label_name
 
-        self.change_label("Information", str(output_value), False)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = int(input_dict["Input"])
+        
+
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
         
 class StringToBooleanCastNode(GenericCastNode):
     # initial default node name.
@@ -260,17 +305,24 @@ class StringToBooleanCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_inputs(self):
-        super(StringToBooleanCastNode, self).check_inputs()
+    def check_function(self, input_dict):
+        is_valid, message, label_name = super(StringToBooleanCastNode, self).check_function(input_dict)
 
-        if self.get_property("is_valid"):
-            self.set_property("is_valid",  self.get_value_from_port("Input").get_property() in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.'])
+        if is_valid:
+            if not input_dict["Input"] in ['yes', 'true', '1', "1.", 'no', 'false', '0', '0.']:
+                is_valid = False
+                message = "Input is not a boolean."
 
-    def update_from_input(self):
-        output_value = bool(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+        return is_valid, message, label_name
 
-        self.change_label("Information", str(output_value), False)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = bool(input_dict["Input"])
+        
+
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
 
 
 
@@ -299,11 +351,13 @@ class BooleanToFloatCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = float(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = float(input_dict["Input"])
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
         
 class BooleanToStringCastNode(GenericCastNode):
     # initial default node name.
@@ -318,11 +372,13 @@ class BooleanToStringCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = str(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = str(input_dict["Input"])
+        
+        output_dict["__message__Information"] = str(output_dict["Output"])
 
-        self.change_label("Information", str(output_value), False)
+        return output_dict
         
 class BooleanToIntegerCastNode(GenericCastNode):
     # initial default node name.
@@ -337,11 +393,14 @@ class BooleanToIntegerCastNode(GenericCastNode):
         
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = bool(self.get_value_from_port("Input").get_property())
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = bool(input_dict["Input"])
+        
 
-        self.change_label("Information", str(output_value), False)
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
 
 
 
@@ -363,11 +422,12 @@ class DataFrameToArrayCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_from_input(self):
-        output_value = self.get_value_from_port("Input").get_property().to_numpy()
-        self.set_output_property('Output', output_value)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = input_dict["Input"].to_numpy()
+        
 
-        self.change_label("Information", str(output_value.shape), False)
+        self.change_label("Information", str(output_dict["Output"].shape), False)
 
         
         
@@ -388,28 +448,30 @@ class ArrayToDataFrameCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_inputs(self):
-        super(ArrayToDataFrameCastNode, self).check_inputs()
+    def check_function(self, input_dict):
+        is_valid, message, label_name = super(ArrayToDataFrameCastNode, self).check_function(input_dict)
 
-        if self.get_property("is_valid"):
+        if is_valid:
 
-            column_list = self.input_properties["Columns Names"].get_property()
-
-            is_valid = True
+            column_list = input_dict["Columns Names"]
 
             for element in column_list:
                 if type(element) != str:
                     is_valid = False
+                    message = "Columns Names input does not contain floats."
             
-            if len(column_list) != len(self.input_properties["Input"].get_property().columns):
+            if len(column_list) != len(input_dict["Input"].columns):
                 is_valid = False
+                message = "Inputs dimensions don't match."
 
+        return is_valid, message, label_name
 
-            self.set_property("is_valid",  is_valid)
+    def update_function(self, input_dict):
+        output_dict = {}
+        output_dict["Output"] = float(pd.DataFrame(self.get_value_from_port("Input"), columns=input_dict["Columns Names"]))
+        
 
-    def update_from_input(self):
-        output_value = float(pd.DataFrame(self.get_value_from_port("Input"), columns=self.input_properties["Columns Names"].get_property()))
-        self.set_output_property('Output', output_value)
+        output_dict["__message__Information"] = "Dataframe size "+str(len(output_dict["Output"]))+" for "+str(len(input_dict["Columns Names"]))+" columns"
 
-        self.change_label("Information", str(output_value), False)
+        return output_dict
         

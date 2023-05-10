@@ -383,15 +383,50 @@ class GenericNode(BaseNode):
 
 
     """
-        Function to be overloaded.
+        Generic function that checks the input values based on a node defined operation function "check_function".
         Set in the "is_defined" property if the inputs match the expectations to compute the outputs.
     """
     def check_inputs(self):
-        raise NotImplementedError
+        if self.has_iterators:
+            is_valid = True
+            message = ""
+            label_name = ""
+
+            for i in range(self.iterator_length):
+                input_dict = {}
+                
+                for input in self.input_properties:
+                    input_dict[input] = self.get_value_from_port(input).get_iterated_property()[i]
+                
+                valid, message, label_name = self.check_function(input_dict)
+                print(i, valid)
+
+                is_valid &= valid
+                
+                if not is_valid:
+                    break
     
+            self.set_property("is_valid", is_valid)
+
+            if (not is_valid) and label_name != "":
+                self.change_label(label_name, message, True)
+        else:
+
+            input_dict = {}
+
+            for input in self.input_properties:
+                input_dict[input] = self.get_value_from_port(input).get_property()
+            
+            valid, message, label_name = self.check_function(input_dict)
+
+            self.set_property("is_valid", valid)
+
+            if (not valid) and label_name != "":
+                self.change_label(label_name, message, True)
+                
 
     """
-        Function to be overloaded.
+        Generic function that updates the outputs based on a node defined operation function "update_function".
         Compute the outputs and store them in their containers.
     """
     def update_from_input(self):
@@ -431,6 +466,9 @@ class GenericNode(BaseNode):
     
     def update_function(self, input_dict):
         raise NotImplementedError("Neither update_from_input nor update_function defined for node : \""+self.NODE_NAME+"\"")
+
+    def check_function(self, input_dict):
+        raise NotImplementedError("Neither check_inputs nor check_function defined for node : \""+self.NODE_NAME+"\"")
 
     """
         Calls the update_values function of all of the node children

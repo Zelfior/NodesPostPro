@@ -9,6 +9,11 @@ from Qt import QtCore, QtGui
 
 import random
 
+import os
+
+from NodeGraphQt.widgets.dialogs import FileDialog
+
+
 def check_cast_type_from_string(name:str, enum_type:PortValueType):
     if enum_type == PortValueType.FLOAT:
         try:
@@ -650,3 +655,17 @@ class GenericNode(BaseNode):
                 self.output(output_id).connected_ports()[connected_id].node().check_children_loop()
 
         return list_children
+
+        
+    def get_file_name(self, ext=None):
+        ext = '*{} '.format(ext) if ext else ''
+        ext_filter = ';;'.join([
+            'CSV file ({}*csv)'.format(ext), 'All Files (*)'
+        ])
+
+        current_dir = os.getcwd()
+        file_dlg = FileDialog.getOpenFileName(
+            None, 'Open File', current_dir, ext_filter)
+        file = file_dlg[0] or None
+
+        self.set_property("Filename", file)

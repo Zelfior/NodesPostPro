@@ -133,6 +133,9 @@ class TripoliExtendedMeshNode(GenericNode):
         self.add_custom_output('Y centers', PortValueType.NP_ARRAY)
         self.add_custom_output('Z centers', PortValueType.NP_ARRAY)
 
+        self.button = self.add_button_widget("Browse file")
+        self.button.set_link(self.get_file_name)
+        
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path,'exemple_value.general')

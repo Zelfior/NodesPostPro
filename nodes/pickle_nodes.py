@@ -24,6 +24,9 @@ class LoadNumpyNode(GenericNode):
         #   create output port for the read dataframe
         self.add_custom_output('Output Array', PortValueType.NP_ARRAY)
 
+        self.button = self.add_button_widget("Browse file")
+        self.button.set_link(self.get_file_name)
+
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path,'example.pkl')
@@ -91,6 +94,9 @@ class LoadPandasNode(GenericNode):
         self.add_custom_output('Columns names', PortValueType.LIST)
 
         #   create QLineEdit text input widget for the file path
+        self.button = self.add_button_widget("Browse file")
+        self.button.set_link(self.get_file_name)
+
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path,'example.pkl')
         self.add_text_input('Filename', 'File name', example_path, tab='widgets')

@@ -28,35 +28,38 @@ class LoadFileNode(GenericNode):
 
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path, 'example_files', 'test.csv')
-        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
+        self.add_twin_input('Filename', PortValueType.STRING, default = example_path)
+        self.add_twin_input('Separator', PortValueType.STRING, default =  ',')
 
         self.add_label("Information")
 
+        self.is_iterated_compatible = True
 
-    def check_inputs(self):
-        print("File found", os.path.isfile(self.get_property("Filename")))
+        
+    def check_function(self, input_dict, first=False):
+        if not "Filename" in input_dict:
+            return False, "Filename is not valid", "Information"
+        
+        if not os.path.isfile(input_dict["Filename"]):
+            return False, "No file at the given path", "Information"
 
-        #   we set in the "is_valid" property a boolean saying if a file is present at the given path
-        if os.path.isfile(self.get_property("Filename")):
-            self.set_property("is_valid", True)
-        else:
-            self.set_property("is_valid", False)
-            self.change_label("Information", "No file at the given path.", True)
+        return True, "", "Information"
 
     
+    def update_function(self, input_dict, first=False):
+        if "Separator" in input_dict:
+            output_dict = {'Output DataFrame': pd.read_csv(input_dict["Filename"], sep=input_dict["Separator"])}
+        else:
+            output_dict = {'Output DataFrame': pd.read_csv(input_dict["Filename"])}
 
-    def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       we set in the "Output DataFrame" output the dataframe associated to the given path
-        self.get_output_property("Output DataFrame").set_property(pd.read_csv(self.get_property("Filename"), sep = ","))
-        self.get_output_property("Columns names").set_property(list(self.get_output_property("Output DataFrame").get_property().columns))
-
-        column_count = len(self.get_output_property("Output DataFrame").get_property().columns)
-        lines_count = len(self.get_output_property("Output DataFrame").get_property())
+        output_dict["Columns names"] = list(output_dict['Output DataFrame'].columns)
         
-        self.change_label("Information", "Columns : "+str(column_count)+", lines : "+str(lines_count), False)
+        column_count = len(output_dict["Columns names"])
+        lines_count = len(output_dict["Output DataFrame"])
+        
+        output_dict["__message__Information"] = "Columns : "+str(column_count)+", lines : "+str(lines_count)
 
-
+        return output_dict
 
 
 
@@ -96,48 +99,30 @@ class GetColumnSelectorNode(GenericNode):
         self.add_label("Information")
         self.change_label("Information", "No information", False)
 
-    def check_inputs(self):
-        #   Checks if the Input DataFrame is:
-        #       -   plugged
-        #       -   defined (if the previous node has its outputs defined)
-        #       -   is a pandas DataFrame
+        self.is_iterated_compatible = True
+
+
+    def check_function(self, input_dict, first=False):
+        if not "Input DataFrame" in input_dict:
+            return False, "Input DataFrame is not valid", "Information"
         
-
-        is_valid, message = self.is_input_valid("Input DataFrame")
-
-        self.set_property("is_valid", is_valid)
-
-        if not is_valid:
-            self.change_label("Information", message, True)
+        return True, "", "Information"
 
     
-    def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       -   If the combo widget labels are different from the DataFrame columns, we update the combo widget
-        #       -   The "Output DataFrame" output becomes the column asked as a DataFrame
+    def update_function(self, input_dict, first=False):
 
-        if self.get_value_from_port("Input DataFrame").is_iterated():
-            if list(self.get_value_from_port("Input DataFrame").get_iterated_property()[0].columns) != self.view.widgets["Column name"].all_items():
+        if first:
+            if list(input_dict["Input Dataframe"].columns) != self.view.widgets["Column name"].all_items():
                 self.view.widgets["Column name"].clear()
-                self.view.widgets["Column name"].add_items(list(self.get_value_from_port("Input DataFrame").get_property().columns))
-
-            input_property = self.get_value_from_port("Input DataFrame").get_iterated_property()
-
-            self.set_output_property('Output DataFrame', [input_property[i][self.get_property("Column name")].to_frame() for i in range(len(input_property))], True)
-            self.set_output_property('Selected column name', self.get_property("Column name"), False)
+                self.view.widgets["Column name"].add_items(list(input_dict["Input Dataframe"].columns))
             
-            self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output DataFrame").get_property()[0])+" x "+str(len(self.get_output_property("Output DataFrame").get_property()))), False)
+        output_dict = {'Output DataFrame': input_dict["Input Dataframe"][input_dict["Column name"]]}
+        
+        output_dict["__message__Information"] = "Lines : "+str(output_dict['Output DataFrame'])
 
-        else:
-            if list(self.get_value_from_port("Input DataFrame").get_property().columns) != self.view.widgets["Column name"].all_items():
-                self.view.widgets["Column name"].clear()
-                self.view.widgets["Column name"].add_items(list(self.get_value_from_port("Input DataFrame").get_property().columns))
+        return output_dict
 
-            self.set_output_property('Output DataFrame', self.get_value_from_port("Input DataFrame").get_property()[self.get_property("Column name")].to_frame(), False)
-            self.set_output_property('Selected column name', self.get_property("Column name"), False)
-            
-            self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output DataFrame").get_property())), False)
-
+    
     def reset_outputs(self):
         super(GetColumnSelectorNode, self).reset_outputs()
 
@@ -177,73 +162,103 @@ class GetColumnNode(GenericNode):
         self.add_label("Information")
         self.change_label("Information", "No information", False)
 
-    def check_inputs(self):
-        #   Checks if the Input DataFrame is:
-        #       -   plugged
-        #       -   defined (if the previous node has its outputs defined)
-        #       -   is a pandas DataFrame
+        self.is_iterated_compatible = True
         
-        is_dataframe_valid, message = self.is_input_valid("Input DataFrame")
-
-        if not is_dataframe_valid:
-            self.change_label("Information", message, True)
-            self.set_property("is_valid", False)
-
-        if is_dataframe_valid:
-            is_dataframe_valid, message = self.is_twin_input_valid("Column name")
-
-            if is_dataframe_valid:
-                if self.get_twin_input("Column name").get_property() in self.get_value_from_port("Input DataFrame").get_property().columns:
-                    is_col_name_valid = True
-                else:
-                    is_col_name_valid = False
-                    self.change_label("Information", "Given name is not in the dataframe columns.", True)
-            else:
-                is_col_name_valid = False
-            
-            self.set_property("is_valid", is_col_name_valid)
-
-
-            if is_col_name_valid:
-                if self.get_twin_input("Column name").is_iterated() and self.get_value_from_port("Input Dataframe").is_iterated():
-                    if len(self.get_twin_input("Column name").get_iterated_property()) != len(self.get_twin_input("Input Dataframe").get_iterated_property()):
-
-                        self.set_property("is_valid", False)
-                        self.change_label("Information", "Inputs should use the same iterator.", True)
+    def check_function(self, input_dict, first=False):
+        if not "Input DataFrame" in input_dict:
+            return False, "Input DataFrame is not valid", "Information"
+        
+        if not "Column name" in input_dict:
+            return False, "Column name is not valid", "Information"
+        
+        if not input_dict["Column name"] in input_dict["Input DataFrame"].columns:
+            return False, "Column name given is not valid", "Information"
+        
+        return True, "", "Information"
 
     
-    def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       -   If the combo widget labels are different from the DataFrame columns, we update the combo widget
-        #       -   The "Output DataFrame" output becomes the column asked as a DataFrame
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output DataFrame': input_dict["Input DataFrame"][input_dict["Column name"]].to_frame()}
+        
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output DataFrame"].shape)
 
-        input_dataframe = self.get_value_from_port("Input DataFrame")
-        input_name = self.get_value_from_port("Column name")
-
-        if input_dataframe.is_iterated():
-            input_dataframe_property = input_dataframe.get_iterated_property()
-
-            if input_name.is_iterated():
-                self.set_output_property('Output DataFrame', [input_dataframe_property[i][input_name.get_iterated_property()[i]].to_frame() for i in range(len(input_dataframe_property))], True)
-
-            else:
-                self.set_output_property('Output DataFrame', [input_dataframe_property[i][input_name.get_property()].to_frame() for i in range(len(input_dataframe_property))], True)
-                
-                self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output DataFrame").get_property()[0])+" x "+str(len(self.get_output_property("Output DataFrame").get_property()))), False)
-
-
-        else:
-            input_dataframe_property = input_dataframe.get_property()
-
-            if input_name.is_iterated():
-                self.set_output_property('Output DataFrame', [input_dataframe_property[input_name.get_iterated_property()[i]].to_frame() for i in range(len(input_name.get_iterated_property()))], True)
-                
-                self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output DataFrame").get_property()[0])+" x "+str(len(input_name.get_iterated_property()))), False)
+        return output_dict
 
 
 
-            else:
-                self.set_output_property('Output DataFrame', input_dataframe_property[input_name.get_property()].to_frame(), False)
-                
-                self.change_label("Information", "Lines : "+str(len(self.get_output_property("Output DataFrame").get_property())), False)
+
+
+class MultiplyNode(GenericNode):
+    """
+    A node class with 2 inputs and 2 outputs.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Pandas'
+
+    # initial default node name.
+    NODE_NAME = 'DF Multiply float'
+
+    def __init__(self):
+        super(MultiplyNode, self).__init__()
+
+        # create input & output ports
+        self.add_custom_input('Input Dataframe', PortValueType.PD_DATAFRAME)
+        self.add_twin_input('Input float', PortValueType.FLOAT)
+        self.add_custom_output('Output Dataframe', PortValueType.PD_DATAFRAME)
+
+        self.is_iterated_compatible = True
+
+        
+    def check_function(self, input_dict, first=False):
+        if not "Input Dataframe" in input_dict:
+            return False, "Input Dataframe 1 is not valid", "Information"
+        if not "Input Float" in input_dict:
+            return False, "Input Float is not valid", "Information"
+        
+        return True, "", "Information"
+
+    
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output Dataframe': input_dict["Input Dataframe"] * input_dict["Input Float"]}
+        
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Dataframe"].shape)
+
+        return output_dict
+
+
+
+class GetAverageNode(GenericNode):
+    """
+    A node class with 2 inputs and 2 outputs.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Pandas'
+
+    # initial default node name.
+    NODE_NAME = 'DF average'
+
+    def __init__(self):
+        super(GetAverageNode, self).__init__()
+
+        # create input & output ports
+        self.add_custom_input('Input Dataframe', PortValueType.PD_DATAFRAME)
+        self.add_custom_output('Output Float', PortValueType.FLOAT)
+
+        self.is_iterated_compatible = True
+        
+    def check_function(self, input_dict, first=False):
+        if not "Input Dataframe" in input_dict:
+            return False, "Input Dataframe 1 is not valid", "Information"
+        
+        return True, "", "Information"
+
+    
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output Dataframe': input_dict["Input Dataframe"].mean()}
+        
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Dataframe"].shape)
+
+        return output_dict
 

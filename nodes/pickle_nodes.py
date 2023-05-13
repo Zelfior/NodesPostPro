@@ -5,6 +5,7 @@ import numpy as np
 import os
 import pickle
 import sys
+from nodes.container import check_type
 
 
 class LoadNumpyNode(GenericNode):
@@ -30,7 +31,7 @@ class LoadNumpyNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path, 'example_files','example.pkl')
-        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
+        self.add_twin_input('Filename', PortValueType.STRING, default = example_path)
 
         self.add_label("Information")
         self.change_label("Information", "Load file to display size", False)
@@ -42,36 +43,37 @@ class LoadNumpyNode(GenericNode):
         self.add_label("Pickle version", label=True)
         self.change_label("Pickle version", str(pickle.format_version), False)
 
-        self.check_inputs()
+        self.update_values()
 
+        self.is_iterated_compatible = True
+        
 
-    def check_inputs(self):
-        #   we set in the "is_valid" property a boolean saying if a file is present at the given path
-        if os.path.isfile(self.get_property("Filename")):
-            try :
-                self.data = pickle.load(open(self.get_property("Filename"), "rb"))
-            except:
-                self.set_property("is_valid", False)
-                self.change_label("Information", "File found not valid.", True)
-                return
+    def check_function(self, input_dict, first=False):
+        if not "Filename" in input_dict:
+            return False, "Filename is not valid", "Information"
+        
+        if not os.path.isfile(self.get_property("Filename")):
+            return False, "No file at given path", "Information"
+        
+        try :
+            self.data = pickle.load(open(self.get_property("Filename"), "rb"))
 
-            if type(self.data) == np.ndarray:
-                self.set_property("is_valid", True)
-            else:
-                self.change_label("Information", "Loaded data is not a numpy array.", True)
-
-        else:
-            self.set_property("is_valid", False)
-            self.change_label("Information", "No file at the given path.", True)
+            if not check_type(self.data, PortValueType.NP_ARRAY):
+                return False, "Loaded data is not a numpy array", "Information"
+        except:
+            return False, "Found file is not valid", "Information"
+        
+        return True, "", "Information"
 
     
-
-    def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       we set in the "Output Array" output the array associated to the given path
-        self.set_output_property("Output Array", self.data, False)
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output Array': self.data}
         
-        self.change_label("Information", "Array shape : "+str(self.data.shape), False)
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Array"].shape)
+
+        return output_dict
+
+
 
     
 
@@ -99,7 +101,7 @@ class LoadPandasNode(GenericNode):
 
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path, 'example_files','example.pkl')
-        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
+        self.add_twin_input('Filename', PortValueType.STRING, default = example_path)
 
         self.add_label("Information")
         self.change_label("Information", "Load file to display size", False)
@@ -111,37 +113,35 @@ class LoadPandasNode(GenericNode):
         self.add_label("Pickle version", label=True)
         self.change_label("Pickle version", str(pickle.format_version), False)
 
-        self.check_inputs()
+        self.is_iterated_compatible = True
 
+        self.update_values()
 
-    def check_inputs(self):
-        #   we set in the "is_valid" property a boolean saying if a file is present at the given path
-        if os.path.isfile(self.get_property("Filename")):
-            try :
-                self.data = pickle.load(open(self.get_property("Filename"), "rb"))
-            except:
-                self.set_property("is_valid", False)
-                self.change_label("Information", "File found not valid.", True)
-                return
+    def check_function(self, input_dict, first=False):
+        if not "Filename" in input_dict:
+            return False, "Filename is not valid", "Information"
+        
+        if not os.path.isfile(self.get_property("Filename")):
+            return False, "No file at given path", "Information"
+        
+        try :
+            self.data = pickle.load(open(self.get_property("Filename"), "rb"))
 
-            if type(self.data) == pd.DataFrame:
-                self.set_property("is_valid", True)
-            else:
-                self.change_label("Information", "Loaded data is not a pandas dataframe.", True)
-
-        else:
-            self.set_property("is_valid", False)
-            self.change_label("Information", "No file at the given path.", True)
+            if not check_type(self.data, PortValueType.PD_DATAFRAME):
+                return False, "Loaded data is not a pandas dataframe", "Information"
+        except:
+            return False, "Found file is not valid", "Information"
+        
+        return True, "", "Information"
 
     
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output DataFrame': self.data}
+        
+        column_count = len(self.data.columns)
+        lines_count = len(self.data)
 
-    def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       we set in the "Output DataFrame" output the dataframe associated to the given path
-        self.set_output_property("Output DataFrame", self.data, False)
-        self.set_output_property("Columns names", self.get_output_property("Output DataFrame").get_property().columns, False)
-        
-        column_count = len(self.get_output_property("Output DataFrame").get_property().columns)
-        lines_count = len(self.get_output_property("Output DataFrame").get_property())
-        
-        self.change_label("Information", "Columns : "+str(column_count)+", lines : "+str(lines_count), False)
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Array"].shape)
+
+        return output_dict
+

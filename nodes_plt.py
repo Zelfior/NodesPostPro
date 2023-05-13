@@ -13,8 +13,7 @@ from NodeGraphQt import (
 )
 
 # import example nodes from the "example_nodes" package
-from nodes import operation_nodes, \
-                    pandas_nodes, \
+from nodes import pandas_nodes, \
                     plt_node, \
                     input_nodes, \
                     cast_nodes, \
@@ -79,14 +78,12 @@ if __name__ == '__main__':
         iterator_nodes.InternalNode,
         iterator_nodes.InteratorListNode,
 
-        #   Operation nodes
-        operation_nodes.MultiplyNode,
-        operation_nodes.GetAverageNode,
-
         #   Pandas nodes
         pandas_nodes.LoadFileNode,
         pandas_nodes.GetColumnNode,
         pandas_nodes.GetColumnSelectorNode,
+        pandas_nodes.MultiplyNode,
+        pandas_nodes.GetAverageNode,
 
         #   Numpy nodes
         numpy_nodes.SetAxisNode,

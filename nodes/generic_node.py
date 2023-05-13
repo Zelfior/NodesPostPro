@@ -214,7 +214,7 @@ class GenericNode(BaseNode):
                 self.label_list[label_name].set_text(label_value, 'white')
 
         else:
-            raise ValueError("Label name doesn't exists")
+            raise ValueError("Label "+label_name+" doesn't exists")
 
     """
         BaseNode set_property overload:

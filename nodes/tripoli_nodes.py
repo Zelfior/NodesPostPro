@@ -139,7 +139,7 @@ class TripoliExtendedMeshNode(GenericNode):
         #   create QLineEdit text input widget for the file path
         file_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         example_path = os.path.join(file_path, 'example_files','exemple_value.general')
-        self.add_text_input('Filename', 'File name', example_path, tab='widgets')
+        self.add_twin_input('Filename', PortValueType.STRING, default = example_path)
 
 
         self.add_label("Size array")
@@ -153,47 +153,51 @@ class TripoliExtendedMeshNode(GenericNode):
 
         self.TP = tripoli_postpro()
 
+        self.is_iterated_compatible = True
 
-    def check_inputs(self):
-        print("File found", os.path.isfile(self.get_property("Filename")))
 
-        #   we set in the "is_valid" property a boolean saying if a file is present at the given path
-        if os.path.isfile(self.get_property("Filename")):
-            self.set_property("is_valid", True)
-        else:
-            self.set_property("is_valid", False)
-            self.change_label("Size array", "No file at the given path.", True)
-            
+    def check_function(self, input_dict, first = False):
+        if not "Filename" in input_dict:            
             self.change_label("Size X bounds" , "", False)
             self.change_label("Size Y bounds" , "", False)
             self.change_label("Size Z bounds" , "", False)
             self.change_label("Size X centers", "", False)
             self.change_label("Size Y centers", "", False)
             self.change_label("Size Z centers", "", False)
-
+            return False, "Filename is not valid", "Size array"
+        
+        if not os.path.isfile(input_dict["Filename"]):
+            self.change_label("Size X bounds" , "", False)
+            self.change_label("Size Y bounds" , "", False)
+            self.change_label("Size Z bounds" , "", False)
+            self.change_label("Size X centers", "", False)
+            self.change_label("Size Y centers", "", False)
+            self.change_label("Size Z centers", "", False)
+            return False, "No file at given path", "Size array"
     
+        return True, "", "Size array"
 
-    def update_from_input(self):
+    def update_function(self, input_dict, first=False):
         #   Called only if check_inputs returned True:
         #       we set in the "Output DataFrame" output the dataframe associated to the given path
 
-        self.TP.read_data(self.get_property("Filename"))
+        self.TP.read_data(input_dict["Filename"])
 
-        self.get_output_property("Value Array").set_property(self.TP.data_value)
-        self.get_output_property("Sigma Array").set_property(self.TP.data_sigma)
+        output_dict = {"Value Array":self.TP.data_value,
+                       "Sigma Array":self.TP.data_sigma,
+                       "X bounds":self.TP.cell_x_bounds,
+                       "Y bounds":self.TP.cell_y_bounds,
+                       "Z bounds":self.TP.cell_z_bounds,
+                       "X centers":self.TP.cell_x_coordinates,
+                       "Y centers":self.TP.cell_y_coordinates,
+                       "Z centers":self.TP.cell_z_coordinates}
 
-        self.get_output_property("X bounds").set_property(self.TP.cell_x_bounds)
-        self.get_output_property("Y bounds").set_property(self.TP.cell_y_bounds)
-        self.get_output_property("Z bounds").set_property(self.TP.cell_z_bounds)
+        output_dict["__message__Size array"] = "Array shape "+str(self.TP.data_value.shape)
+        output_dict["__message__Size X bounds"] = "X bounds shape "+str(self.TP.cell_x_bounds.shape)
+        output_dict["__message__Size Y bounds"] = "Y bounds shape "+str(self.TP.cell_y_bounds.shape)
+        output_dict["__message__Size Z bounds" ] = "Z bounds shape "+str(self.TP.cell_z_bounds.shape)
+        output_dict["__message__Size X centers"] = "X centers shape "+str(self.TP.cell_x_coordinates.shape)
+        output_dict["__message__Size Y centers"] = "Y centers shape "+str(self.TP.cell_y_coordinates.shape)
+        output_dict["__message__Size Z centers"] = "Z centers shape "+str(self.TP.cell_z_coordinates.shape)
 
-        self.get_output_property("X centers").set_property(self.TP.cell_x_coordinates)
-        self.get_output_property("Y centers").set_property(self.TP.cell_y_coordinates)
-        self.get_output_property("Z centers").set_property(self.TP.cell_z_coordinates)
-
-        self.change_label("Size array", "Array shape "+str(self.TP.data_value.shape), False)
-        self.change_label("Size X bounds" , "X bounds shape "+str(self.TP.cell_x_bounds.shape), False)
-        self.change_label("Size Y bounds" , "Y bounds shape "+str(self.TP.cell_y_bounds.shape), False)
-        self.change_label("Size Z bounds" , "Z bounds shape "+str(self.TP.cell_z_bounds.shape), False)
-        self.change_label("Size X centers", "X centers shape "+str(self.TP.cell_x_coordinates.shape), False)
-        self.change_label("Size Y centers", "Y centers shape "+str(self.TP.cell_y_coordinates.shape), False)
-        self.change_label("Size Z centers", "Z centers shape "+str(self.TP.cell_z_coordinates.shape), False)
+        return output_dict

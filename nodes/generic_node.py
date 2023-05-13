@@ -144,6 +144,7 @@ class GenericNode(BaseNode):
 
         self.output_properties = {}
         self.input_properties = {}
+        
         self.label_list = {}
         self.twin_inputs = []
 
@@ -396,10 +397,23 @@ class GenericNode(BaseNode):
                 input_dict = {}
                 
                 for input in self.input_properties:
-                    input_dict[input] = self.get_value_from_port(input).get_iterated_property()[i]
-                
+                    valid = False
+                    if input in self.twin_inputs:
+                        if self.is_twin_input_valid(input)[0]:
+                            input_container = self.get_twin_input(input)
+                            valid = True
+                    else:
+                        if self.is_input_valid(input)[0]:
+                            input_container = self.get_value_from_port(input)
+                            valid = True
+
+                    if valid:
+                        if input_container.is_iterated():
+                            input_dict[input] = input_container.get_iterated_property()[i]
+                        else:
+                            input_dict[input] = input_container.get_property()
+
                 valid, message, label_name = self.check_function(input_dict)
-                print(i, valid)
 
                 is_valid &= valid
                 
@@ -415,7 +429,12 @@ class GenericNode(BaseNode):
             input_dict = {}
 
             for input in self.input_properties:
-                input_dict[input] = self.get_value_from_port(input).get_property()
+                if input in self.twin_inputs:
+                    if self.is_twin_input_valid(input)[0]:
+                        input_dict[input] = self.get_twin_input(input).get_property()
+                else:
+                    if self.is_input_valid(input)[0]:
+                        input_dict[input] = self.get_value_from_port(input).get_property()
             
             valid, message, label_name = self.check_function(input_dict)
 
@@ -437,7 +456,21 @@ class GenericNode(BaseNode):
                 input_dict = {}
                 
                 for input in self.input_properties:
-                    input_dict[input] = self.get_value_from_port(input).get_iterated_property()[i]
+                    valid = False
+                    if input in self.twin_inputs:
+                        if self.is_twin_input_valid(input)[0]:
+                            input_container = self.get_twin_input(input)
+                            valid = True
+                    else:
+                        if self.is_input_valid(input)[0]:
+                            input_container = self.get_value_from_port(input)
+                            valid = True
+
+                    if valid:
+                        if input_container.is_iterated():
+                            input_dict[input] = input_container.get_iterated_property()[i]
+                        else:
+                            input_dict[input] = input_container.get_property()
                 
                 output_dicts.append(self.update_function(input_dict))
 
@@ -453,7 +486,12 @@ class GenericNode(BaseNode):
             input_dict = {}
 
             for input in self.input_properties:
-                input_dict[input] = self.get_value_from_port(input).get_property()
+                if input in self.twin_inputs:
+                    if self.is_twin_input_valid(input)[0]:
+                        input_dict[input] = self.get_twin_input(input).get_property()
+                else:
+                    if self.is_input_valid(input)[0]:
+                        input_dict[input] = self.get_value_from_port(input).get_property()
             
             output_dict = self.update_function(input_dict)
 

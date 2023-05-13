@@ -211,6 +211,11 @@ class Container():
     def set_iterated(self, value:bool):
         self.is_iterated = value
 
+    """
+        Defines how the container object is printed
+    """
+    def __str__(self):
+        return "-- Print Container --\nEnum:"+str(self.enum_value)+"\nDefined:"+str(self.defined)+"\nIterated:"+str(self.iterated)
 
 
 
@@ -235,3 +240,4 @@ class PltContainer:
             return self.parameters
         else:
             raise ValueError("Given property name does not exist: "+property_name)
+        

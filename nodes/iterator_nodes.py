@@ -171,5 +171,5 @@ class InteratorListNode(GenericNode):
         if len(self.get_output_property("Output").get_property()) == 0:
             self.change_label("Information", "List length: "+str(len(self.get_output_property("Output").get_property())), False)
         else:
-            self.change_label("Information", "List length: "+str(len(self.get_output_property("Output").get_property()))+"\nType: "+str(type(self.get_output_property("Output").get_property()[0])), False)
+            self.change_label("Information", "List length: "+str(len(self.get_output_property("Output").get_property()))+"\nType: "+str(self.get_output_property("Output").get_property()[0].__class__.__name__), False)
         

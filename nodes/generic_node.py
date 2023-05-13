@@ -424,6 +424,8 @@ class GenericNode(BaseNode):
 
             if (not is_valid) and label_name != "":
                 self.change_label(label_name, message, True)
+            elif label_name != "":
+                self.change_label(label_name, "", False)
         else:
 
             input_dict = {}
@@ -442,6 +444,8 @@ class GenericNode(BaseNode):
 
             if (not valid) and label_name != "":
                 self.change_label(label_name, message, True)
+            elif label_name != "":
+                self.change_label(label_name, "", False)
                 
 
     """
@@ -472,7 +476,7 @@ class GenericNode(BaseNode):
                         else:
                             input_dict[input] = input_container.get_property()
                 
-                output_dicts.append(self.update_function(input_dict))
+                output_dicts.append(self.update_function(input_dict, first = (i == 0)))
 
             if len(output_dicts) > 0:
                 for output in output_dicts[0]:
@@ -502,10 +506,10 @@ class GenericNode(BaseNode):
                     self.change_label(output.replace("__message__",""), output_dict[output], False)
             
     
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         raise NotImplementedError("Neither update_from_input nor update_function defined for node : \""+self.NODE_NAME+"\"")
 
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         raise NotImplementedError("Neither check_inputs nor check_function defined for node : \""+self.NODE_NAME+"\"")
 
     """

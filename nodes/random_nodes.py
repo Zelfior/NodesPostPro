@@ -25,30 +25,25 @@ class RandomUniformNode(GenericNode):
 
         self.add_label("Information", "")
 
+        self.is_iterated_compatible = True
+        
+    def check_function(self, input_dict, first = False):
+        if not "Min" in input_dict:
+            return False, "Min value is not valid", "Information"
 
-    def check_inputs(self):
-        #   we set in the "is_valid" property a boolean saying if the string is a float
-        self.set_property("is_valid", True)
+        if not "Max" in input_dict:
+            return False, "Max value is not valid", "Information"
 
-        for twin in self.twin_inputs:
-            valid, message = self.is_twin_input_valid(twin)
+        if input_dict["Min"] > input_dict["Max"]:
+            return False, "Max must be greater than Min", "Information"
 
-            self.set_property("is_valid", valid and self.get_property("is_valid"))
+        return True, "", "Information"
 
-            if not valid:
-                self.change_label("Information", message, True)
+    def update_function(self, input_dict, first = False):
+        output_dict = {'Output Value': random.uniform(input_dict["Min"], input_dict["Max"])} 
+        output_dict["__message__Information"] = str(output_dict['Output Value'])
+        return output_dict
 
-        if self.get_property("is_valid"):
-            if float(self.get_twin_input("Min").get_property()) > float(self.get_twin_input("Max").get_property()):
-                self.set_property("is_valid", False)
-                self.change_label("Information", "Max should be greater than Min.", True)
-
-
-    def update_from_input(self):
-        #   Called only if check_inputs returned True:
-        #       we set in the "Output DataFrame" output the dataframe associated to the given path
-        self.get_output_property("Output Value").set_property(random.uniform(float(self.get_twin_input("Min").get_property()),float(self.get_twin_input("Max").get_property())))
-        self.change_label("Information", str(self.get_output_property("Output Value").get_property()), False)
 
 
 
@@ -76,7 +71,7 @@ class RandomIntegerNode(GenericNode):
 
         self.is_iterated_compatible = True
 
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         if not "Min" in input_dict:
             return False, "Min value is not valid", "Information"
 
@@ -88,7 +83,7 @@ class RandomIntegerNode(GenericNode):
 
         return True, "", "Information"
 
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {'Output Value': random.randint(input_dict["Min"], input_dict["Max"])} 
         output_dict["__message__Information"] = str(output_dict['Output Value'])
         return output_dict

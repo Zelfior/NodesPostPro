@@ -34,38 +34,28 @@ class SetAxisNode(GenericNode):
 
         self.add_label("Information")
 
+        self.is_iterated_compatible = True
 
-    def check_inputs(self):
 
-        is_valid, message = self.is_input_valid("Input Array")
-
-        self.set_property("is_valid", is_valid)
-
-        if not is_valid:
-            self.change_label("Information", message, True)
-    
-    def update_from_input(self):
-        if self.get_value_from_port("Input Array").is_iterated():
-            if self.axis_widget.get_range()[-1] != len(self.get_value_from_port("Input Array").get_iterated_property()[0].shape) - 1:
-                self.axis_widget.set_range(0, len(self.get_value_from_port("Input Array").get_iterated_property()[0].shape) - 1)
-
-            if self.value_widget.get_range()[-1] != self.get_value_from_port("Input Array").get_iterated_property()[0].shape[self.axis_widget.get_value()] - 1:
-                self.value_widget.set_range(0, self.get_value_from_port("Input Array").get_iterated_property()[0].shape[self.axis_widget.get_value()] - 1)
-
-            self.set_output_property('Output Array', [np.take(self.get_value_from_port("Input Array").get_iterated_property()[i], self.value_widget.get_value(), self.axis_widget.get_value()) for i in range(len(self.get_value_from_port("Input Array")))], True)
-            
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape) + " x "+ str(self.iterator_length), False)
-
+    def check_function(self, input_dict, first=False):
+        if "Input Array" in input_dict:
+            return True, "", "Information"
         else:
-            if self.axis_widget.get_range()[-1] != len(self.get_value_from_port("Input Array").get_property().shape) - 1:
-                self.axis_widget.set_range(0, len(self.get_value_from_port("Input Array").get_property().shape) - 1)
+            return False, "Input Array is not valid", "Information"
 
-            if self.value_widget.get_range()[-1] != self.get_value_from_port("Input Array").get_property().shape[self.axis_widget.get_value()] - 1:
-                self.value_widget.set_range(0, self.get_value_from_port("Input Array").get_property().shape[self.axis_widget.get_value()] - 1)
 
-            self.set_output_property('Output Array', np.take(self.get_value_from_port("Input Array").get_property(), self.value_widget.get_value(), self.axis_widget.get_value()), False)
-            
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
+    def update_function(self, input_dict, first=False):
+        if first:
+            if self.axis_widget.get_range()[-1] != len(input_dict["Input Array"].shape) - 1:
+                self.axis_widget.set_range(0, len(input_dict["Input Array"].shape) - 1)
+    
+            if self.value_widget.get_range()[-1] != input_dict["Input Array"].shape[self.axis_widget.get_value()] - 1:
+                self.value_widget.set_range(0, input_dict["Input Array"].shape[self.axis_widget.get_value()] - 1)
+
+        output_dict = {'Output Array': np.take(input_dict["Input Array"], self.value_widget.get_value(), self.axis_widget.get_value())}
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Array"].shape)
+        return output_dict
+
 
     def reset_outputs(self):
         super(SetAxisNode, self).reset_outputs()
@@ -248,28 +238,21 @@ class NP_SqueezeNode(GenericNode):
 
         self.add_label("Information")
 
-
-    def check_inputs(self):        
-        is_valid_1, message_1 = self.is_input_valid("Input Array")
-
-        self.set_property("is_valid", is_valid_1)
-
-        if not is_valid_1:
-            self.change_label("Information", message_1, True)
+        self.is_iterated_compatible = True
 
 
-    def update_from_input(self):
-        if self.get_value_from_port("Input Array").is_iterated():
-
-            self.set_output_property('Output Array', [np.squeeze(self.get_value_from_port("Input Array").get_iterated_property()[i]) for i in range(len(self.get_value_from_port("Input Array").get_iterated_property()))], True)
-            
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape) + " x "+ str(self.iterator_length), False)
-        
+    def check_function(self, input_dict, first=False):
+        if "Input Array" in input_dict:
+            return True, "", "Information"
         else:
-            self.set_output_property('Output Array', np.squeeze(self.get_value_from_port("Input Array").get_property()), False)
-            
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
+            return False, "Input Array is not valid", "Information"
+        
 
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output Array': np.squeeze(input_dict["Input Array"])} 
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Array"].shape)
+        return output_dict
+    
         
 class NP_FlattenNode(GenericNode):
     """
@@ -297,24 +280,15 @@ class NP_FlattenNode(GenericNode):
         self.add_label("Information")
 
 
-    def check_inputs(self):        
-        is_valid_1, message_1 = self.is_input_valid("Input Array")
 
-        self.set_property("is_valid", is_valid_1)
-
-        if not is_valid_1:
-            self.change_label("Information", message_1, True)
-
-        
-    def update_from_input(self):
-        if self.get_value_from_port("Input Array").is_iterated():
-
-            self.set_output_property('Output Array', [self.get_value_from_port("Input Array").get_iterated_property()[i].flatten() for i in range(len(self.get_value_from_port("Input Array").get_iterated_property()))], True)
-            
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_iterated_property()[0].shape) + " x "+ str(self.iterator_length), False)
-        
+    def check_function(self, input_dict, first=False):
+        if "Input Array" in input_dict:
+            return True, "", "Information"
         else:
-            self.set_output_property('Output Array', self.get_value_from_port("Input Array").get_property().flatten(), False)
-            
-            self.change_label("Information", "Output shape : "+str(self.get_output_property("Output Array").get_property().shape), False)
-
+            return False, "Input Array is not valid", "Information"
+        
+        
+    def update_function(self, input_dict, first=False):
+        output_dict = {'Output Array': input_dict["Input Array"].flatten()} 
+        output_dict["__message__Information"] = "Output shape : "+str(output_dict["Output Array"].shape)
+        return output_dict

@@ -27,7 +27,7 @@ class GenericCastNode(GenericNode):
 
         self.is_iterated_compatible = True
 
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         
         is_valid, message = self.is_input_valid("Input")
 
@@ -56,7 +56,7 @@ class FloatToIntegerCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = int(input_dict["Input"])
         
@@ -78,7 +78,7 @@ class FloatToStringCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = str(input_dict["Input"])
         
@@ -100,7 +100,7 @@ class FloatToBooleanCastNode(GenericCastNode):
         
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = bool(input_dict["Input"])
         
@@ -112,7 +112,7 @@ class FloatToBooleanCastNode(GenericCastNode):
         
 
 
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         is_valid, message, label_name = super(FloatToBooleanCastNode, self).check_function(input_dict)
 
         if is_valid:
@@ -150,7 +150,7 @@ class IntegerToFloatCastNode(GenericCastNode):
 
         self.is_iterated_compatible = True
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         
         output_dict["Output"] = float(input_dict["Input"])
@@ -173,7 +173,7 @@ class IntegerToStringCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = str(input_dict["Input"])
         
@@ -195,7 +195,7 @@ class IntegerToBooleanCastNode(GenericCastNode):
         
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = bool(input_dict["Input"])
         
@@ -208,7 +208,7 @@ class IntegerToBooleanCastNode(GenericCastNode):
 
 
     
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         is_valid, message, label_name = super(IntegerToBooleanCastNode, self).check_function(input_dict)
 
         if is_valid:
@@ -239,7 +239,7 @@ class StringToFloatCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         is_valid, message, label_name = super(StringToFloatCastNode, self).check_inputs(input_dict)
 
         if is_valid:
@@ -249,7 +249,7 @@ class StringToFloatCastNode(GenericCastNode):
 
         return is_valid, message, label_name
     
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = float(input_dict["Input"])
         
@@ -272,7 +272,7 @@ class StringToIntegerCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         is_valid, message, label_name = super(StringToIntegerCastNode, self).check_function(input_dict)
 
         if is_valid:
@@ -282,7 +282,7 @@ class StringToIntegerCastNode(GenericCastNode):
 
         return is_valid, message, label_name
 
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = int(input_dict["Input"])
         
@@ -305,7 +305,7 @@ class StringToBooleanCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         is_valid, message, label_name = super(StringToBooleanCastNode, self).check_function(input_dict)
 
         if is_valid:
@@ -315,7 +315,7 @@ class StringToBooleanCastNode(GenericCastNode):
 
         return is_valid, message, label_name
 
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = bool(input_dict["Input"])
         
@@ -351,7 +351,7 @@ class BooleanToFloatCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = float(input_dict["Input"])
 
@@ -372,7 +372,7 @@ class BooleanToStringCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = str(input_dict["Input"])
         
@@ -393,7 +393,7 @@ class BooleanToIntegerCastNode(GenericCastNode):
         
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = bool(input_dict["Input"])
         
@@ -422,7 +422,7 @@ class DataFrameToArrayCastNode(GenericCastNode):
                                
         self.add_label("Information")
         
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = input_dict["Input"].to_numpy()
         
@@ -448,7 +448,7 @@ class ArrayToDataFrameCastNode(GenericCastNode):
         self.add_label("Information")
         
     
-    def check_function(self, input_dict):
+    def check_function(self, input_dict, first = False):
         is_valid, message, label_name = super(ArrayToDataFrameCastNode, self).check_function(input_dict)
 
         if is_valid:
@@ -466,7 +466,7 @@ class ArrayToDataFrameCastNode(GenericCastNode):
 
         return is_valid, message, label_name
 
-    def update_function(self, input_dict):
+    def update_function(self, input_dict, first = False):
         output_dict = {}
         output_dict["Output"] = float(pd.DataFrame(self.get_value_from_port("Input"), columns=input_dict["Columns Names"]))
         

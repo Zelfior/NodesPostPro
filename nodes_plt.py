@@ -14,6 +14,7 @@ from NodeGraphQt import (
 
 # import example nodes from the "example_nodes" package
 from nodes import pandas_nodes, \
+                    list_nodes, \
                     plt_node, \
                     input_nodes, \
                     cast_nodes, \
@@ -72,6 +73,10 @@ if __name__ == '__main__':
         
         cast_nodes.DataFrameToArrayCastNode,
         cast_nodes.ArrayToDataFrameCastNode,
+
+        #   List operators,
+
+        list_nodes.GetListElementNode,
 
         #   Iterators
         iterator_nodes.ExternalNode,

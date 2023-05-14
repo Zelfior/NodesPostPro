@@ -173,6 +173,18 @@
         "label":"Internal iterator and Random",
         "file":"hotkeys/hotkey_functions.py",
         "function_name":"internal_iterator_random"
+      },
+      {
+        "type":"command",
+        "label":"Internal iterator and column plot",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"internal_column_plot"
+      },
+      {
+        "type":"command",
+        "label":"Random inputs and histogram",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"iterator_random_hist"
       }
     ]
   },

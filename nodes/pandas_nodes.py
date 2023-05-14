@@ -35,6 +35,8 @@ class LoadFileNode(GenericNode):
 
         self.is_iterated_compatible = True
 
+        self.update_values()
+
         
     def check_function(self, input_dict, first=False):
         if not "Filename" in input_dict:
@@ -110,7 +112,6 @@ class GetColumnSelectorNode(GenericNode):
 
     
     def update_function(self, input_dict, first=False):
-
         if first:
             if list(input_dict["Input DataFrame"].columns) != self.view.widgets["Column name"].all_items():
                 self.view.widgets["Column name"].clear()

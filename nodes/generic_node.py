@@ -335,7 +335,6 @@ class GenericNode(BaseNode):
             if self.get_property("is_valid"):
                 self.check_inputs()
 
-
             self.check_children_loop(self.check_seed)
 
             if self.get_property("is_valid"):
@@ -355,7 +354,6 @@ class GenericNode(BaseNode):
             self.update_twin_inputs()
             self.propagate()
             
-
             if self.get_property("is_valid"):
                 for port in self.view.inputs:
                     for pipe in port._pipes:
@@ -389,43 +387,48 @@ class GenericNode(BaseNode):
             raise ValueError("Wrong port name given:", port_name)
 
 
-    def make_input_dict(self, i):
+    def make_input_dict(self, i, error_messages = False):
         input_dict = {}
         
         for input in self.input_properties:
-            valid = False
             if input in self.twin_inputs:
-                if self.is_twin_input_valid(input)[0]:
+                valid, message = self.is_twin_input_valid(input)
+                if valid:
                     input_container = self.get_twin_input(input)
-                    valid = True
             else:
-                if self.is_input_valid(input)[0]:
+                valid, message = self.is_input_valid(input)
+                if valid:
                     input_container = self.get_value_from_port(input)
-                    valid = True
 
             if valid:
                 if input_container.is_iterated():
                     input_dict[input] = input_container.get_iterated_property()[i]
                 else:
                     input_dict[input] = input_container.get_property()
+            else:
+                if error_messages:
+                    input_dict[input] = "Error_"+message
+
 
         for input in self.property_to_update:
-            valid = False
             if input in self.twin_inputs:
-                if self.is_twin_input_valid(input)[0]:
+                valid, message = self.is_twin_input_valid(input)
+                if valid:
                     input_container = self.get_twin_input(input)
-                    valid = True
             else:
-                if self.is_input_valid(input)[0]:
+                valid, message = self.is_input_valid(input)
+                if valid:
                     input_container = Container(self.widget_properties[input])
                     input_container.set_property(self.get_property(input))
-                    valid = True
 
             if valid:
                 if input_container.is_iterated():
                     input_dict[input] = input_container.get_iterated_property()[i]
                 else:
                     input_dict[input] = input_container.get_property()
+            else:
+                if error_messages:
+                    input_dict[input] = "Error_"+message
 
         return input_dict
 
@@ -441,7 +444,7 @@ class GenericNode(BaseNode):
             label_name = ""
 
             for i in range(self.iterator_length):
-                input_dict = self.make_input_dict(i)
+                input_dict = self.make_input_dict(i, error_messages=True)
 
                 valid, message, label_name = self.check_function(input_dict)
 
@@ -458,7 +461,7 @@ class GenericNode(BaseNode):
                 self.change_label(label_name, "", False)
         else:
 
-            input_dict = self.make_input_dict(0)
+            input_dict = self.make_input_dict(0, error_messages=True)
                         
             valid, message, label_name = self.check_function(input_dict, first=True)
 
@@ -644,8 +647,8 @@ class GenericNode(BaseNode):
         return button
 
     def add_checkbox(self, name, text=''):
-
         super(GenericNode, self).add_checkbox(name, text=text)
+        self.widget_properties[name] = PortValueType.BOOL
         self.property_to_update.append(name)
 
     """

@@ -155,6 +155,8 @@ class TripoliExtendedMeshNode(GenericNode):
 
         self.is_iterated_compatible = True
 
+        self.update_values()
+
 
     def check_function(self, input_dict, first = False):
         if not "Filename" in input_dict:            

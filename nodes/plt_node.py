@@ -19,20 +19,28 @@ from nodes.container import PltContainer
 def plot_element_on_axis(figure : Figure, axis : Axes, element):
 
     if element['element_type'] == "plot":
+        if not "X" in element:
+            return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
         return axis.plot(element['X'], element['Y'], **kwargs_dict)
         
     elif element['element_type'] == "fill_between":
+        if not "X" in element:
+            return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y1", "Y2", "element_type", "priority"]}
         return axis.fill_between(element['X'], element['Y1'], element['Y2'], **kwargs_dict)
         
     elif element['element_type'] == "imshow":
+        if not "X" in element:
+            return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
         kwargs_dict["aspect"] = "auto"
         return axis.imshow(element['Y'], **kwargs_dict)
 
     elif element['element_type'] == "scatter":
-        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority"]}
+        if not "X" in element:
+            return None
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority", "markersize"]}
 
         if "Color array" in element:
             if type(element["Color array"]) == pd.DataFrame:
@@ -45,9 +53,14 @@ def plot_element_on_axis(figure : Figure, axis : Axes, element):
         elif "Color" in element:
             kwargs_dict["c"] = element["Color"]
 
+        if "markersize" in element:
+            kwargs_dict["s"] = element["markersize"]
+
         return axis.scatter(element['X'], element['Y'], **kwargs_dict)
 
     elif element['element_type'] == "hist":
+        if not "X" in element:
+            return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "element_type", "priority"]}
         return axis.hist(element['X'], **kwargs_dict)
                 
@@ -346,21 +359,19 @@ class PltElementNode(GenericNode):
         self.element_type = "undefined"
         self.y_name = 'Y'
 
-    def update_from_input(self):
-        properties_dict = {"element_type": self.element_type}
+    def update_function(self, input_dict, first = False):
+        element_dict = {"element_type": self.element_type}
 
         for input in self.input_properties:
-            input_value = self.get_value_from_port(input)
+            if input in input_dict:
+                element_dict[input] = input_dict[input]
 
-            if input_value is not None:
-                properties_dict[input] = input_value.get_property()
+        if (not "X" in element_dict):# and (self.y_name in element_dict) and (element_dict[self.y_name] is not None):
+            element_dict["X"] = list(range(len(element_dict[self.y_name])))
 
-        if not "X" in properties_dict:
-            properties_dict["X"] = list(range(len(properties_dict[self.y_name])))
+        self.change_label("Information", "", False)
 
-        self.set_output_property("Element", properties_dict, False)
-
-        self.change_label("Information", "", True)
+        return element_dict
 
     def add_linestyle_combo(self):
         self.add_combo_menu('linestyle', 'linestyle', items=['solid', 'dotted', 'dashed', 'dashdot'])
@@ -377,7 +388,6 @@ class PltElementNode(GenericNode):
 
 
 
-#   TODO internal iterator
 class PlotNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -418,43 +428,31 @@ class PlotNode(PltElementNode):
         self.is_iterated_compatible = True
 
     def check_function(self, input_dict, first=False):
-        if not "Y" in input_dict:
+        if (not "Y" in input_dict) or (type(input_dict["Y"]) == str):
             return False, "Y is not valid", "Information"
 
-        if "X" in input_dict and not are_plottable_compatible(input_dict["X"], input_dict["Y"]):
+        if ("X" in input_dict) and (not type(input_dict["X"]) == str) and (not are_plottable_compatible(input_dict["X"], input_dict["Y"])):
             return False, "X and Y are not compatible", "Information"
+        
+        for value in input_dict:
+            if not value in ["X", "Y"]:
+                if type(input_dict[value]) == str and "Error_" in input_dict[value] and (not "is not defined" in input_dict[value]):
+                    return False, input_dict[value].replace("Error_", ""), "Information"
 
         return True, "", "Information"
 
-        # for input in self.input_properties:
-        #     if not input in ["Y"]:
-
-        #         input_value = self.get_value_from_port(input)
-
-        #         if input_value is not None:
-        #             is_valid, message = self.is_input_valid(input)
-
-        #             self.set_property("is_valid", is_valid and self.get_property("is_valid"))
-
-        #             if not is_valid:
-        #                 self.change_label("Information", message, True)
-
                    
-    def update_from_input(self):
-        super(PlotNode, self).update_from_input()
+    def update_function(self, input_dict, first = False):
+        element_dict = super(PlotNode, self).update_function(input_dict, first)
 
-        properties_dict = self.get_output_property("Element").get_property()
-
-        properties_dict['linestyle'] = self.get_property('linestyle')
+        element_dict['linestyle'] = self.get_property('linestyle')
 
         if self.get_property('marker') != "None":
-            properties_dict['marker'] = self.get_property('marker')
+            element_dict['marker'] = self.get_property('marker')
 
-        properties_dict['priority'] = int(self.priority_widget.get_value())
+        element_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict, False)
-
-
+        return {"Element":element_dict}
 
 
 
@@ -465,7 +463,8 @@ class PlotNode(PltElementNode):
 
 
 
-#   TODO internal iterator
+
+
 class FillBetweenNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -498,83 +497,55 @@ class FillBetweenNode(PltElementNode):
         self.element_type = "fill_between"
         self.y_name = 'Y1'
 
-    def check_inputs(self):
-        is_valid_x, message_x = self.is_input_valid("X")
-        is_valid_y1, message_y1 = self.is_input_valid("Y1")
-        is_valid_y2, message_y2 = self.is_input_valid("Y2")
+        self.is_iterated_compatible = True
 
-        self.set_property("is_valid", is_valid_x and is_valid_y1 and is_valid_y2)
-
-        if not is_valid_x:
-            self.change_label("Information", message_x, True)
-        elif not is_valid_y1:
-            self.change_label("Information", message_y1, True)
-        elif not is_valid_y2:
-            self.change_label("Information", message_y2, True)
-                    
-
-        if self.get_property("is_valid"):
-            if not are_plottable_compatible(self.get_value_from_port("X").get_property(), self.get_value_from_port("Y1").get_property()):
-                self.change_label("Information", "Inputs X and Y1 are not compatible", True)
-                self.set_property("is_valid", False)
                 
-            elif not are_plottable_compatible(self.get_value_from_port("X").get_property(), self.get_value_from_port("Y2").get_property()):
-                self.change_label("Information", "Inputs X and Y2 are not compatible", True)
-                self.set_property("is_valid", False)
+    def check_function(self, input_dict, first=False):
+        for key in ["X", "Y1", "Y2"]:
+            if (not key in input_dict) or (type(input_dict[key]) == str):
+                return False, key+" is not valid", "Information"
+            if len(np.squeeze(np.array(input_dict[key])).shape) > 1:
+                return False, key+" should be 1D", "Information"
 
-            elif self.get_value_from_port("Where") is not None:
-                if self.is_input_valid("Where")[0]:
-                    if not are_plottable_compatible(self.get_value_from_port("X").get_property(), self.get_value_from_port("Where").get_property()):
-                        self.change_label("Information", "Inputs X and Where are not compatible", True)
-                        self.set_property("is_valid", False)
-                    elif len(np.squeeze(np.array(self.get_value_from_port("X").get_property())).shape) > 1:
-                        self.change_label("Information", "Inputs X should be 1D", True)
-                        self.set_property("is_valid", False)
-                else:
-                    self.change_label("Information", self.is_input_valid("Where")[1], True)
+        if not are_plottable_compatible(input_dict["X"], input_dict["Y1"]):
+            return False, "X and Y1 are not compatible", "Information"
 
-            elif len(np.squeeze(np.array(self.get_value_from_port("X").get_property())).shape) > 1:
-                self.change_label("Information", "Inputs X should be 1D", True)
-                self.set_property("is_valid", False)
-            elif len(np.squeeze(np.array(self.get_value_from_port("Y1").get_property())).shape) > 1:
-                self.change_label("Information", "Inputs Y1 should be 1D", True)
-                self.set_property("is_valid", False)
-            elif len(np.squeeze(np.array(self.get_value_from_port("Y2").get_property())).shape) > 1:
-                self.change_label("Information", "Inputs Y2 should be 1D", True)
-                self.set_property("is_valid", False)
+        if not are_plottable_compatible(input_dict["X"], input_dict["Y2"]):
+            return False, "X and Y2 are not compatible", "Information"
 
+        if not are_plottable_compatible(input_dict["X"], input_dict["Y1"]):
+            return False, "X and Y1 are not compatible", "Information"
 
-        for input in self.input_properties:
-            if not input in ["X", "Y2", "Y1", "Where"]:
-
-                input_value = self.get_value_from_port(input)
-
-                if input_value is not None:
-                    is_valid, message = self.is_input_valid(input)
-
-                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
-
-                    if not is_valid:
-                        self.change_label("Information", message, True)
+        if (type(input_dict["Where"]) != str) and not are_plottable_compatible(input_dict["X"], input_dict["Where"]):
+            return False, "X and Where are not compatible", "Information"
+        
+        if (type(input_dict["Where"]) != str) and len(np.squeeze(np.array(input_dict["Where"])).shape):
+            return False, "Where input should be 1D", "Information"
+        
+        for value in input_dict:
+            if not value in ["X", "Y1", "Y2", "Where"]:
+                if type(input_dict[value]) == str and "Error_" in input_dict[value] and (not "is not defined" in input_dict[value]):
+                    return False, input_dict[value].replace("Error_", ""), "Information"
+                
+        return True, "", "Information"
 
                    
-    def update_from_input(self):
-        super(FillBetweenNode, self).update_from_input()
+    def update_function(self, input_dict, first = False):
+        element_dict = super(FillBetweenNode, self).update_function(input_dict, first)
 
-        properties_dict = self.get_output_property("Element").get_property()
-
+        if not "X" in element_dict:
+            return {"Element":element_dict}
+        
         for key in ["X", "Y1", "Y2"]:
-            properties_dict[key] = np.squeeze(np.array(properties_dict[key]))
+            element_dict[key] = np.squeeze(np.array(element_dict[key]))
 
-        if "Where" in properties_dict:
-            properties_dict["where"] = np.squeeze(np.array(properties_dict["Where"]))
-            del properties_dict["Where"]
+        if "Where" in element_dict:
+            element_dict["where"] = np.squeeze(np.array(element_dict["Where"]))
+            del element_dict["Where"]
 
-        properties_dict['priority'] = int(self.priority_widget.get_value())
+        element_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict, False)
-
-
+        return {"Element":element_dict}
 
 
 
@@ -584,7 +555,8 @@ class FillBetweenNode(PltElementNode):
 
 
 
-#   TODO internal iterator
+
+
 class ScatterNode(PltElementNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -621,43 +593,33 @@ class ScatterNode(PltElementNode):
 
         self.element_type = "scatter"
 
-
-    def check_inputs(self):
-        is_valid, message = self.is_input_valid("Y")
-
-        self.set_property("is_valid", is_valid)
-
-        if not is_valid:
-            self.change_label("Information", message, True)
-                    
-
-        for input in self.input_properties:
-            if not input == "Y":
-
-                input_value = self.get_value_from_port(input)
-
-                if input_value is not None:
-                    is_valid, message = self.is_input_valid(input)
-
-                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
-
-                    if not is_valid:
-                        self.change_label("Information", message, True)
+        self.is_iterated_compatible = True
 
 
-    def update_from_input(self):
-        super(ScatterNode, self).update_from_input()
+    def check_function(self, input_dict, first=False):
+        if (not "Y" in input_dict) or (type(input_dict["Y"]) == str):
+            return False, "Y is not valid", "Information"
 
-        properties_dict = self.get_output_property("Element").get_property()
+        if ("X" in input_dict) and (not type(input_dict["X"]) == str) and (not are_plottable_compatible(input_dict["X"], input_dict["Y"])):
+            return False, "X and Y are not compatible", "Information"
+
+        for value in input_dict:
+            if not value in ["X", "Y"]:
+                if type(input_dict[value]) == str and "Error_" in input_dict[value] and (not "is not defined" in input_dict[value]):
+                    return False, input_dict[value].replace("Error_", ""), "Information"
+
+        return True, "", "Information"
+
+                   
+    def update_function(self, input_dict, first = False):
+        element_dict = super(ScatterNode, self).update_function(input_dict, first)
 
         if self.get_property('marker') != "None":
-            properties_dict['marker'] = self.get_property('marker')
+            element_dict['marker'] = self.get_property('marker')
 
-        properties_dict['priority'] = int(self.priority_widget.get_value())
+        element_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict, False)
-
-
+        return {"Element":element_dict}
 
 
 
@@ -673,7 +635,7 @@ class ScatterNode(PltElementNode):
 
 
 
-#   TODO internal iterator
+
 class HistNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -714,75 +676,58 @@ class HistNode(GenericNode):
 
         self.element_type = "hist"
 
-    def check_inputs(self):
-        is_valid, message = self.is_input_valid("X")
-
-        self.set_property("is_valid", is_valid)
-
-        if not is_valid:
-            self.change_label("Information", message, True)
 
 
-        for input in self.input_properties:
-            if not input == "Y":
+    def check_function(self, input_dict, first=False):
+        if (not "X" in input_dict) or (type(input_dict["X"]) == str):
+            return False, "X is not valid", "Information"
 
-                input_value = self.get_value_from_port(input)
+        if ("Weight" in input_dict) and (not type(input_dict["Weight"]) == str) and (not are_plottable_compatible(input_dict["X"], input_dict["Weight"])):
+            return False, "X and Weight are not compatible", "Information"
 
-                if input_value is not None:
-                    is_valid, message = self.is_input_valid(input)
+        for value in input_dict:
+            if not value in ["X", "Weight"]:
+                if type(input_dict[value]) == str and "Error_" in input_dict[value] and (not "is not defined" in input_dict[value]):
+                    return False, input_dict[value].replace("Error_", ""), "Information"
 
-                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
-
-                    if not is_valid:
-                        self.change_label("Information", message, True)
-
-        if is_valid and self.is_input_valid("Weight")[0]:
-            if np.squeeze(np.array(self.get_value_from_port("X").get_property())).shape != \
-                np.squeeze(np.array(self.get_value_from_port("Weight").get_property())).shape:
-                    self.set_property("is_valid", False)
-                    self.change_label("Information", "Arrays X and Weight should have the same shape.", True)
+        return True, "", "Information"
 
                    
-    def update_from_input(self):
-        
-        properties_dict = {"element_type": self.element_type}
+    def update_function(self, input_dict, first = False):
+        element_dict = {"element_type": self.element_type}
 
         for input in self.input_properties:
-            input_value = self.get_value_from_port(input)
+            if input in input_dict:
+                element_dict[input] = input_dict[input]
 
-            if input_value is not None:
-                properties_dict[input] = input_value.get_property()
+        element_dict['histtype'] = input_dict['histtype'] 
+        element_dict['density'] = input_dict['density'] 
+        element_dict['cumulative'] = input_dict['cumulative'] 
+        element_dict['log'] = input_dict['log'] 
 
-        properties_dict['histtype'] = self.get_property('histtype')
-        properties_dict['density'] = self.get_property('density')
-        properties_dict['cumulative'] = self.get_property('cumulative')
-        properties_dict['log'] = self.get_property('log')
+        if "Weight" in element_dict:
+            element_dict["weights"] = element_dict["Weight"]
+            del element_dict["Weight"]
 
-        if "Weight" in properties_dict:
-            properties_dict["weights"] = properties_dict["Weight"]
-            del properties_dict["Weight"]
+        if "Bins" in element_dict:
+            element_dict["bins"] = element_dict["Bins"]
+            del element_dict["Bins"]
 
-        if "Bins" in properties_dict:
-            properties_dict["bins"] = properties_dict["Bins"]
-            del properties_dict["Bins"]
-
-        if "X min" in properties_dict:
-            if "X max" in properties_dict:
-                properties_dict["range"] = [properties_dict["X min"], properties_dict["X max"]]
-                del properties_dict["X max"]
+        if "X min" in element_dict:
+            if "X max" in element_dict:
+                element_dict["range"] = [element_dict["X min"], element_dict["X max"]]
+                del element_dict["X max"]
             else:
-                properties_dict["range"] = [properties_dict["X min"], max(np.array(properties_dict["X"]).flatten())]
-            del properties_dict["X min"]
+                element_dict["range"] = [element_dict["X min"], max(np.array(element_dict["X"]).flatten())]
+            del element_dict["X min"]
 
-        elif "X max" in properties_dict:
-            properties_dict["range"] = [min(np.array(properties_dict["X"]).flatten()), properties_dict["X max"]]
-            del properties_dict["X max"]
+        elif "X max" in element_dict:
+            element_dict["range"] = [min(np.array(element_dict["X"]).flatten()), element_dict["X max"]]
+            del element_dict["X max"]
 
-        properties_dict['priority'] = int(self.priority_widget.get_value())
+        element_dict['priority'] = int(self.priority_widget.get_value())
 
-        self.set_output_property("Element", properties_dict, False)
-
-        self.change_label("Information", "", True)
+        return {"Element":element_dict}
 
 
 
@@ -811,7 +756,7 @@ class HistNode(GenericNode):
 
 
 
-#   TODO internal iterator
+
 class PltFigureNode(GenericNode):
 
     # unique node identifier.
@@ -851,7 +796,9 @@ class PltFigureNode(GenericNode):
         self.add_text_input("canvas_height", "Height", "6")
 
         self.plot_widget = pltWidget(self.view, name="plot")
+
         self.create_property('Plot_Widget', None)
+
         self.view.add_widget(self.plot_widget)
         self.view.draw_node()
 
@@ -859,18 +806,30 @@ class PltFigureNode(GenericNode):
         
         self.add_label("Information")
 
+        self.is_iterated_compatible = True
+
     def update_from_input(self):
         if not self.get_value_from_port("Input Plottable 1") == None or not self.get_value_from_port("Input Plottable 2") == None:
 
             if self.get_value_from_port("Input Plottable 1", multiple=True) == None:
                 self.input_arrays_1 = None
             else:
-                self.input_arrays_1 = [element.get_property() for element in self.get_value_from_port("Input Plottable 1", multiple=True)]
+                self.input_arrays_1 = []
+                for element in self.get_value_from_port("Input Plottable 1", multiple=True):
+                    if element.is_iterated():
+                        self.input_arrays_1 += element.get_iterated_property()
+                    else:
+                        self.input_arrays_1.append(element.get_property())
                 
             if self.get_value_from_port("Input Plottable 2", multiple=True) == None:
                 self.input_arrays_2 = None
             else:
-                self.input_arrays_2 = [element.get_property() for element in self.get_value_from_port("Input Plottable 2", multiple=True)]
+                self.input_arrays_2 = []
+                for element in self.get_value_from_port("Input Plottable 2", multiple=True):
+                    if element.is_iterated():
+                        self.input_arrays_2 += element.get_iterated_property()
+                    else:
+                        self.input_arrays_2.append(element.get_property())
 
             plot_parameters = {"legend":self.get_property("legend"),
                                     "x_log":self.get_property("x_log"),
@@ -923,7 +882,6 @@ class PltFigureNode(GenericNode):
         if not is_float(self.get_property("canvas_width")):
             self.set_property("is_valid", False)
             self.change_label("Information", "Given width should be a float", True)
-
 
 
     def reset_outputs(self):

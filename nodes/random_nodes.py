@@ -24,7 +24,7 @@ class RandomUniformNode(GenericNode):
         self.add_twin_input("Max", PortValueType.FLOAT, default = "1.")
 
         self.add_label("Information", "")
-
+        
         self.is_iterated_compatible = True
         
     def check_function(self, input_dict, first = False):

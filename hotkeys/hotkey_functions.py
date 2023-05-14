@@ -278,6 +278,22 @@ def pickle_imshow_savefig(graph):
 
 def tripoli_fill_between(graph):
     load_example(graph, "tripoli_fill_between.json")
+
+    for node in graph.all_nodes():
+        if node.name() == "Set axis":
+            node.value_widget.set_value(58)
+        if node.name() == "Set axis 1":
+            node.value_widget.set_value(59)
+        if node.name() == "Set axis 2":
+            node.value_widget.set_value(60)
     
 def internal_iterator_random(graph):
     load_example(graph, "internal_iterator_random.json")
+
+def internal_column_plot(graph):
+    load_example(graph, "interator_column_plot.json")
+
+def iterator_random_hist(graph):
+    load_example(graph, "iterator_random_hist.json")
+
+    

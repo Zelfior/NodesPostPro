@@ -145,6 +145,11 @@ class Container():
             self.countained_value = value
             self.defined = True
             self.iterated = False
+
+        elif value is None:
+            self.defined = False
+            self.iterated = False
+            
         else:
             raise TypeError("Requested type: "+str(self.enum_value)+", found: "+str(type(value)))
 

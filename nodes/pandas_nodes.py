@@ -112,13 +112,17 @@ class GetColumnSelectorNode(GenericNode):
     def update_function(self, input_dict, first=False):
 
         if first:
-            if list(input_dict["Input Dataframe"].columns) != self.view.widgets["Column name"].all_items():
+            if list(input_dict["Input DataFrame"].columns) != self.view.widgets["Column name"].all_items():
                 self.view.widgets["Column name"].clear()
-                self.view.widgets["Column name"].add_items(list(input_dict["Input Dataframe"].columns))
+                self.view.widgets["Column name"].add_items(list(input_dict["Input DataFrame"].columns))
             
-        output_dict = {'Output DataFrame': input_dict["Input Dataframe"][input_dict["Column name"]]}
+        output_dict = {}
+
+        if "Column name" in input_dict:
+            output_dict['Output DataFrame'] = input_dict["Input DataFrame"][input_dict["Column name"]].to_frame()
+            output_dict['Selected column name'] = input_dict["Column name"]
         
-        output_dict["__message__Information"] = "Lines : "+str(output_dict['Output DataFrame'])
+        output_dict["__message__Information"] = "Lines : "+str(len(input_dict['Input DataFrame']))
 
         return output_dict
 

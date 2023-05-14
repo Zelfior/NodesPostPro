@@ -338,8 +338,6 @@ class ImShowNode(GenericNode):
 
 
 
-
-#   TODO internal iterator
 class PltElementNode(GenericNode):
 
     def __init__(self):
@@ -417,28 +415,29 @@ class PlotNode(PltElementNode):
 
         self.element_type = "plot"
 
+        self.is_iterated_compatible = True
 
-    def check_inputs(self):
-        is_valid, message = self.is_input_valid("Y")
+    def check_function(self, input_dict, first=False):
+        if not "Y" in input_dict:
+            return False, "Y is not valid", "Information"
 
-        self.set_property("is_valid", is_valid)
+        if "X" in input_dict and not are_plottable_compatible(input_dict["X"], input_dict["Y"]):
+            return False, "X and Y are not compatible", "Information"
 
-        if not is_valid:
-            self.change_label("Information", message, True)
-                    
+        return True, "", "Information"
 
-        for input in self.input_properties:
-            if not input == "Y":
+        # for input in self.input_properties:
+        #     if not input in ["Y"]:
 
-                input_value = self.get_value_from_port(input)
+        #         input_value = self.get_value_from_port(input)
 
-                if input_value is not None:
-                    is_valid, message = self.is_input_valid(input)
+        #         if input_value is not None:
+        #             is_valid, message = self.is_input_valid(input)
 
-                    self.set_property("is_valid", is_valid and self.get_property("is_valid"))
+        #             self.set_property("is_valid", is_valid and self.get_property("is_valid"))
 
-                    if not is_valid:
-                        self.change_label("Information", message, True)
+        #             if not is_valid:
+        #                 self.change_label("Information", message, True)
 
                    
     def update_from_input(self):

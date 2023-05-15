@@ -19,27 +19,27 @@ from nodes.container import PltContainer
 def plot_element_on_axis(figure : Figure, axis : Axes, element):
 
     if element['element_type'] == "plot":
-        if not "X" in element:
-            return None
+        # if not "X" in element:
+        #     return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
         return axis.plot(element['X'], element['Y'], **kwargs_dict)
         
     elif element['element_type'] == "fill_between":
-        if not "X" in element:
-            return None
+        # if not "X" in element:
+        #     return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y1", "Y2", "element_type", "priority"]}
         return axis.fill_between(element['X'], element['Y1'], element['Y2'], **kwargs_dict)
         
     elif element['element_type'] == "imshow":
-        if not "X" in element:
-            return None
+        # if not "X" in element:
+        #     return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
         kwargs_dict["aspect"] = "auto"
         return axis.imshow(element['Y'], **kwargs_dict)
 
     elif element['element_type'] == "scatter":
-        if not "X" in element:
-            return None
+        # if not "X" in element:
+        #     return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "Color", "Color array", "priority", "markersize"]}
 
         if "Color array" in element:
@@ -59,8 +59,8 @@ def plot_element_on_axis(figure : Figure, axis : Axes, element):
         return axis.scatter(element['X'], element['Y'], **kwargs_dict)
 
     elif element['element_type'] == "hist":
-        if not "X" in element:
-            return None
+        # if not "X" in element:
+        #     return None
         kwargs_dict = {key:element[key] for key in element if key not in ["X", "element_type", "priority"]}
         return axis.hist(element['X'], **kwargs_dict)
                 
@@ -285,7 +285,7 @@ class ImShowNode(GenericNode):
 
         self.add_custom_input('label', PortValueType.STRING)
 
-        self.add_combo_menu('norm', 'norm', items=["linear", "log", "symlog", "logit"])
+        # self.add_combo_menu('norm', 'norm', items=["linear", "log", "symlog", "logit"])
         
         self.priority_widget = self.add_int_selector(name="Priority", label='Priority')
         self.priority_widget.set_range(0, 50)
@@ -335,7 +335,7 @@ class ImShowNode(GenericNode):
             if input_value is not None:
                 properties_dict[input] = input_value.get_property()
 
-        properties_dict['norm'] = self.get_property('norm')
+        # properties_dict['norm'] = self.get_property('norm')
 
         properties_dict['priority'] = int(self.priority_widget.get_value())
 

@@ -39,7 +39,7 @@ class LoadFileNode(GenericNode):
 
         
     def check_function(self, input_dict, first=False):
-        if not "Filename" in input_dict:
+        if (not "Filename" in input_dict) or ("is not defined" in input_dict["Filename"]):
             return False, "Filename is not valid", "Information"
         
         if not os.path.isfile(input_dict["Filename"]):
@@ -105,7 +105,7 @@ class GetColumnSelectorNode(GenericNode):
 
 
     def check_function(self, input_dict, first=False):
-        if not "Input DataFrame" in input_dict:
+        if (not "Input DataFrame" in input_dict) or (type(input_dict["Input DataFrame"]) == str):
             return False, "Input DataFrame is not valid", "Information"
         
         return True, "", "Information"
@@ -170,10 +170,10 @@ class GetColumnNode(GenericNode):
         self.is_iterated_compatible = True
         
     def check_function(self, input_dict, first=False):
-        if not "Input DataFrame" in input_dict:
+        if (not "Input DataFrame" in input_dict) or (type(input_dict["Input DataFrame"]) == str):
             return False, "Input DataFrame is not valid", "Information"
         
-        if not "Column name" in input_dict:
+        if (not "Column name" in input_dict) or ("is not defined" in input_dict["Column name"]):
             return False, "Column name is not valid", "Information"
         
         if not input_dict["Column name"] in input_dict["Input DataFrame"].columns:
@@ -216,9 +216,9 @@ class MultiplyNode(GenericNode):
 
         
     def check_function(self, input_dict, first=False):
-        if not "Input Dataframe" in input_dict:
+        if (not "Input DataFrame" in input_dict) or (type(input_dict["Input DataFrame"]) == str):
             return False, "Input Dataframe 1 is not valid", "Information"
-        if not "Input Float" in input_dict:
+        if (not "Input Float" in input_dict) or (type(input_dict["Input Float"]) == str):
             return False, "Input Float is not valid", "Information"
         
         return True, "", "Information"
@@ -254,7 +254,7 @@ class GetAverageNode(GenericNode):
         self.is_iterated_compatible = True
         
     def check_function(self, input_dict, first=False):
-        if not "Input Dataframe" in input_dict:
+        if (not "Input DataFrame" in input_dict) or (type(input_dict["Input DataFrame"]) == str):
             return False, "Input Dataframe 1 is not valid", "Information"
         
         return True, "", "Information"

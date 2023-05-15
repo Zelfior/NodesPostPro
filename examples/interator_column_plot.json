@@ -43,7 +43,6 @@
       "custom":{
         "is_valid":true,
         "Browse file":true,
-        "Filename":"F:\\Documents\\NodeEditor\\NodeGraphQt-master\\example_files\\test.csv",
         "Filename_label":"",
         "Separator":",",
         "Separator_label":"",

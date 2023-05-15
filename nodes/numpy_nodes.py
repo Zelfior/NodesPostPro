@@ -38,10 +38,9 @@ class SetAxisNode(GenericNode):
 
 
     def check_function(self, input_dict, first=False):
-        if "Input Array" in input_dict:
-            return True, "", "Information"
-        else:
+        if (not "Input Array" in input_dict) or (type(input_dict["Input Array"]) == str):
             return False, "Input Array is not valid", "Information"
+        return True, "", "Information"
 
 
     def update_function(self, input_dict, first=False):
@@ -100,10 +99,10 @@ class NP_AddNode(GenericNode):
 
 
     def check_function(self, input_dict, first=False):
-        if not "Input Array 1" in input_dict:
+        if (not "Input Array 1" in input_dict) or (type(input_dict["Input Array 1"]) == str):
             return False, "Input Array 1 is not valid", "Information"
         
-        if not "Input Array 2" in input_dict:
+        if (not "Input Array 2" in input_dict) or (type(input_dict["Input Array 2"]) == str):
             return False, "Input Array 2 is not valid", "Information"
         
         if input_dict["Input Array 1"].shape != input_dict["Input Array 2"].shape:
@@ -151,8 +150,8 @@ class NP_MultiplyFloatNode(GenericNode):
 
 
     def check_function(self, input_dict, first=False):
-        if not "Input Array" in input_dict:
-            return False, "Input Array 1 is not valid", "Information"
+        if (not "Input Array" in input_dict) or (type(input_dict["Input Array"]) == str):
+            return False, "Input Array is not valid", "Information"
         
         if not "Input float" in input_dict:
             return False, "Input float is not valid", "Information"
@@ -199,10 +198,9 @@ class NP_SqueezeNode(GenericNode):
 
 
     def check_function(self, input_dict, first=False):
-        if "Input Array" in input_dict:
-            return True, "", "Information"
-        else:
+        if (not "Input Array" in input_dict) or (type(input_dict["Input Array"]) == str):
             return False, "Input Array is not valid", "Information"
+        return True, "", "Information"
         
 
     def update_function(self, input_dict, first=False):
@@ -239,10 +237,9 @@ class NP_FlattenNode(GenericNode):
 
 
     def check_function(self, input_dict, first=False):
-        if "Input Array" in input_dict:
-            return True, "", "Information"
-        else:
+        if (not "Input Array" in input_dict) or (type(input_dict["Input Array"]) == str):
             return False, "Input Array is not valid", "Information"
+        return True, "", "Information"
         
         
     def update_function(self, input_dict, first=False):

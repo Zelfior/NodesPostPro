@@ -159,7 +159,7 @@ class TripoliExtendedMeshNode(GenericNode):
 
 
     def check_function(self, input_dict, first = False):
-        if not "Filename" in input_dict:            
+        if (not "Filename" in input_dict) or ("is not defined" in input_dict["Filename"]):
             self.change_label("Size X bounds" , "", False)
             self.change_label("Size Y bounds" , "", False)
             self.change_label("Size Z bounds" , "", False)

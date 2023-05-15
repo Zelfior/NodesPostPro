@@ -49,7 +49,7 @@ class LoadNumpyNode(GenericNode):
         
 
     def check_function(self, input_dict, first=False):
-        if not "Filename" in input_dict:
+        if (not "Filename" in input_dict) or ("is not defined" in input_dict["Filename"]):
             return False, "Filename is not valid", "Information"
         
         if not os.path.isfile(self.get_property("Filename")):
@@ -118,7 +118,7 @@ class LoadPandasNode(GenericNode):
         self.update_values()
 
     def check_function(self, input_dict, first=False):
-        if not "Filename" in input_dict:
+        if (not "Filename" in input_dict) or ("is not defined" in input_dict["Filename"]):
             return False, "Filename is not valid", "Information"
         
         if not os.path.isfile(self.get_property("Filename")):

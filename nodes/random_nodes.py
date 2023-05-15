@@ -28,10 +28,10 @@ class RandomUniformNode(GenericNode):
         self.is_iterated_compatible = True
         
     def check_function(self, input_dict, first = False):
-        if not "Min" in input_dict:
+        if (not "Min" in input_dict) or (type(input_dict["Min"]) == str):
             return False, "Min value is not valid", "Information"
 
-        if not "Max" in input_dict:
+        if (not "Max" in input_dict) or (type(input_dict["Max"]) == str):
             return False, "Max value is not valid", "Information"
 
         if input_dict["Min"] > input_dict["Max"]:
@@ -72,10 +72,10 @@ class RandomIntegerNode(GenericNode):
         self.is_iterated_compatible = True
 
     def check_function(self, input_dict, first = False):
-        if not "Min" in input_dict:
+        if (not "Min" in input_dict) or (type(input_dict["Min"]) == str):
             return False, "Min value is not valid", "Information"
 
-        if not "Max" in input_dict:
+        if (not "Max" in input_dict) or (type(input_dict["Max"]) == str):
             return False, "Max value is not valid", "Information"
 
         if input_dict["Min"] > input_dict["Max"]:

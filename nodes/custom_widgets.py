@@ -48,9 +48,9 @@ class LabelWidget(QtWidgets.QWidget):
 
 
 
-class InformationLabelWidget(NodeBaseWidget):
+class InputTableWidget(NodeBaseWidget):
     def __init__(self, parent=None, name='', label = False):
-        super(InformationLabelWidget, self).__init__(parent)
+        super(InputTableWidget, self).__init__(parent)
 
         # set the name for node property.
         self.set_name(name)
@@ -215,3 +215,78 @@ class ButtonNodeWidget(NodeBaseWidget):
     
     def set_link(self, function):
         self.button_widget.button_widget.clicked.connect(function)
+
+
+
+        
+"""
+
+
+
+
+
+
+"""
+class TableWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None, name=''):
+        super(TableWidget, self).__init__(parent)
+
+        self.table_widget = QtWidgets.QTableWidget(1, 5)
+
+        layout = QtWidgets.QHBoxLayout(self)
+        layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        layout.setContentsMargins(5, 0, 5, 0)
+        layout.addWidget(self.table_widget)
+
+    def get_value(self):
+        return self.table_widget.items()
+
+    def set_value(self, value):
+        if type(value) == list:
+            if self.table_widget.rowCount() < len(value):
+                self.set_length(len(value))
+            for i in range(len(value)):
+                self.table_widget.setItem(0, 0, QtWidgets.QTableWidgetItem(value[i]))
+        else:
+            self.table_widget.setItem(0, 0, QtWidgets.QTableWidgetItem(value))
+
+        return
+    
+    def clear(self):
+        self.table_widget.clear()
+    
+    def update(self):
+        self.table_widget.update()
+
+    def set_visible(self, visible):
+        self.table_widget.setVisible(visible)
+
+    def set_length(self, count):
+        self.table_widget.setRowCount(count)
+
+
+
+class InputTableWidget(NodeBaseWidget):
+    def __init__(self, parent=None, name='', label = False):
+        super(InputTableWidget, self).__init__(parent)
+
+        # set the name for node property.
+        self.set_name(name)
+
+        # set the label above the widget.
+        if label:
+            self.set_label(name)
+
+        self.table_widget = TableWidget(name = name)
+
+        self.set_custom_widget(self.table_widget)
+
+    def get_value(self):
+        return self.table_widget.get_value()
+
+    def set_value(self, value):
+        self.table_widget.clear()
+        self.table_widget.set_value(value)
+        self.table_widget.update()
+    
+

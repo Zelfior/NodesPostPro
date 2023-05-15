@@ -53,6 +53,7 @@ if __name__ == '__main__':
         input_nodes.InputIntegerNode,
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
+        input_nodes.InputListNode,
 
         #   Cast nodes
         cast_nodes.FloatToIntegerCastNode,

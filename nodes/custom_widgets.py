@@ -231,7 +231,7 @@ class TableWidget(QtWidgets.QWidget):
     def __init__(self, parent=None, name=''):
         super(TableWidget, self).__init__(parent)
 
-        self.table_widget = QtWidgets.QTableWidget(1, 5)
+        self.table_widget = QtWidgets.QTableWidget(5, 1)
 
         layout = QtWidgets.QHBoxLayout(self)
         layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
@@ -239,7 +239,7 @@ class TableWidget(QtWidgets.QWidget):
         layout.addWidget(self.table_widget)
 
     def get_value(self):
-        return self.table_widget.items()
+        return [str(it) for it in self.table_widget.items()]
 
     def set_value(self, value):
         if type(value) == list:
@@ -289,4 +289,6 @@ class InputTableWidget(NodeBaseWidget):
         self.table_widget.set_value(value)
         self.table_widget.update()
     
+    def set_length(self, value):
+        self.table_widget.set_length(value)
 

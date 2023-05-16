@@ -12,6 +12,8 @@ import random
 import os
 
 from NodeGraphQt.widgets.dialogs import FileDialog
+from NodeGraphQt.widgets.node_widgets import _NodeGroupBox
+
 
 
 def check_cast_type_from_string(name:str, enum_type:PortValueType):
@@ -165,6 +167,7 @@ class GenericNode(BaseNode):
         else:
             property = self.get_property(input_name)
             value = Container(self.widget_properties[input_name])
+            print(input_name, self.widget_properties[input_name], property)
             value.set_property(property)
             input_property_type = self.widget_properties[input_name]
 
@@ -609,14 +612,29 @@ class GenericNode(BaseNode):
 
 
 
+
+    def add_table_input(self, name, label):
+        table_selector = InputTableWidget(self.view, name=name)
+        self.create_property(name, 0)
+
+        table_selector.value_changed.connect(lambda k, v: self.set_property(k, v))
+
+        self.view.add_widget(table_selector)
+        self.view.draw_node()
+
+        self.widget_properties[name] = PortValueType.STRING
+        self.property_to_update.append(name)
+
+        return table_selector
+
     def add_combo_menu(self, name, label, items=[]):
         super(GenericNode, self).add_combo_menu(name, label, items=items)
         self.widget_properties[name] = PortValueType.STRING
         self.property_to_update.append(name)
 
-    def add_text_input(self, name, label, default, tab = None):
+    def add_text_input(self, name, label, default, tab = None, text_type=PortValueType.STRING):
         super(GenericNode, self).add_text_input(name, label, default, tab = tab)
-        self.widget_properties[name] = PortValueType.STRING
+        self.widget_properties[name] = text_type
         self.property_to_update.append(name)
 
 
@@ -664,7 +682,7 @@ class GenericNode(BaseNode):
 
         self.add_custom_input(name, type_enum)
         if widget_type == "TEXT":
-            self.add_text_input(name, name, default)
+            self.add_text_input(name, name, default, text_type=type_enum)
         elif widget_type == "INT_SELECTOR":
             self.add_int_selector(name, name)
 
@@ -784,3 +802,6 @@ class GenericNode(BaseNode):
         file = file_dlg[0] or None
 
         self.set_property("Filename", file)
+
+    def get_layout(self):
+        return _NodeGroupBox(self._label).layout()

@@ -32,13 +32,13 @@ class LabelWidget(QtWidgets.QWidget):
         return self.label_widget.text()
 
     def set_value(self, value):
-        return self.label_widget.setText(value)
+        return self.label_widget.setText(str(value))
     
     def clear(self):
         self.label_widget.clear()
     
     def setText(self, label_value):
-        self.label_widget.setText(label_value)
+        self.label_widget.setText(str(label_value))
     
     def update(self):
         self.label_widget.update()
@@ -48,9 +48,9 @@ class LabelWidget(QtWidgets.QWidget):
 
 
 
-class InputTableWidget(NodeBaseWidget):
+class InputLabelWidget(NodeBaseWidget):
     def __init__(self, parent=None, name='', label = False):
-        super(InputTableWidget, self).__init__(parent)
+        super(InputLabelWidget, self).__init__(parent)
 
         # set the name for node property.
         self.set_name(name)

@@ -203,7 +203,7 @@ class GenericNode(BaseNode):
         if label_name in self.label_list:
             raise ValueError("Label name already exists")
         else:
-            self.label_list[label_name] = InputTableWidget(self.view, name = label_name, label=label)
+            self.label_list[label_name] = InputLabelWidget(self.view, name = label_name, label=label)
             # self.add_custom_widget(self.label_list[label_name])
             self.view.add_widget(self.label_list[label_name])
             self.view.draw_node()

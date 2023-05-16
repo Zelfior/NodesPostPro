@@ -160,19 +160,19 @@ class InputListNode(GenericNode):
         super(InputListNode, self).__init__()
 
         #   create output port for the read dataframe
-        self.add_custom_output('Output Value', PortValueType.STRING)
+        self.add_custom_output('Output Value', PortValueType.LIST)
 
         #   create QLineEdit text input widget for the file path
-        self.add_twin_input('Rows count', PortValueType.INTEGER, default=5)
+        self.add_twin_input('Rows count', PortValueType.INTEGER, default="5")
 
         
 
     def check_inputs(self):
         #   we set in the "is_valid" property a boolean saying if the string is a float
-        self.set_property("is_valid",check_cast_type_from_string(self.get_property("Value"), PortValueType.INTEGER))
+        self.set_property("is_valid",check_cast_type_from_string(self.get_property("Rows count"), PortValueType.INTEGER))
     
 
-    def update_function(self):
+    def update_function(self, input_):
         #   Called only if check_inputs returned True:
         #       we set in the "Output DataFrame" output the dataframe associated to the given path
         if self.get_property("Value").lower().replace(" ", "") in ['yes', 'true', '1', "1."]:

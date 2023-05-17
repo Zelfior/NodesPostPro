@@ -251,15 +251,16 @@ class TableWidget(QtWidgets.QWidget):
 
     def set_value(self, value):
         print("value to set in table", value)
-        self.finished = False
         if type(value) == list:
+            self.finished = False
             for i in range(len(value)):
                 if i < self.table_widget.rowCount():
+                    if i == len(value) - 1:
+                        self.finished = True
                     self.table_widget.setItem(i, 0, QtWidgets.QTableWidgetItem(value[i]))
         else:
             self.table_widget.setItem(0, 0, QtWidgets.QTableWidgetItem(value))
 
-        self.finished = True
         return
     
     def clear(self):

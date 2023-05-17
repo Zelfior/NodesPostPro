@@ -1,0 +1,8 @@
+README.md
+setup.cfg
+setup.py
+NodesPostPro.egg-info/PKG-INFO
+NodesPostPro.egg-info/SOURCES.txt
+NodesPostPro.egg-info/dependency_links.txt
+NodesPostPro.egg-info/requires.txt
+NodesPostPro.egg-info/top_level.txt

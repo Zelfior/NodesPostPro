@@ -12,7 +12,6 @@ from NodeGraphQt import (
     NodesPaletteWidget
 )
 
-# import example nodes from the "example_nodes" package
 from NodesPostPro.nodes import pandas_nodes, \
                     list_nodes, \
                     plt_node, \
@@ -24,7 +23,7 @@ from NodesPostPro.nodes import pandas_nodes, \
                     iterator_nodes, \
                     random_nodes
 
-if __name__ == '__main__':
+def main():
 
     # handle SIGINT to make the app terminate on CTRL+C
     signal.signal(signal.SIGINT, signal.SIG_DFL)

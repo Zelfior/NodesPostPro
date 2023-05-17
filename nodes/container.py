@@ -156,7 +156,7 @@ class Container():
     """
         Sets iterated property if valid.
     """
-    def set_iterated_property(self, value, check_comparable = True):
+    def set_iterated_property(self, value, check_comparable = False):
         if not type(value) == list:
             raise TypeError("")
 

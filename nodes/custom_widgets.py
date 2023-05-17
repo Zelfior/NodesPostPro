@@ -238,18 +238,28 @@ class TableWidget(QtWidgets.QWidget):
         layout.setContentsMargins(5, 0, 5, 0)
         layout.addWidget(self.table_widget)
 
+        self.finished = True
+
     def get_value(self):
-        return [str(it) for it in self.table_widget.items()]
+        output = []
+
+        for i in range(self.table_widget.rowCount()):
+            if not self.table_widget.item(i, 0) == None:
+                output.append(self.table_widget.item(i, 0).text())
+                
+        return output
 
     def set_value(self, value):
+        print("value to set in table", value)
+        self.finished = False
         if type(value) == list:
-            if self.table_widget.rowCount() < len(value):
-                self.set_length(len(value))
             for i in range(len(value)):
-                self.table_widget.setItem(0, 0, QtWidgets.QTableWidgetItem(value[i]))
+                if i < self.table_widget.rowCount():
+                    self.table_widget.setItem(i, 0, QtWidgets.QTableWidgetItem(value[i]))
         else:
             self.table_widget.setItem(0, 0, QtWidgets.QTableWidgetItem(value))
 
+        self.finished = True
         return
     
     def clear(self):
@@ -285,9 +295,11 @@ class InputTableWidget(NodeBaseWidget):
         return self.table_widget.get_value()
 
     def set_value(self, value):
-        self.table_widget.clear()
-        self.table_widget.set_value(value)
-        self.table_widget.update()
+        print(value, self.get_value())
+        if value != self.get_value():
+            # self.table_widget.clear()
+            self.table_widget.set_value(value)
+            self.table_widget.update()
     
     def set_length(self, value):
         self.table_widget.set_length(value)

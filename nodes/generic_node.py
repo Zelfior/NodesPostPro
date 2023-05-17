@@ -622,8 +622,8 @@ class GenericNode(BaseNode):
         self.view.add_widget(table_selector)
         self.view.draw_node()
 
-        self.widget_properties[name] = PortValueType.STRING
-        self.property_to_update.append(name)
+        self.widget_properties[name] = PortValueType.LIST
+        # self.property_to_update.append(name)
 
         return table_selector
 

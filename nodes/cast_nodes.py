@@ -240,10 +240,10 @@ class StringToFloatCastNode(GenericCastNode):
         
     
     def check_function(self, input_dict, first = False):
-        is_valid, message, label_name = super(StringToFloatCastNode, self).check_inputs(input_dict)
+        is_valid, message, label_name = super(StringToFloatCastNode, self).check_function(input_dict)
 
         if is_valid:
-            if not is_float(input_dict("Input")):
+            if not is_float(input_dict["Input"]):
                 is_valid = False
                 message = "Input is not a float."
 

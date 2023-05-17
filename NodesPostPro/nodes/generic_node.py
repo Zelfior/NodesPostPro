@@ -167,7 +167,6 @@ class GenericNode(BaseNode):
         else:
             property = self.get_property(input_name)
             value = Container(self.widget_properties[input_name])
-            print(input_name, self.widget_properties[input_name], property)
             value.set_property(property)
             input_property_type = self.widget_properties[input_name]
 

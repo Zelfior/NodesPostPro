@@ -1,3 +1,5 @@
 *.pyc
 *.png
 *.jpg
+*.egg-info
+NodesPostPro.egg-info

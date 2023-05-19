@@ -337,6 +337,8 @@ class ImShowNode(GenericNode):
 
         # properties_dict['norm'] = self.get_property('norm')
 
+        properties_dict['origin']='lower'
+
         properties_dict['priority'] = int(self.priority_widget.get_value())
 
         self.set_output_property("Element", properties_dict, False)

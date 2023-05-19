@@ -20,6 +20,7 @@ class PortValueType(Enum):
     DICT = 9
     FIGURE = 10
     ANY = 11
+    NUMBER = 12
 
 """
     Color association with the port type enum
@@ -47,6 +48,8 @@ def get_color_from_enum(enum_value):
         return (0, 0, 0)
     elif enum_value == PortValueType.ANY:
         return (122, 122, 122)
+    elif enum_value == PortValueType.NUMBER:
+        return (30, 150, 150)
     else:
         raise ValueError("No color defined for PortValueType "+str(enum_value))
     
@@ -77,6 +80,8 @@ def check_type(value, enum_value):
         return type(value) == PltContainer
     elif enum_value == PortValueType.ANY:
         return value is not None
+    elif enum_value == PortValueType.NUMBER:
+        return type(value) in [int, float]
     else:
         raise ValueError("PortValueType "+str(enum_value)+" not implemented in function check_type")
     

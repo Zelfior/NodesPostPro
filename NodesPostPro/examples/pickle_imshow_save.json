@@ -126,7 +126,6 @@
       "subgraph_session":{},
       "custom":{
         "is_valid":true,
-        "norm":"linear",
         "Priority":0,
         "Information":""
       }

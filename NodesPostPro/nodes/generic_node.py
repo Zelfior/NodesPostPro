@@ -156,6 +156,7 @@ class GenericNode(BaseNode):
         self.is_iterated_compatible = False
         self.has_iterators = False
         self.iterator_length = -1
+        self.requires_compatible_iterator = False
 
         # self.graph.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
 
@@ -585,7 +586,7 @@ class GenericNode(BaseNode):
     def set_output_property(self, output_name, value, iterated):
         if output_name in self.output_properties:
             if iterated:
-                self.output_properties[output_name].set_iterated_property(value)
+                self.output_properties[output_name].set_iterated_property(value, check_comparable = self.requires_compatible_iterator)
             else:
                 self.output_properties[output_name].set_property(value)
         else:
@@ -730,7 +731,7 @@ class GenericNode(BaseNode):
 
             if self.has_iterators:
                 contained_value = container.get_property()
-                container.set_iterated_property([contained_value]*self.iterator_length)
+                container.set_iterated_property([contained_value]*self.iterator_length, check_comparable=self.requires_compatible_iterator)
 
             return container
 

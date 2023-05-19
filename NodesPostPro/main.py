@@ -12,16 +12,17 @@ from NodeGraphQt import (
     NodesPaletteWidget
 )
 
-from NodesPostPro.nodes import pandas_nodes, \
+from NodesPostPro.nodes import input_nodes, \
+                    math_nodes, \
                     list_nodes, \
+                    random_nodes, \
+                    pandas_nodes, \
                     plt_node, \
-                    input_nodes, \
                     cast_nodes, \
                     pickle_nodes, \
                     numpy_nodes, \
                     tripoli_nodes, \
-                    iterator_nodes, \
-                    random_nodes
+                    iterator_nodes
 
 def main():
 
@@ -53,6 +54,10 @@ def main():
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
         input_nodes.InputListNode,
+
+        #   Math nodes
+        math_nodes.OneMathNode,
+        math_nodes.TwoMathNode,
 
         #   Cast nodes
         cast_nodes.FloatToIntegerCastNode,

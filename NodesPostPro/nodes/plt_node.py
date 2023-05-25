@@ -4,6 +4,8 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from Qt import QtWidgets
 
+import NodeGraphQt
+
 from NodeGraphQt.widgets.node_widgets import _NodeGroupBox
 
 import pandas as pd
@@ -809,6 +811,23 @@ class PltFigureNode(GenericNode):
         self.add_label("Information")
 
         self.is_iterated_compatible = True
+
+
+    #     print(self.label_list["Information"].label_widget.parent()) #   The layout of the plt node
+    #     print(self.label_list["Information"].label_widget.layout()) #   The layout of the custom node
+        
+    #     self.temp_do_stuff(self.label_list["Information"].label_widget.parent())
+
+    #     print(self.view.widgets["canvas_width"])
+    #     print(self.view.widgets["canvas_width"].layout())
+    #     print(self.view.widgets["canvas_width"].parent())
+    #     print(self.view.parent())
+
+    # def temp_do_stuff(self, object_:_NodeGroupBox):
+    #     print(object_.layout())
+    #     print(object_.layout().count())             #   This is 1
+    #     print(object_.layout().itemAt(0).widget())  #   This is the label widget
+    #     # print(object_.layout().parent().parent().layout())
 
     def update_from_input(self):
         if not self.get_value_from_port("Input Plottable 1") == None or not self.get_value_from_port("Input Plottable 2") == None:

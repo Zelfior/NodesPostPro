@@ -3,18 +3,18 @@ from NodesPostPro.nodes.container import *
 import numpy as np
 import pandas as pd
 
-    # FLOAT = 1
-    # INTEGER = 2
-    # STRING = 3
-    # BOOL = 4
-    # LIST = 5
-    # NP_ARRAY = 6
-    # PD_DATAFRAME = 7
-    # PLOTTABLE = 8
-    # DICT = 9
-    # FIGURE = 10
-    # ANY = 11
-    # NUMBER = 12
+# FLOAT = 1
+# INTEGER = 2
+# STRING = 3
+# BOOL = 4
+# LIST = 5
+# NP_ARRAY = 6
+# PD_DATAFRAME = 7
+# PLOTTABLE = 8
+# DICT = 9
+# FIGURE = 10
+# ANY = 11
+# NUMBER = 12
 
 def make_couples():
     return [
@@ -34,3 +34,12 @@ def test_check_type_valid():
     for value in valid_couples:
         for type_ in value[1]:
             assert check_type(value[0], type_)
+
+
+def test_check_type_invalid():
+    valid_couples = make_couples()
+
+    for value in valid_couples:
+        for type_1 in PortValueType:
+            if not type_1 in value[1]:
+                assert not check_type(value[0], type_1)

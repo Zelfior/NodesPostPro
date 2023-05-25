@@ -14,6 +14,7 @@ from NodeGraphQt import (
 
 from NodesPostPro.nodes import input_nodes, \
                     math_nodes, \
+                    string_nodes, \
                     list_nodes, \
                     random_nodes, \
                     pandas_nodes, \
@@ -58,6 +59,10 @@ def main():
         #   Math nodes
         math_nodes.OneMathNode,
         math_nodes.TwoMathNode,
+        math_nodes.TrigonometryNode,
+
+        #   Math nodes
+        string_nodes.ReplaceNode,
 
         #   Cast nodes
         cast_nodes.FloatToIntegerCastNode,

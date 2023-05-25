@@ -20,6 +20,8 @@ class OneMathNode(GenericNode):
         self.add_combo_menu('Operation', 'Operation', ["Absolute", "Square", "Sqrt", "Ln", "Log", "Exp", "Inverse", "Sign"])
                                
         self.add_label("Information")
+
+        self.is_iterated_compatible = True
         
     
     def check_function(self, input_dict, first = False):
@@ -78,14 +80,14 @@ class OneMathNode(GenericNode):
 
 
 
-class OneMathNode(GenericNode):
+class TrigonometryNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Math'
     # initial default node name.
     NODE_NAME = 'Trigonometry'
 
     def __init__(self):
-        super(OneMathNode, self).__init__()
+        super(TrigonometryNode, self).__init__()
 
         # create input & output ports
         self.add_custom_input('Input', PortValueType.NUMBER)
@@ -94,6 +96,8 @@ class OneMathNode(GenericNode):
         self.add_combo_menu('Operation', 'Operation', ["Sin", "Cos", "Tan", "Asin", "Acos", "Atan"])
                                
         self.add_label("Information")
+        
+        self.is_iterated_compatible = True
         
     
     def check_function(self, input_dict, first = False):
@@ -162,6 +166,8 @@ class TwoMathNode(GenericNode):
         self.add_combo_menu('Operation', 'Operation', ["Add", "Subtract", "Multiply", "Divide", "Power", "Modulo", "Round"])
                                
         self.add_label("Information")
+        
+        self.is_iterated_compatible = True
         
     
     def check_function(self, input_dict, first = False):

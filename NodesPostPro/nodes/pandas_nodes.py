@@ -211,6 +211,8 @@ class MultiplyNode(GenericNode):
         self.add_custom_input('Input Dataframe', PortValueType.PD_DATAFRAME)
         self.add_twin_input('Input float', PortValueType.FLOAT)
         self.add_custom_output('Output Dataframe', PortValueType.PD_DATAFRAME)
+        
+        self.add_label("Information")
 
         self.is_iterated_compatible = True
 
@@ -250,6 +252,8 @@ class GetAverageNode(GenericNode):
         # create input & output ports
         self.add_custom_input('Input Dataframe', PortValueType.PD_DATAFRAME)
         self.add_custom_output('Output Float', PortValueType.FLOAT)
+        
+        self.add_label("Information")
 
         self.is_iterated_compatible = True
         

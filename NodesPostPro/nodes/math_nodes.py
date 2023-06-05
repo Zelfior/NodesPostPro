@@ -1,8 +1,23 @@
 from NodesPostPro.nodes.generic_node import GenericNode, PortValueType
+from NodesPostPro.nodes.container import check_type
 
 import math
+import numpy as np
+import pandas as pd
 
+def apply_function(value, function):
+    if check_type(value, PortValueType.PD_DATAFRAME):
+        return value.apply(function)
+    elif check_type(value, PortValueType.FLOAT):
+        return float(function(value))
+    elif check_type(value, PortValueType.INTEGER):
+        return int(function(value))
+    elif check_type(value, PortValueType.NP_ARRAY):
+        return function(value)
+    else:
+        raise ValueError("Wrong type given in apply_function")
         
+
 
 class OneMathNode(GenericNode):
     # unique node identifier.
@@ -14,8 +29,8 @@ class OneMathNode(GenericNode):
         super(OneMathNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input', PortValueType.NUMBER)
-        self.add_custom_output('Output', PortValueType.NUMBER)
+        self.add_custom_input('Input', PortValueType.MATH_COMPATIBLE)
+        self.add_custom_output('Output', PortValueType.MATH_COMPATIBLE)
 
         self.add_combo_menu('Operation', 'Operation', ["Absolute", "Square", "Sqrt", "Ln", "Log", "Exp", "Inverse", "Sign"])
                                
@@ -28,16 +43,16 @@ class OneMathNode(GenericNode):
         if (not "Input" in input_dict) or (type(input_dict["Input"]) == str):
             return False, "Input not valid", "Information"
         
-        if self.get_property("Operation") == "Sqrt" and input_dict["Input"] < 0.:
+        if self.get_property("Operation") == "Sqrt" and check_type(input_dict["Input"], PortValueType.NUMBER) and input_dict["Input"] < 0.:
             return False, "Input cannot be negative.", "Information"
         
-        if self.get_property("Operation") == "Ln" and input_dict["Input"] <= 0.:
+        if self.get_property("Operation") == "Ln" and check_type(input_dict["Input"], PortValueType.NUMBER) and input_dict["Input"] <= 0.:
             return False, "Input cannot be negative or 0.", "Information"
         
-        if self.get_property("Operation") == "Log" and input_dict["Input"] <= 0.:
+        if self.get_property("Operation") == "Log" and check_type(input_dict["Input"], PortValueType.NUMBER) and input_dict["Input"] <= 0.:
             return False, "Input cannot be negative or 0.", "Information"
         
-        if self.get_property("Operation") == "Inverse" and input_dict["Input"] == 0.:
+        if self.get_property("Operation") == "Inverse" and check_type(input_dict["Input"], PortValueType.NUMBER) and input_dict["Input"] == 0.:
             return False, "Input cannot be 0.", "Information"
         
         return True, "", "Information"
@@ -48,28 +63,30 @@ class OneMathNode(GenericNode):
 
         operation = self.get_property("Operation")
         if operation == "Sqrt":
-            output_dict["Output"] = math.sqrt(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.sqrt)
         elif operation == "Square":
-            output_dict["Output"] = math.pow(input_dict["Input"], 2)
+            output_dict["Output"] = apply_function(input_dict["Input"], np.square)
         elif operation == "Ln":
-            output_dict["Output"] = math.log(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.log)
         elif operation == "Log":
-            output_dict["Output"] = math.log10(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.log10)
         elif operation == "Exp":
-            output_dict["Output"] = math.exp(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.exp)
         elif operation == "Absolute":
-            output_dict["Output"] = abs(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.abs)
         elif operation == "Sign":
-            if input_dict["Input"] >= 0:
-                output_dict["Output"] = 1
-            else:
-                output_dict["Output"] = -1
+            output_dict["Output"] = apply_function(input_dict["Input"], np.sign)
         elif operation == "Inverse":
-            output_dict["Output"] = 1./input_dict["Input"]
+            output_dict["Output"] = apply_function(input_dict["Input"], np.reciprocal)
         else:
             raise NotImplementedError("Operation "+operation+" not implemented in one number math node.")
 
-        output_dict["__message__Information"] = "Output: "+str(output_dict["Output"])
+        if check_type(output_dict["Output"], PortValueType.NUMBER):
+            output_dict["__message__Information"] = "Output: "+str(output_dict["Output"])
+        elif check_type(output_dict["Output"], PortValueType.NP_ARRAY):
+            output_dict["__message__Information"] = "Output shape: "+str(output_dict["Output"].shape)
+        elif check_type(output_dict["Output"], PortValueType.PD_DATAFRAME):
+            output_dict["__message__Information"] = "Columns : "+str(len(output_dict["Output"].columns))+", lines : "+str(len(output_dict["Output"]))
 
         return output_dict
         

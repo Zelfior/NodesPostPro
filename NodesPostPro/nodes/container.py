@@ -21,6 +21,7 @@ class PortValueType(Enum):
     FIGURE = 10
     ANY = 11
     NUMBER = 12
+    MATH_COMPATIBLE = 13
 
 """
     Color association with the port type enum
@@ -50,6 +51,8 @@ def get_color_from_enum(enum_value):
         return (122, 122, 122)
     elif enum_value == PortValueType.NUMBER:
         return (30, 150, 150)
+    elif enum_value == PortValueType.MATH_COMPATIBLE:
+        return (0, 100, 100)
     else:
         raise ValueError("No color defined for PortValueType "+str(enum_value))
     
@@ -82,6 +85,8 @@ def check_type(value, enum_value):
         return value is not None
     elif enum_value == PortValueType.NUMBER:
         return type(value) in [int, float]
+    elif enum_value == PortValueType.MATH_COMPATIBLE:
+        return type(value) in [int, float, np.ndarray, pd.DataFrame]
     else:
         raise ValueError("PortValueType "+str(enum_value)+" not implemented in function check_type")
     
@@ -109,6 +114,29 @@ def are_comparable(value1, value2, enum_value):
         return check_type(value1, enum_value) and check_type(value2, enum_value) and list(value1.keys()) == list(value2.keys())
     elif enum_value == PortValueType.FIGURE:
         return type(value1) == PltContainer and type(value2) == PltContainer
+    elif enum_value == PortValueType.NUMBER:
+        return check_type(value1, enum_value) and check_type(value2, enum_value)
+    elif enum_value == PortValueType.MATH_COMPATIBLE:
+        is_number_1 = check_type(value1, PortValueType.NUMBER)
+        is_number_2 = check_type(value2, PortValueType.NUMBER)
+
+        if is_number_1 and is_number_2:
+            return (type(value1) == type(value2))
+        else:
+            is_df_1 = check_type(value1, PortValueType.PD_DATAFRAME)
+            is_df_2 = check_type(value1, PortValueType.PD_DATAFRAME)
+            
+            is_np_1 = check_type(value1, PortValueType.NP_ARRAY)
+            is_np_2 = check_type(value1, PortValueType.NP_ARRAY)
+
+            if (is_df_1 or is_df_2) and (is_np_1 or is_np_2):
+                return False
+            elif (is_df_1 and is_df_2):
+                return are_comparable(value1, value2, PortValueType.PD_DATAFRAME)
+            elif (is_np_1 and is_np_2):
+                return are_comparable(value1, value2, PortValueType.NP_ARRAY)
+            return True
+            
     elif enum_value == PortValueType.ANY:
         same_type = (type(value1) == type(value2))
         if same_type:

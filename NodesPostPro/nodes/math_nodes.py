@@ -1,5 +1,5 @@
 from NodesPostPro.nodes.generic_node import GenericNode, PortValueType
-from NodesPostPro.nodes.container import check_type
+from NodesPostPro.nodes.container import check_type, are_comparable
 
 import math
 import numpy as np
@@ -23,7 +23,7 @@ class OneMathNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Math'
     # initial default node name.
-    NODE_NAME = 'One number'
+    NODE_NAME = 'One element'
 
     def __init__(self):
         super(OneMathNode, self).__init__()
@@ -107,10 +107,10 @@ class TrigonometryNode(GenericNode):
         super(TrigonometryNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input', PortValueType.NUMBER)
-        self.add_custom_output('Output', PortValueType.NUMBER)
+        self.add_custom_input('Input', PortValueType.MATH_COMPATIBLE)
+        self.add_custom_output('Output', PortValueType.MATH_COMPATIBLE)
 
-        self.add_combo_menu('Operation', 'Operation', ["Sin", "Cos", "Tan", "Asin", "Acos", "Atan"])
+        self.add_combo_menu('Operation', 'Operation', ["Sin", "Cos", "Tan", "Asin", "Acos", "Atan", "Atan2"])
                                
         self.add_label("Information")
         
@@ -121,10 +121,10 @@ class TrigonometryNode(GenericNode):
         if (not "Input" in input_dict) or (type(input_dict["Input"]) == str):
             return False, "Input not valid", "Information"
         
-        if self.get_property("Operation") in ["Asin", "Acos"] and (input_dict["Input"] < 1. or input_dict["Input"] > 1.):
+        if self.get_property("Operation") in ["Asin", "Acos"] and check_type(input_dict["Input"], PortValueType.NUMBER) and (input_dict["Input"] < 1. or input_dict["Input"] > 1.):
             return False, "Input should be between -1. and 1..", "Information"
         
-        if self.get_property("Operation") == "Tan" and ((input_dict["Input"] + math.pi/2)%math.pi == 0.):
+        if self.get_property("Operation") == "Tan" and check_type(input_dict["Input"], PortValueType.NUMBER) and ((input_dict["Input"] + math.pi/2)%math.pi == 0.):
             return False, "tan(Input) impossible.", "Information"
         
         return True, "", "Information"
@@ -135,17 +135,19 @@ class TrigonometryNode(GenericNode):
 
         operation = self.get_property("Operation")
         if operation == "Sin":
-            output_dict["Output"] = math.sin(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.sin)
         elif operation == "Cos":
-            output_dict["Output"] = math.cos(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.cos)
         elif operation == "Tan":
-            output_dict["Output"] = math.tan(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.tan)
         elif operation == "Asin":
-            output_dict["Output"] = math.asin(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.arcsin)
         elif operation == "Acos":
-            output_dict["Output"] = math.acos(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.arccos)
         elif operation == "Atan":
-            output_dict["Output"] = math.atan(input_dict["Input"])
+            output_dict["Output"] = apply_function(input_dict["Input"], np.arctan)
+        elif operation == "Atan2":
+            output_dict["Output"] = apply_function(input_dict["Input"], np.arctan2)
         else:
             raise NotImplementedError("Operation "+operation+" not implemented in trigonometry math node.")
 
@@ -170,15 +172,15 @@ class TwoMathNode(GenericNode):
     # unique node identifier.
     __identifier__ = 'Math'
     # initial default node name.
-    NODE_NAME = 'Two numbers'
+    NODE_NAME = 'Two elements (element wise)'
 
     def __init__(self):
         super(TwoMathNode, self).__init__()
 
         # create input & output ports
-        self.add_custom_input('Input 1', PortValueType.NUMBER)
-        self.add_custom_input('Input 2', PortValueType.NUMBER)
-        self.add_custom_output('Output', PortValueType.NUMBER)
+        self.add_custom_input('Input 1', PortValueType.MATH_COMPATIBLE)
+        self.add_custom_input('Input 2', PortValueType.MATH_COMPATIBLE)
+        self.add_custom_output('Output', PortValueType.MATH_COMPATIBLE)
 
         self.add_combo_menu('Operation', 'Operation', ["Add", "Subtract", "Multiply", "Divide", "Power", "Modulo", "Round"])
                                
@@ -194,18 +196,30 @@ class TwoMathNode(GenericNode):
         if (not "Input 2" in input_dict) or (type(input_dict["Input 2"]) == str):
             return False, "Input 2 not valid", "Information"
         
-        if self.get_property("Operation") == "Divide" and input_dict["Input 2"] == 0.:
-            return False, "Cannot divide by 0.", "Information"
+        if not are_comparable(input_dict["Input 1"], input_dict["Input 2"]):
+            return False, "Inputs are not compatible.", "Information"
         
         if self.get_property("Operation") == "Power" and (input_dict["Input 1"] == 0. and input_dict["Input 2"] == 0.\
                                                             or input_dict["Input 1"] < 0. and int(input_dict["Input 2"]) != input_dict["Input 2"]):
             return False, "Input 1 and 2 are not compatible.", "Information"
+
+        if self.get_property("Operation") in ["Modulo", "Round"] and not check_type(input_dict["Input 2"], PortValueType.INTEGER):
+            return False, "Input 2 is not an integer.", "Information"
+
+        if self.get_property("Operation") == "Divide" and input_dict["Input 2"] == 0.:
+            return False, "Cannot divide by 0.", "Information"
 
         if self.get_property("Operation") == "Modulo" and input_dict["Input 2"] == 0.:
             return False, "Cannot divide by 0.", "Information"
 
         if self.get_property("Operation") == "Round" and (int(input_dict["Input 2"]) != input_dict["Input 2"]):
             return False, "Input 2 invalid.", "Information"
+        
+        if not (check_type(input_dict["Input 1"], PortValueType.NUMBER) and check_type(input_dict["Input 2"], PortValueType.NUMBER)):
+            if not type(input_dict["Input 1"]) == type(input_dict["Input 2"]):
+                return False, "Inputs are not compatible.", "Information"
+            elif check_type(input_dict["Input 1"], PortValueType.PD_DATAFRAME)
+
         
         return True, "", "Information"
         

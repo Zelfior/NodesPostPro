@@ -6,7 +6,7 @@
     "pipe_slicing":false
   },
   "nodes":{
-    "0x1796c44e220":{
+    "0x1774170a4f0":{
       "type_":"Tripoli.TripoliExtendedMeshNode",
       "icon":null,
       "name":"Extended mesh",
@@ -31,11 +31,11 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":269.0,
-      "height":229.75,
+      "width":309.0,
+      "height":248.65,
       "pos":[
-        -800.0,
-        0.0
+        -1198.26056102853,
+        4.192216431879267
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -43,6 +43,8 @@
       "custom":{
         "is_valid":true,
         "Browse file":true,
+        "Filename":"C:\\Users\\tm787802\\Desktop\\NodesPostPro\\NodesPostPro\\example_files\\exemple_value.general",
+        "Filename_label":"",
         "Size array":"Array shape (200, 1, 114)",
         "Size X bounds":"X bounds shape (201,)",
         "Size Y bounds":"Y bounds shape (2,)",
@@ -52,7 +54,7 @@
         "Size Z centers":"Z centers shape (114,)"
       }
     },
-    "0x1796c709460":{
+    "0x1774287d2b0":{
       "type_":"Numpy.NP_SqueezeNode",
       "icon":null,
       "name":"Squeeze",
@@ -80,8 +82,8 @@
       "width":249.0,
       "height":60,
       "pos":[
-        -400.0,
-        0.0
+        -798.2605610285301,
+        4.192216431879267
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -91,7 +93,7 @@
         "Information":"Output shape : (200, 114)"
       }
     },
-    "0x1796c7097f0":{
+    "0x1774287d610":{
       "type_":"Numpy.SetAxisNode",
       "icon":null,
       "name":"Set axis",
@@ -116,11 +118,11 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":249.0,
+      "width":299.0,
       "height":130.0,
       "pos":[
-        0.0,
-        0.0
+        -398.26056102853,
+        4.192216431879267
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -128,11 +130,11 @@
       "custom":{
         "is_valid":true,
         "Axis":0,
-        "Value":0,
+        "Value":70,
         "Information":"Output shape : (114,)"
       }
     },
-    "0x1796c711a60":{
+    "0x1774287daf0":{
       "type_":"Input.InputStringNode",
       "icon":null,
       "name":"String",
@@ -171,7 +173,7 @@
         "Value":"Sigma"
       }
     },
-    "0x1796c711cd0":{
+    "0x1774287dd60":{
       "type_":"Numpy.SetAxisNode",
       "icon":null,
       "name":"Set axis 1",
@@ -196,11 +198,11 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":249.0,
+      "width":299.0,
       "height":130.0,
       "pos":[
-        0.0,
-        200.0
+        -398.26056102853,
+        204.19221643187925
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -208,52 +210,11 @@
       "custom":{
         "is_valid":true,
         "Axis":0,
-        "Value":0,
+        "Value":70,
         "Information":"Output shape : (114,)"
       }
     },
-    "0x1796c71e250":{
-      "type_":"Numpy.SetAxisNode",
-      "icon":null,
-      "name":"Set axis 2",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":249.0,
-      "height":130.0,
-      "pos":[
-        0.0,
-        400.0
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Axis":0,
-        "Value":0,
-        "Information":"Output shape : (114,)"
-      }
-    },
-    "0x1796c71e7c0":{
+    "0x1774288e280":{
       "type_":"Input.InputStringNode",
       "icon":null,
       "name":"String 1",
@@ -281,8 +242,8 @@
       "width":258.0,
       "height":68.05000000000001,
       "pos":[
-        0.0,
-        550.0
+        1.2766313180332247,
+        301.0568929835158
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -292,7 +253,7 @@
         "Value":"Value"
       }
     },
-    "0x1796c71eb50":{
+    "0x1774288e550":{
       "type_":"Input.InputFloatNode",
       "icon":null,
       "name":"Float",
@@ -331,7 +292,7 @@
         "Value":"0.2"
       }
     },
-    "0x1796c71ee80":{
+    "0x1774288e7f0":{
       "type_":"Matplotlib.FillBetweenNode",
       "icon":null,
       "name":"Fill Between",
@@ -356,11 +317,11 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":197.0,
+      "width":207.0,
       "height":190.9,
       "pos":[
-        400.0,
-        0.0
+        401.13233829911985,
+        -18.117412785916358
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -371,7 +332,7 @@
         "Information":""
       }
     },
-    "0x1796cf2d880":{
+    "0x177428991f0":{
       "type_":"Matplotlib.PlotNode",
       "icon":null,
       "name":"Plot",
@@ -399,8 +360,8 @@
       "width":223.0,
       "height":190.9,
       "pos":[
-        400.0,
-        300.0
+        385.9570555016343,
+        255.3179038688362
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -413,7 +374,7 @@
         "Information":""
       }
     },
-    "0x1796cf38910":{
+    "0x17742a9d250":{
       "type_":"Matplotlib.PltFigureNode",
       "icon":null,
       "name":"Figure",
@@ -441,8 +402,8 @@
       "width":833.0,
       "height":834.5500000000001,
       "pos":[
-        800.0,
-        0.0
+        802.5532626360666,
+        -19.149469770498783
       ],
       "layout_direction":0,
       "port_deletion_allowed":false,
@@ -460,146 +421,305 @@
         "Plot_Widget":"",
         "Information":""
       }
+    },
+    "0x17744bd34f0":{
+      "type_":"Numpy.NP_SqueezeNode",
+      "icon":null,
+      "name":"Squeeze 1",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":249.0,
+      "height":60,
+      "pos":[
+        -795.7919509627885,
+        81.45454819176652
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Information":"Output shape : (200, 114)"
+      }
+    },
+    "0x17744c29820":{
+      "type_":"Math.TwoMathNode",
+      "icon":null,
+      "name":"Two elements (element wise)",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":328.0,
+      "height":93.25,
+      "pos":[
+        0.5831635566491968,
+        4.419960961881571
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Operation":"Add",
+        "Information":"Output array shape: (114,)"
+      }
+    },
+    "0x17744c229d0":{
+      "type_":"Math.TwoMathNode",
+      "icon":null,
+      "name":"Two elements (element wise) 1",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":337.0,
+      "height":93.25,
+      "pos":[
+        -2.789620298645616,
+        105.7385826423346
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Operation":"Subtract",
+        "Information":"Output array shape: (114,)"
+      }
     }
   },
   "connections":[
     {
       "out":[
-        "0x1796c44e220",
+        "0x1774170a4f0",
         "Value Array"
       ],
       "in":[
-        "0x1796c709460",
+        "0x1774287d2b0",
         "Input Array"
       ]
     },
     {
       "out":[
-        "0x1796c44e220",
+        "0x1774170a4f0",
+        "Sigma Array"
+      ],
+      "in":[
+        "0x17744bd34f0",
+        "Input Array"
+      ]
+    },
+    {
+      "out":[
+        "0x1774170a4f0",
         "Z centers"
       ],
       "in":[
-        "0x1796c71ee80",
+        "0x1774288e7f0",
         "X"
       ]
     },
     {
       "out":[
-        "0x1796c44e220",
+        "0x1774170a4f0",
         "Z centers"
       ],
       "in":[
-        "0x1796cf2d880",
+        "0x177428991f0",
         "X"
       ]
     },
     {
       "out":[
-        "0x1796c709460",
+        "0x1774287d2b0",
         "Output Array"
       ],
       "in":[
-        "0x1796c7097f0",
+        "0x1774287d610",
         "Input Array"
       ]
     },
     {
       "out":[
-        "0x1796c709460",
+        "0x1774287d610",
         "Output Array"
       ],
       "in":[
-        "0x1796c711cd0",
-        "Input Array"
+        "0x17744c29820",
+        "Input 1"
       ]
     },
     {
       "out":[
-        "0x1796c709460",
+        "0x1774287d610",
         "Output Array"
       ],
       "in":[
-        "0x1796c71e250",
-        "Input Array"
+        "0x17744c229d0",
+        "Input 1"
       ]
     },
     {
       "out":[
-        "0x1796c7097f0",
+        "0x1774287d610",
         "Output Array"
       ],
       "in":[
-        "0x1796c71ee80",
-        "Y1"
-      ]
-    },
-    {
-      "out":[
-        "0x1796c711a60",
-        "Output Value"
-      ],
-      "in":[
-        "0x1796c71ee80",
-        "label"
-      ]
-    },
-    {
-      "out":[
-        "0x1796c711cd0",
-        "Output Array"
-      ],
-      "in":[
-        "0x1796cf2d880",
+        "0x177428991f0",
         "Y"
       ]
     },
     {
       "out":[
-        "0x1796c71e250",
-        "Output Array"
+        "0x1774287daf0",
+        "Output Value"
       ],
       "in":[
-        "0x1796c71ee80",
-        "Y2"
+        "0x1774288e7f0",
+        "label"
+      ]
+    },
+    {
+      "in":[
+        "0x1774287dd60",
+        "Input Array"
+      ],
+      "out":[
+        "0x17744bd34f0",
+        "Output Array"
       ]
     },
     {
       "out":[
-        "0x1796c71e7c0",
+        "0x1774287dd60",
+        "Output Array"
+      ],
+      "in":[
+        "0x17744c29820",
+        "Input 2"
+      ]
+    },
+    {
+      "out":[
+        "0x1774287dd60",
+        "Output Array"
+      ],
+      "in":[
+        "0x17744c229d0",
+        "Input 2"
+      ]
+    },
+    {
+      "out":[
+        "0x1774288e280",
         "Output Value"
       ],
       "in":[
-        "0x1796cf2d880",
+        "0x177428991f0",
         "label"
       ]
     },
     {
       "out":[
-        "0x1796c71eb50",
+        "0x1774288e550",
         "Output Value"
       ],
       "in":[
-        "0x1796c71ee80",
+        "0x1774288e7f0",
         "alpha"
       ]
     },
     {
+      "in":[
+        "0x1774288e7f0",
+        "Y1"
+      ],
       "out":[
-        "0x1796c71ee80",
+        "0x17744c29820",
+        "Output"
+      ]
+    },
+    {
+      "in":[
+        "0x1774288e7f0",
+        "Y2"
+      ],
+      "out":[
+        "0x17744c229d0",
+        "Output"
+      ]
+    },
+    {
+      "out":[
+        "0x1774288e7f0",
         "Element"
       ],
       "in":[
-        "0x1796cf38910",
+        "0x17742a9d250",
         "Input Plottable 1"
       ]
     },
     {
       "out":[
-        "0x1796cf2d880",
+        "0x177428991f0",
         "Element"
       ],
       "in":[
-        "0x1796cf38910",
+        "0x17742a9d250",
         "Input Plottable 1"
       ]
     }

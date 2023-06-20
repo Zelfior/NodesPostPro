@@ -213,7 +213,7 @@ class TwoMathNode(GenericNode):
         if (not "Input 2" in input_dict) or (type(input_dict["Input 2"]) == str):
             return False, "Input 2 not valid", "Information"
         
-        if not are_comparable(input_dict["Input 1"], input_dict["Input 2"]):
+        if not are_comparable(input_dict["Input 1"], input_dict["Input 2"], PortValueType.MATH_COMPATIBLE):
             return False, "Inputs are not compatible.", "Information"
 
         if check_type(input_dict["Input 1"], PortValueType.NUMBER) and \
@@ -300,7 +300,14 @@ class TwoMathNode(GenericNode):
             else:
                 raise NotImplementedError("Operation "+operation+" not implemented for two matrixes.")
 
-        output_dict["__message__Information"] = "Output: "+str(output_dict["Output"])
+        if check_type(output_dict["Output"], PortValueType.NUMBER):
+            output_dict["__message__Information"] = "Output: "+str(output_dict["Output"])
+        elif check_type(output_dict["Output"], PortValueType.NP_ARRAY):
+            output_dict["__message__Information"] = "Output array shape: "+str(output_dict["Output"].shape)
+        elif check_type(output_dict["Output"], PortValueType.LIST):
+            output_dict["__message__Information"] = "Output list length: "+str(len(output_dict["Output"]))
+        elif check_type(output_dict["Output"], PortValueType.PD_DATAFRAME):
+            output_dict["__message__Information"] = "Output dataframe shape: "+str(len(output_dict["Output"].columns))+" columns, "+str(len(output_dict["Output"])+" lines")
 
         return output_dict
         

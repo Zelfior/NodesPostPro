@@ -13,6 +13,7 @@ from NodeGraphQt import (
 )
 
 from NodesPostPro.nodes import input_nodes, \
+                    tool_nodes, \
                     math_nodes, \
                     string_nodes, \
                     list_nodes, \
@@ -55,6 +56,9 @@ def main():
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
         input_nodes.InputListNode,
+
+        #   Tools nodes
+        tool_nodes.PrintNode,
 
         #   Math nodes
         math_nodes.OneMathNode,

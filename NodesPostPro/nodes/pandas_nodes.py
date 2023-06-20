@@ -119,6 +119,14 @@ class GetColumnSelectorNode(GenericNode):
             
         output_dict = {}
 
+        
+        if "Column name" not in input_dict or not (input_dict["Column name"] in input_dict["Input DataFrame"]):
+            if list(input_dict["Input DataFrame"].columns) != self.view.widgets["Column name"].all_items():
+                self.view.widgets["Column name"].clear()
+                self.view.widgets["Column name"].add_items(list(input_dict["Input DataFrame"].columns))
+
+            input_dict["Column name"] = input_dict["Input DataFrame"].columns[0]
+
         if "Column name" in input_dict:
             output_dict['Output DataFrame'] = input_dict["Input DataFrame"][input_dict["Column name"]].to_frame()
             output_dict['Selected column name'] = input_dict["Column name"]

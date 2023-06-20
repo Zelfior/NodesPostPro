@@ -15,8 +15,25 @@ def apply_function(value, function):
     elif check_type(value, PortValueType.NP_ARRAY):
         return function(value)
     else:
-        raise ValueError("Wrong type given in apply_function")
+        raise ValueError("Wrong type given in apply_function : "+str(type(value)))
         
+def apply_twin_function(value1, value2, function):
+    if check_type(value1, PortValueType.PD_DATAFRAME):
+        return function(value1, value2) # Works considering value 2 is a float as a condition in check_function
+    elif check_type(value1, PortValueType.NP_ARRAY):
+        return function(value1, value2)
+    else:
+        raise ValueError("Wrong type given in apply_twin_function : "+str(type(value1)))
+
+def object_clone(value_to_clone, target_value):
+    if check_type(target_value, PortValueType.PD_DATAFRAME):
+        return target_value*0 + value_to_clone
+    elif check_type(target_value, PortValueType.NP_ARRAY):
+        return target_value*0 + value_to_clone
+    elif check_type(target_value, PortValueType.LIST):
+        return [target_value for i in range(len(target_value))]
+    else:
+        raise ValueError("Function object_clone not implemented for type : "+str(type(target_value)))
 
 
 class OneMathNode(GenericNode):
@@ -198,28 +215,32 @@ class TwoMathNode(GenericNode):
         
         if not are_comparable(input_dict["Input 1"], input_dict["Input 2"]):
             return False, "Inputs are not compatible.", "Information"
+
+        if check_type(input_dict["Input 1"], PortValueType.NUMBER) and \
+            check_type(input_dict["Input 2"], PortValueType.NUMBER):
         
-        if self.get_property("Operation") == "Power" and (input_dict["Input 1"] == 0. and input_dict["Input 2"] == 0.\
-                                                            or input_dict["Input 1"] < 0. and int(input_dict["Input 2"]) != input_dict["Input 2"]):
-            return False, "Input 1 and 2 are not compatible.", "Information"
+            if self.get_property("Operation") == "Power" and (input_dict["Input 1"] == 0. and input_dict["Input 2"] == 0.\
+                                                                or input_dict["Input 1"] < 0. and int(input_dict["Input 2"]) != input_dict["Input 2"]):
+                return False, "Input 1 and 2 are not compatible.", "Information"
 
-        if self.get_property("Operation") in ["Modulo", "Round"] and not check_type(input_dict["Input 2"], PortValueType.INTEGER):
-            return False, "Input 2 is not an integer.", "Information"
+            if self.get_property("Operation") in ["Modulo", "Round"] and not check_type(input_dict["Input 2"], PortValueType.INTEGER):
+                return False, "Input 2 is not an integer.", "Information"
 
-        if self.get_property("Operation") == "Divide" and input_dict["Input 2"] == 0.:
-            return False, "Cannot divide by 0.", "Information"
+            if self.get_property("Operation") == "Divide" and input_dict["Input 2"] == 0.:
+                return False, "Cannot divide by 0.", "Information"
 
-        if self.get_property("Operation") == "Modulo" and input_dict["Input 2"] == 0.:
-            return False, "Cannot divide by 0.", "Information"
+            if self.get_property("Operation") == "Modulo" and input_dict["Input 2"] == 0.:
+                return False, "Cannot divide by 0.", "Information"
 
-        if self.get_property("Operation") == "Round" and (int(input_dict["Input 2"]) != input_dict["Input 2"]):
-            return False, "Input 2 invalid.", "Information"
+            if self.get_property("Operation") == "Round" and (int(input_dict["Input 2"]) != input_dict["Input 2"]):
+                return False, "Input 2 invalid.", "Information"
         
-        if not (check_type(input_dict["Input 1"], PortValueType.NUMBER) and check_type(input_dict["Input 2"], PortValueType.NUMBER)):
-            if not type(input_dict["Input 1"]) == type(input_dict["Input 2"]):
-                return False, "Inputs are not compatible.", "Information"
-            elif check_type(input_dict["Input 1"], PortValueType.PD_DATAFRAME)
+        ###     Si on a un nombre seulement
+        elif not (check_type(input_dict["Input 1"], PortValueType.PLOTTABLE) and check_type(input_dict["Input 2"], PortValueType.PLOTTABLE)):
+            if self.get_property("Operation") in ["Modulo", "Round", "Power"] and not check_type(input_dict["Input 2"], PortValueType.NUMBER):
+                return False, "Inputs type couple incompatible.", "Information"
 
+        ###     Si deux objets, alors are comparable a fait le travail.
         
         return True, "", "Information"
         
@@ -228,22 +249,56 @@ class TwoMathNode(GenericNode):
         output_dict = {}
 
         operation = self.get_property("Operation")
-        if operation == "Add":
-            output_dict["Output"] = input_dict["Input 1"] + input_dict["Input 2"]
-        elif operation == "Subtract":
-            output_dict["Output"] = input_dict["Input 1"] - input_dict["Input 2"]
-        elif operation == "Multiply":
-            output_dict["Output"] = input_dict["Input 1"] * input_dict["Input 2"]
-        elif operation == "Divide":
-            output_dict["Output"] = input_dict["Input 1"] / input_dict["Input 2"]
-        elif operation == "Power":
-            output_dict["Output"] = math.pow(input_dict["Input 1"], input_dict["Input 2"])
-        elif operation == "Modulo":
-            output_dict["Output"] = input_dict["Input 1"]%input_dict["Input 2"]
-        elif operation == "Round":
-            output_dict["Output"] = round(input_dict["Input 1"], int(input_dict["Input 2"]))
+        
+        if check_type(input_dict["Input 1"], PortValueType.NUMBER) and \
+            check_type(input_dict["Input 2"], PortValueType.NUMBER):
+            if operation == "Add":
+                output_dict["Output"] = input_dict["Input 1"] + input_dict["Input 2"]
+            elif operation == "Subtract":
+                output_dict["Output"] = input_dict["Input 1"] - input_dict["Input 2"]
+            elif operation == "Multiply":
+                output_dict["Output"] = input_dict["Input 1"] * input_dict["Input 2"]
+            elif operation == "Divide":
+                output_dict["Output"] = input_dict["Input 1"] / input_dict["Input 2"]
+            elif operation == "Power":
+                output_dict["Output"] = math.pow(input_dict["Input 1"], input_dict["Input 2"])
+            elif operation == "Modulo":
+                output_dict["Output"] = input_dict["Input 1"]%input_dict["Input 2"]
+            elif operation == "Round":
+                output_dict["Output"] = round(input_dict["Input 1"], int(input_dict["Input 2"]))
+            else:
+                raise NotImplementedError("Operation "+operation+" not implemented in two numbers math node.")
+
         else:
-            raise NotImplementedError("Operation "+operation+" not implemented in two numbers math node.")
+            if (check_type(input_dict["Input 1"], PortValueType.PLOTTABLE) and check_type(input_dict["Input 2"], PortValueType.PLOTTABLE)):
+                input_1 = input_dict["Input 1"]
+                input_2 = input_dict["Input 2"]
+            elif check_type(input_dict["Input 1"], PortValueType.PLOTTABLE):
+                input_1 = input_dict["Input 1"]
+                input_2 = object_clone(input_1, input_dict["Input 2"])
+            else:
+                input_2 = input_dict["Input 2"]
+                input_1 = object_clone(input_2, input_dict["Input 1"])
+
+                
+            if operation == "Add":
+                output_dict["Output"] = input_1 + input_2
+            elif operation == "Subtract":
+                output_dict["Output"] = input_1 - input_2
+
+            elif operation == "Multiply":
+                output_dict["Output"] = input_1 * input_2
+            elif operation == "Divide":
+                output_dict["Output"] = input_1 / input_2
+
+            elif operation == "Power":
+                output_dict["Output"] = apply_twin_function(input_1, input_2, np.power)
+            elif operation == "Modulo":
+                output_dict["Output"] = apply_twin_function(input_1, input_2, np.mod)
+            elif operation == "Round":
+                output_dict["Output"] = apply_twin_function(input_1, input_2, np.round)
+            else:
+                raise NotImplementedError("Operation "+operation+" not implemented for two matrixes.")
 
         output_dict["__message__Information"] = "Output: "+str(output_dict["Output"])
 

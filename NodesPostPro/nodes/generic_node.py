@@ -331,6 +331,8 @@ class GenericNode(BaseNode):
     """
     def update_values(self):
         if self.to_update:
+            
+            print("Updating node "+self._view.name)
             self.set_property("is_valid", True)
 
             self.check_iterators()

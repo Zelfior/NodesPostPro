@@ -435,6 +435,13 @@ class PlotNode(PltElementNode):
         if (not "Y" in input_dict) or (type(input_dict["Y"]) == str):
             return False, "Y is not valid", "Information"
 
+        for input_name in ["X", "Y"]:
+            if check_type(input_dict[input_name], PortValueType.PD_DATAFRAME):
+                health_check = input_dict[input_name].apply(lambda s: pd.to_numeric(s, errors='coerce').notnull().all())
+                for key in range(len(health_check)):
+                    if not health_check[key]:
+                        return False, "Column "+health_check.index[key]+" of Y is not valid", "Information"
+
         if ("X" in input_dict) and (not type(input_dict["X"]) == str) and (not are_plottable_compatible(input_dict["X"], input_dict["Y"])):
             return False, "X and Y are not compatible", "Information"
         
@@ -867,7 +874,6 @@ class PltFigureNode(GenericNode):
             if self.get_twin_input("Title").get_property() != "":
                 plot_parameters["Title"] = self.get_twin_input("Title").get_property()
 
-            print("Updating plot")
             self.plot_widget.update_plot_list(self.input_arrays_1, self.input_arrays_2, plot_parameters)
 
             self.set_output_property("Figure", PltContainer(self.plot_widget.canvas.fig,

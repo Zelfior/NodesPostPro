@@ -60,7 +60,7 @@ class ExternalNode(GenericNode):
 
     def clicked_function(self):
         for i in range(int(self.get_property("Min")), int(self.get_property("Max")), int(self.get_property("Step"))):
-            self.set_output_property('i', i)
+            self.set_output_property('i', i, False)
             self.propagate()
 
         self.set_output_property('i', int(self.get_property("Min")), False)

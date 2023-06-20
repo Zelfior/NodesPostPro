@@ -1,3 +1,0 @@
-Qt.py>=1.2.0
-NodeGraphQt>=0.5.5
-PySide2>=5.15

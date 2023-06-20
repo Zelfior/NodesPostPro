@@ -2,4 +2,4 @@
 *.png
 *.jpg
 *.egg-info
-NodesPostPro.egg-info
+NodesPostPro.egg-info/*

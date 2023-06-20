@@ -296,4 +296,7 @@ def internal_column_plot(graph):
 def iterator_random_hist(graph):
     load_example(graph, "iterator_random_hist.json")
 
+def external_iterator_column_plot(graph):
+    load_example(graph, "external_iterator_column_plot.json")
+
     

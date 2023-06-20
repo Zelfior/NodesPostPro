@@ -185,6 +185,12 @@
         "label":"Random inputs and histogram",
         "file":"hotkeys/hotkey_functions.py",
         "function_name":"iterator_random_hist"
+      },
+      {
+        "type":"command",
+        "label":"External iterator and column plot",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"external_iterator_column_plot"
       }
     ]
   },

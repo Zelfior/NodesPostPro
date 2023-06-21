@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import os
 import signal
+import sys
+from types import FrameType
 
 from Qt import QtCore, QtWidgets
 
@@ -25,6 +27,21 @@ from NodesPostPro.nodes import input_nodes, \
                     numpy_nodes, \
                     tripoli_nodes, \
                     iterator_nodes
+
+def tracefunc(frame:FrameType, event:str, arg, indent=[0]):
+    if event == "call":
+        indent[0] += 2
+        if "NodeGraphQt" in frame.f_code.co_filename:
+            if "self" in frame.f_locals:
+                try:
+                    print("-",indent[0],"> call function", 
+                    frame.f_code.co_name, 
+                    "> NodeGraphQt"+frame.f_code.co_filename.split("NodeGraphQt")[-1], 
+                    ">", frame.f_locals["self"].name)
+                except:
+                    pass
+
+        
 
 def main():
 
@@ -138,149 +155,6 @@ def main():
     graph_widget.resize(1100, 800)
     graph_widget.show()
 
-    current_height = 0.
-
-    # """
-    
-    #     Exemple pandas/plot
-    
-    # """
-    # # # create node with custom text color and disable it.
-    # read_file_node = graph.create_node('Pandas.LoadFileNode')#, text_color='#feab20')
-    # read_file_node.set_pos(-400,current_height)
-
-    # # # create node and set a custom icon.
-    # get_column_node = graph.create_node('Pandas.GetColumnSelectorNode')
-
-    # plot_node = graph.create_node('Matplotlib.PlotNode')
-    # plot_node.set_pos(400,current_height)
-
-    # plot_show_node = graph.create_node('Matplotlib.PltFigureNode')
-    # plot_show_node.set_pos(800,current_height)
-
-    # for node in graph.all_nodes():
-    #     node.set_to_update(False)
-    
-    # read_file_node.set_output(0, get_column_node.input(0))
-    # get_column_node.set_output(0, plot_node.input(1))
-    # plot_node.set_output(0, plot_show_node.input(0))
-    
-
-
-    # """
-    
-    #     Exemple imshow
-    
-    # """
-    # current_height += 1000
-
-    # pickle_node = graph.create_node("Pickle.LoadNumpyNode")
-    # pickle_node.set_pos(-400,current_height)
-
-    # set_axis_1_node = graph.create_node("Numpy.SetAxisNode")
-    # set_axis_1_node.set_pos(0,current_height)
-    
-    # imshow_node = graph.create_node('Matplotlib.ImShowNode')
-    # imshow_node.set_pos(400,current_height)
-
-    # plot_show_node_2 = graph.create_node('Matplotlib.PltFigureNode')
-    # plot_show_node_2.set_pos(800,current_height)
-
-    # save_file_name = graph.create_node('Input.InputStringNode')
-    # save_file_name.set_pos(1700,current_height+100)
-    # save_file_name.set_property("Value", "figure.png")
-
-    # save_file_node = graph.create_node('Matplotlib.SaveFigureNode')
-    # save_file_node.set_pos(2000,current_height)
-
-    # for node in graph.all_nodes():
-    #     node.set_to_update(False)
-
-    # pickle_node.set_output(0, set_axis_1_node.input(0))
-    # set_axis_1_node.axis_widget.set_value(1)
-    # set_axis_1_node.set_output(0, imshow_node.input(0))
-    # imshow_node.set_output(0, plot_show_node_2.input(0))
-    # plot_show_node_2.set_property("color_bar", True)
-    # plot_show_node_2.set_output(0, save_file_node.input(0))
-    # save_file_name.set_output(0, save_file_node.input(1))
-
-
-    # """
-    
-    #     Exemple fill_between
-    
-    # """
-    # current_height += 1200
-    # read_tripoli_node = graph.create_node("Tripoli.TripoliExtendedMeshNode")
-    # read_tripoli_node.set_pos(-800,current_height)
-
-    # squeeze_tripoli_node = graph.create_node("Numpy.NP_SqueezeNode")
-    # squeeze_tripoli_node.set_pos(-400,current_height)
-
-    # set_axis_2_1_node = graph.create_node("Numpy.SetAxisNode")
-    # set_axis_2_1_node.set_pos(0,current_height)
-
-    # fill_between_name = graph.create_node("Input.InputStringNode")
-    # fill_between_name.set_pos(0,current_height - 100)
-    # fill_between_name.set_property("Value", "Sigma")
-
-    # set_axis_2_2_node = graph.create_node("Numpy.SetAxisNode")
-    # set_axis_2_2_node.set_pos(0,current_height + 200)
-
-    # set_axis_2_3_node = graph.create_node("Numpy.SetAxisNode")
-    # set_axis_2_3_node.set_pos(0,current_height + 400)
-
-    # plot_name = graph.create_node("Input.InputStringNode")
-    # plot_name.set_pos(0,current_height + 550)
-    # plot_name.set_property("Value", "Value")
-
-    # alpha_value = graph.create_node("Input.InputFloatNode")
-    # alpha_value.set_pos(0,current_height - 200)
-    # alpha_value.set_property("Value", "0.2")
-    
-    # fill_between_node = graph.create_node('Matplotlib.FillBetweenNode')
-    # fill_between_node.set_pos(400,current_height)
-    
-    # plot_2_node = graph.create_node('Matplotlib.PlotNode')
-    # plot_2_node.set_pos(400,current_height+300)
-
-    # plot_show_node_3 = graph.create_node('Matplotlib.PltFigureNode')
-    # plot_show_node_3.set_pos(800,current_height)
-
-
-    # for node in graph.all_nodes():
-    #     node.set_to_update(False)
-
-
-
-    # read_tripoli_node.set_output(0, squeeze_tripoli_node.input(0))
-
-    # squeeze_tripoli_node.set_output(0, set_axis_2_1_node.input(0))
-    # squeeze_tripoli_node.set_output(0, set_axis_2_2_node.input(0))
-    # squeeze_tripoli_node.set_output(0, set_axis_2_3_node.input(0))
-
-    # set_axis_2_1_node.value_widget.set_value(59)
-    # set_axis_2_2_node.value_widget.set_value(60)
-    # set_axis_2_3_node.value_widget.set_value(61)
-
-    # set_axis_2_1_node.set_output(0, fill_between_node.input(1))
-    # set_axis_2_2_node.set_output(0, plot_2_node.input(1))
-    # set_axis_2_3_node.set_output(0, fill_between_node.input(2))
-
-    # read_tripoli_node.set_output(7, fill_between_node.input(0))
-    # read_tripoli_node.set_output(7, plot_2_node.input(0))
-
-    # alpha_value.set_output(0, fill_between_node.input(6))
-    # plot_name.set_output(0, plot_2_node.input(2))
-    # fill_between_name.set_output(0, fill_between_node.input(4))
-
-    # plot_show_node_3.set_property("legend", True)
-
-
-    # fill_between_node.set_output(0, plot_show_node_3.input(0))
-    # plot_2_node.set_output(0, plot_show_node_3.input(0))
-
-
     for node in graph.all_nodes():
         node.set_to_update(True)
         node.update_values()
@@ -322,5 +196,10 @@ def main():
     # nodes_palette.set_category_label('nodes.basic', 'Basic Nodes')
     # nodes_palette.set_category_label('nodes.group', 'Group Nodes')
     # nodes_palette.show()
+    
+    if "debug" in sys.argv:
+        sys.setprofile(tracefunc)
+
+    sys.gettrace()
 
     app.exec_()

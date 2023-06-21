@@ -275,10 +275,10 @@ class TwoMathNode(GenericNode):
                 input_2 = input_dict["Input 2"]
             elif check_type(input_dict["Input 1"], PortValueType.PLOTTABLE):
                 input_1 = input_dict["Input 1"]
-                input_2 = object_clone(input_1, input_dict["Input 2"])
+                input_2 = object_clone(input_dict["Input 2"], input_1)
             else:
                 input_2 = input_dict["Input 2"]
-                input_1 = object_clone(input_2, input_dict["Input 1"])
+                input_1 = object_clone(input_dict["Input 1"], input_2)
 
                 
             if operation == "Add":
@@ -307,7 +307,7 @@ class TwoMathNode(GenericNode):
         elif check_type(output_dict["Output"], PortValueType.LIST):
             output_dict["__message__Information"] = "Output list length: "+str(len(output_dict["Output"]))
         elif check_type(output_dict["Output"], PortValueType.PD_DATAFRAME):
-            output_dict["__message__Information"] = "Output dataframe shape: "+str(len(output_dict["Output"].columns))+" columns, "+str(len(output_dict["Output"])+" lines")
+            output_dict["__message__Information"] = "Output dataframe shape: "+str(len(output_dict["Output"].columns))+" columns, "+str(len(output_dict["Output"]))+" lines"
 
         return output_dict
         

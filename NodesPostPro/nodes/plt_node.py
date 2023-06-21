@@ -518,6 +518,13 @@ class FillBetweenNode(PltElementNode):
             if len(np.squeeze(np.array(input_dict[key])).shape) > 1:
                 return False, key+" should be 1D", "Information"
 
+        for input_name in ["X", "Y1", "Y2"]:
+            if check_type(input_dict[input_name], PortValueType.PD_DATAFRAME):
+                health_check = input_dict[input_name].apply(lambda s: pd.to_numeric(s, errors='coerce').notnull().all())
+                for key in range(len(health_check)):
+                    if not health_check[key]:
+                        return False, "Column "+health_check.index[key]+" of Y is not valid", "Information"
+
         if not are_plottable_compatible(input_dict["X"], input_dict["Y1"]):
             return False, "X and Y1 are not compatible", "Information"
 
@@ -619,6 +626,13 @@ class ScatterNode(PltElementNode):
                 if type(input_dict[value]) == str and "Error_" in input_dict[value] and (not "is not defined" in input_dict[value]):
                     return False, input_dict[value].replace("Error_", ""), "Information"
 
+        for input_name in ["X", "Y"]:
+            if check_type(input_dict[input_name], PortValueType.PD_DATAFRAME):
+                health_check = input_dict[input_name].apply(lambda s: pd.to_numeric(s, errors='coerce').notnull().all())
+                for key in range(len(health_check)):
+                    if not health_check[key]:
+                        return False, "Column "+health_check.index[key]+" of Y is not valid", "Information"
+
         return True, "", "Information"
 
                    
@@ -700,6 +714,13 @@ class HistNode(GenericNode):
             if not value in ["X", "Weight"]:
                 if type(input_dict[value]) == str and "Error_" in input_dict[value] and (not "is not defined" in input_dict[value]):
                     return False, input_dict[value].replace("Error_", ""), "Information"
+
+        for input_name in ["X", "Weight"]:
+            if check_type(input_dict[input_name], PortValueType.PD_DATAFRAME):
+                health_check = input_dict[input_name].apply(lambda s: pd.to_numeric(s, errors='coerce').notnull().all())
+                for key in range(len(health_check)):
+                    if not health_check[key]:
+                        return False, "Column "+health_check.index[key]+" of Y is not valid", "Information"
 
         return True, "", "Information"
 

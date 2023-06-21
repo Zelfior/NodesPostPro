@@ -22,11 +22,12 @@ class LabelWidget(QtWidgets.QWidget):
 
         self.label_widget = QtWidgets.QLabel(name)
         self.label_widget.setAlignment(QtCore.Qt.AlignCenter)
+        # self.label_widget.setWordWrap(True)   #   Cuts the text at the widget size
 
-        layout = QtWidgets.QHBoxLayout(self)
-        layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
-        layout.setContentsMargins(5, 0, 5, 0)
-        layout.addWidget(self.label_widget)
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.setSizeConstraint(QtWidgets.QLayout.SetMinAndMaxSize)
+        self.layout.setContentsMargins(5, 0, 5, 0)
+        self.layout.addWidget(self.label_widget)
 
     def get_value(self):
         return self.label_widget.text()
@@ -77,7 +78,15 @@ class InputLabelWidget(NodeBaseWidget):
         self.label_widget.setStyleSheet("color: "+color)
         self.label_widget.update()
 
+    def boundingRect(self):
+        self.label_widget.adjustSize()
 
+        bounding_rect = super().boundingRect()
+        
+        bounding_rect.setWidth(self.label_widget.width() + 5)
+        bounding_rect.setHeight(self.label_widget.height() + 5)
+
+        return bounding_rect
 
 
 """

@@ -122,7 +122,7 @@ def are_comparable(value1, value2, enum_value):
 
         if is_number_1 and is_number_2:
             return (type(value1) == type(value2))
-        else:
+        elif not is_number_1 and not is_number_2:
             is_df_1 = check_type(value1, PortValueType.PD_DATAFRAME)
             is_df_2 = check_type(value1, PortValueType.PD_DATAFRAME)
             
@@ -135,6 +135,8 @@ def are_comparable(value1, value2, enum_value):
                 return are_comparable(value1, value2, PortValueType.PD_DATAFRAME)
             elif (is_np_1 and is_np_2):
                 return are_comparable(value1, value2, PortValueType.NP_ARRAY)
+            return True
+        else:
             return True
             
     elif enum_value == PortValueType.ANY:

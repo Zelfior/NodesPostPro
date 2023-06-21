@@ -4,6 +4,7 @@ from NodesPostPro.nodes.container import check_type, are_comparable
 import math
 import numpy as np
 import pandas as pd
+from functools import partial
 
 def apply_function(value, function):
     if check_type(value, PortValueType.PD_DATAFRAME):
@@ -18,8 +19,15 @@ def apply_function(value, function):
         raise ValueError("Wrong type given in apply_function : "+str(type(value)))
         
 def apply_twin_function(value1, value2, function):
-    if check_type(value1, PortValueType.PD_DATAFRAME):
-        return function(value1, value2) # Works considering value 2 is a float as a condition in check_function
+    if check_type(value1, PortValueType.PD_DATAFRAME): # Works considering value 2 is a float as a condition in check_function
+        if function == np.round:
+            print(value2)
+            return value1.round(value2)
+        elif function == np.power:
+            return np.power(value1, value2)
+        elif function == np.mod:
+            return np.mod(value1, value2)
+        # return value1.apply(partial(function, value2)) 
     elif check_type(value1, PortValueType.NP_ARRAY):
         return function(value1, value2)
     else:
@@ -296,7 +304,7 @@ class TwoMathNode(GenericNode):
             elif operation == "Modulo":
                 output_dict["Output"] = apply_twin_function(input_1, input_2, np.mod)
             elif operation == "Round":
-                output_dict["Output"] = apply_twin_function(input_1, input_2, np.round)
+                output_dict["Output"] = apply_twin_function(input_1, input_dict["Input 2"], np.round)
             else:
                 raise NotImplementedError("Operation "+operation+" not implemented for two matrixes.")
 

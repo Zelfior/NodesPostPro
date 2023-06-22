@@ -236,8 +236,6 @@ class pltWidget(NodeBaseWidget):
                 else:
                     base_spec = current_subgrid[0]
 
-                print(figure_list.keys())
-
                 if cut == "V":
                     new_specs = base_spec.subgridspec(2, 1, height_ratios=[figure_list["ratio1"], figure_list["ratio2"]])
 

@@ -329,7 +329,7 @@ class GenericNode(BaseNode):
             Else:
                 -   Resets the node outputs
     """
-    def update_values(self):
+    def update_values(self, propagate = True):
         if self.to_update:
             
             print("Updating node "+self._view.name)
@@ -357,7 +357,9 @@ class GenericNode(BaseNode):
             self.view.update()
             self.update()
             self.update_twin_inputs()
-            self.propagate()
+
+            if propagate:
+                self.propagate()
             
             if self.get_property("is_valid"):
                 for port in self.view.inputs:
@@ -521,13 +523,17 @@ class GenericNode(BaseNode):
         Calls the update_values function of all of the node children
     """
     def propagate(self):
-        #   Loop on outputs
-        for output_id in range(len(self.outputs())):
-            #   Loop on each ports to which the output is connected
-            for connected_id in range(len(self.output(output_id).connected_ports())):
-                #   Call the update_values function of the connected node
-                self.output(output_id).connected_ports()[connected_id].node().update_values()
-    
+        #   Getting children in order to update
+
+        update_order_names = self.get_propagation_order()
+        children_list = self.get_children_dict()
+
+        del update_order_names[0]
+
+        while len(update_order_names) > 0:
+            children_list[update_order_names[0]].update_values(propagate = False)
+            del update_order_names[0]
+
 
     """
         Resets all of the outputs containers.
@@ -807,3 +813,68 @@ class GenericNode(BaseNode):
 
     def get_layout(self):
         return _NodeGroupBox(self._label).layout()
+
+    def get_propagation_order(self):
+        nodes_heritage = self.get_heritage(True)
+
+        children_dict = {}
+
+        node_list = []
+
+        for node in nodes_heritage:
+            children_dict[node["name"]] = node["children"]
+            if not node["name"] in node_list:
+                node_list.append(node["name"])
+
+        unsorted_nodes = node_list.copy()
+        node_order = []
+
+        while len(unsorted_nodes) > 0:
+
+            for i in range(len(unsorted_nodes)):
+                node = unsorted_nodes[i]
+
+                is_valid = True
+
+                for child in children_dict[node]:
+                    if not child in node_order:
+                        is_valid = False
+                
+                if is_valid:
+                    node_order.insert(0, node)
+                    del unsorted_nodes[i]
+                    break
+
+        return node_order
+
+    def get_heritage(self, propagate:bool):
+        children_list = [{"name": self.name(), "children": []}]
+
+        for port_name in self.outputs():
+            port = self.outputs()[port_name]#.connected_ports()[connected_port].node()
+            if len(port.connected_ports()) > 0:
+                for connected_port in port.connected_ports():
+                    if not connected_port.node().name() in children_list[0]["children"]:
+                        children_list[0]["children"].append(connected_port.node().name())
+
+                        if propagate:
+                            children_list += connected_port.node().get_heritage(propagate)
+
+        return children_list
+    
+    def get_children_dict(self):
+        children_dict = {}
+
+        for port_name in self.outputs():
+            port = self.outputs()[port_name]#.connected_ports()[connected_port].node()
+            if len(port.connected_ports()) > 0:
+                for connected_port in port.connected_ports():
+                    if not connected_port.node().name() in children_dict:
+                        children_dict[connected_port.node().name()]=connected_port.node()
+
+                        new_node_children = connected_port.node().get_children_dict()
+                        for node_name in new_node_children:
+                            if not node_name in children_dict:
+                                children_dict[node_name] = new_node_children[node_name]
+
+        return children_dict

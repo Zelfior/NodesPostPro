@@ -135,6 +135,8 @@ def main():
         plt_node.FillBetweenNode,
         plt_node.HistNode,
         plt_node.SaveFigureNode,
+        plt_node.VerticalSplitNode,
+        plt_node.HorizontalSplitNode,
         
         #   Pickle nodes
         pickle_nodes.LoadNumpyNode,

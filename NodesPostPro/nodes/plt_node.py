@@ -2,6 +2,7 @@ from NodeGraphQt import NodeBaseWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
+from matplotlib.gridspec import SubplotSpec 
 from Qt import QtWidgets
 
 import NodeGraphQt
@@ -73,8 +74,7 @@ class PltCanvasWidget(QtWidgets.QWidget):
         super(PltCanvasWidget, self).__init__(parent)
         self.fig = Figure(figsize=(width, height))
         self.canvas = FigureCanvasQTAgg(self.fig)
-        self.axes = self.fig.add_subplot(111)
-        self.twinx_axes = None
+        self.base_grid_spec = self.fig.add_gridspec(1, 1)
 
         self.layout_ = QtWidgets.QHBoxLayout(self)
         self.layout_.setContentsMargins(-5, -5, -5, -5)
@@ -86,8 +86,7 @@ class PltCanvasWidget(QtWidgets.QWidget):
     
     def update_figure(self, width, height):
         self.fig.clear()
-        self.axes = self.fig.add_subplot(111)
-        self.twinx_axes = None
+        self.base_grid_spec = self.fig.add_gridspec(1, 1)
 
         self.fig.set_figwidth(width)
         self.fig.set_figheight(height)
@@ -109,11 +108,6 @@ class pltWidget(NodeBaseWidget):
         # set the custom widget.
         self.set_custom_widget(self.canvas)
 
-        self.input_arrays_1 = []
-        self.input_arrays_2 = []
-
-        self.plot_parameters= {"legend": False, "x_log":False, "y_log":False, "color_bar":False}
-
         self.title = ""
 
     def sort_by_priority(self, array):
@@ -133,12 +127,132 @@ class pltWidget(NodeBaseWidget):
 
         return new_array
 
+    def plot_on_axis(self, fig:Figure, axis:Axes, parameters:dict, array1:list, array2:list):
 
-    def update_plot(self):
+        array1 = self.sort_by_priority(array1)
+        array2 = self.sort_by_priority(array2)
 
-        
-        if "width" in self.plot_parameters:
-            self.canvas.update_figure(int(self.plot_parameters["width"]), int(self.plot_parameters["height"]))
+        mappables= []
+
+        if array1 is not None:
+            for element in array1:
+                el = plot_element_on_axis(fig, axis, element)
+
+                if element['element_type'] == "imshow":
+                    mappables.append(el)
+        else:
+            axis.yaxis.set_visible(False)
+                
+        if array2 is not None:
+            twinx_axes = axis.twinx()
+
+            for element in array2:
+                el = plot_element_on_axis(fig, twinx_axes, element)
+
+                if element['element_type'] == "imshow":
+                    mappables.append(el)
+        else:
+            twinx_axes = None
+                
+
+        if "Title" in parameters:
+            axis.set_title(parameters["Title"])
+
+        if "X_min" in parameters:
+            if "X_max" in parameters:
+                axis.set_xlim((parameters["X_min"], parameters["X_max"]))
+            else:
+                axis.set_xlim((parameters["X_min"], None))
+        elif "X_max" in parameters:
+            axis.set_xlim((None, parameters["X_max"]))
+
+        if "Y_min" in parameters:
+            if "Y_max" in parameters:
+                axis.set_ylim((parameters["Y_min"], parameters["Y_max"]))
+            else:
+                axis.set_ylim((parameters["Y_min"], None))
+        elif "Y_max" in parameters:
+            axis.set_ylim((None, parameters["Y_max"]))
+
+
+        if "X label" in parameters:
+            axis.set_xlabel(parameters["X label"])
+            
+        if "Y label 1" in parameters:
+            if array1 is not None:
+                axis.set_ylabel(parameters["Y label 1"])
+            
+        if "Y label 2" in parameters:
+            if twinx_axes is not None:
+                twinx_axes.set_ylabel(parameters["Y label 2"])
+
+
+
+        if parameters["legend"]:
+            if twinx_axes != None:
+                h1, l1 = axis.get_legend_handles_labels()
+                h2, l2 = twinx_axes.get_legend_handles_labels()
+                axis.legend(handles=h1+h2, labels=l1+l2)
+            else:
+                axis.legend()
+
+        if parameters["color_bar"]:
+            if len(mappables) > 0:
+                self.canvas.fig.colorbar(mappables[0])
+            
+        if parameters["x_log"]:
+            axis.set_xscale('log')
+        else:   
+            axis.set_xscale('linear')
+            
+        if parameters["y_log"]:
+            axis.set_yscale('log')
+        else:   
+            axis.set_yscale('linear')
+
+    def update_iteration(self, figure_list, current_subgrid):
+
+            cut = figure_list["cut_direction"]
+
+            if cut is None:
+                if list(figure_list.keys()) == ["cut_direction"]:
+                    axis = self.canvas.fig.add_subplot(current_subgrid)
+                    axis.set_visible(False)
+
+                else:
+                    assert len(figure_list["list"]) == 1
+
+                    input_arrays_1 = figure_list["list"][0]["array1"]
+                    input_arrays_2 = figure_list["list"][0]["array2"]
+                    plot_parameters = figure_list["list"][0]["parameters"]
+
+                    axis = self.canvas.fig.add_subplot(current_subgrid)
+                    self.plot_on_axis(self.canvas.fig, axis, plot_parameters, input_arrays_1, input_arrays_2)
+            else:
+                assert len(figure_list["list"]) == 2
+
+                if type(current_subgrid) == SubplotSpec:
+                    base_spec = current_subgrid
+                else:
+                    base_spec = current_subgrid[0]
+
+                print(figure_list.keys())
+
+                if cut == "V":
+                    new_specs = base_spec.subgridspec(2, 1, height_ratios=[figure_list["ratio1"], figure_list["ratio2"]])
+
+                if cut == "H":
+                    new_specs = base_spec.subgridspec(1, 2, width_ratios=[figure_list["ratio1"], figure_list["ratio2"]])
+
+                self.update_iteration(figure_list["list"][0], new_specs[0])
+                self.update_iteration(figure_list["list"][1], new_specs[1])
+
+
+    def update_plot(self, figure_list):
+
+        plot_parameters = figure_list["parameters"]
+        if "width" in plot_parameters:
+            self.canvas.update_figure(int(plot_parameters["width"]), int(plot_parameters["height"]))
 
             #   On reset le custom widget du canvas pour qu'il prenne en compte la nouvelle taille
             group = _NodeGroupBox(self._label)
@@ -147,101 +261,22 @@ class pltWidget(NodeBaseWidget):
 
         else:
             self.canvas.fig.clear()  # clear the axes content
+            self.canvas.base_grid_spec = self.canvas.fig.add_gridspec(1, 1)
 
-            self.canvas.axes = self.canvas.fig.add_subplot(111)
-            self.canvas.twinx_axes = None
+        cut = figure_list["cut_direction"]
 
-        self.input_arrays_1 = self.sort_by_priority(self.input_arrays_1)
-        self.input_arrays_2 = self.sort_by_priority(self.input_arrays_2)
+        if cut == None:
+            input_arrays_1 = figure_list["list"][0]["array1"]
+            input_arrays_2 = figure_list["list"][0]["array2"]
+            plot_parameters = figure_list["list"][0]["parameters"]
 
-        mappables= []
-
-        if self.input_arrays_1 is not None:
-            for element in self.input_arrays_1:
-                el = plot_element_on_axis(self.canvas.fig, self.canvas.axes, element)
-
-                if element['element_type'] == "imshow":
-                    mappables.append(el)
-                
-        if self.input_arrays_2 is not None:
-            self.canvas.twinx_axes = self.canvas.axes.twinx()
-
-            for element in self.input_arrays_2:
-                el = plot_element_on_axis(self.canvas.fig, self.canvas.twinx_axes, element)
-
-                if element['element_type'] == "imshow":
-                    mappables.append(el)
-                
-
-        if "Title" in self.plot_parameters:
-            self.canvas.axes.set_title(self.plot_parameters["Title"])
-
-        if "X_min" in self.plot_parameters:
-            if "X_max" in self.plot_parameters:
-                self.canvas.axes.set_xlim((self.plot_parameters["X_min"], self.plot_parameters["X_max"]))
-            else:
-                self.canvas.axes.set_xlim((self.plot_parameters["X_min"], None))
-        elif "X_max" in self.plot_parameters:
-            self.canvas.axes.set_xlim((None, self.plot_parameters["X_max"]))
-
-        if "Y_min" in self.plot_parameters:
-            if "Y_max" in self.plot_parameters:
-                self.canvas.axes.set_ylim((self.plot_parameters["Y_min"], self.plot_parameters["Y_max"]))
-            else:
-                self.canvas.axes.set_ylim((self.plot_parameters["Y_min"], None))
-        elif "Y_max" in self.plot_parameters:
-            self.canvas.axes.set_ylim((None, self.plot_parameters["Y_max"]))
-
-
-        if "X label" in self.plot_parameters:
-            self.canvas.axes.set_xlabel(self.plot_parameters["X label"])
-            
-        if "Y label 1" in self.plot_parameters:
-            if self.input_arrays_1 is not None:
-                self.canvas.axes.set_ylabel(self.plot_parameters["Y label 1"])
-            
-        if "Y label 2" in self.plot_parameters:
-            if self.canvas.twinx_axes is not None:
-                self.canvas.twinx_axes.set_ylabel(self.plot_parameters["Y label 2"])
-
-
-
-        if self.plot_parameters["legend"]:
-            if self.canvas.twinx_axes != None:
-                h1, l1 = self.canvas.axes.get_legend_handles_labels()
-                h2, l2 = self.canvas.twinx_axes.get_legend_handles_labels()
-                self.canvas.axes.legend(handles=h1+h2, labels=l1+l2)
-            else:
-                self.canvas.axes.legend()
-
-        if self.plot_parameters["color_bar"]:
-            if len(mappables) > 0:
-                self.canvas.fig.colorbar(mappables[0])
-            
-        if self.plot_parameters["x_log"]:
-            self.canvas.axes.set_xscale('log')
-        else:   
-            self.canvas.axes.set_xscale('linear')
-            
-        if self.plot_parameters["y_log"]:
-            self.canvas.axes.set_yscale('log')
-        else:   
-            self.canvas.axes.set_yscale('linear')
+            axis = self.canvas.fig.add_subplot(self.canvas.base_grid_spec[0])
+            self.plot_on_axis(self.canvas.fig, axis, plot_parameters, input_arrays_1, input_arrays_2)
+        else:
+            self.update_iteration(figure_list, self.canvas.base_grid_spec[0])
 
         self.canvas.fig.tight_layout()
         self.canvas.canvas.draw()  # actually draw the new content
-
-
-
-
-    def update_plot_list(self, array_1, array_2, plot_parameters):
-        self.input_arrays_1 = array_1
-        self.input_arrays_2 = array_2
-        self.plot_parameters = plot_parameters
-
-        self.update_plot()
-
-
 
     def get_value(self):
         return ''
@@ -782,14 +817,47 @@ class HistNode(GenericNode):
 
 
 
+class GenericFigureNode(GenericNode):
+    def __init__(self):
+        super(GenericFigureNode, self).__init__()
+
+
+
+    def reset_outputs(self):
+        super(GenericFigureNode, self).reset_outputs()
+
+        if check_type(self.get_property("canvas_width"), PortValueType.INTEGER) and \
+            check_type(self.get_property("canvas_height"), PortValueType.INTEGER):
+            self.plot_widget.update_plot({
+                            "cut_direction": None, 
+                            "parameters":{"width":self.get_property("canvas_width"), "height":self.get_property("canvas_height")},
+                            "list":[
+                                    {
+                                        "array1": None, 
+                                        "array2": None, 
+                                        "parameters": {"legend": False, "x_log":False, "y_log":False, "color_bar":False}
+                                    }
+                                ]})
+        else:
+            
+            self.plot_widget.update_plot({
+                            "cut_direction": None, 
+                            "parameters":{"width":6, "height":6},
+                            "list":[
+                                    {
+                                        "array1": None, 
+                                        "array2": None, 
+                                        "parameters": {"legend": False, "x_log":False, "y_log":False, "color_bar":False}
+                                    }
+                                ]})
+
+        self.change_label("Information", "", False)
 
 
 
 
 
-
-
-class PltFigureNode(GenericNode):
+class PltFigureNode(GenericFigureNode):
 
     # unique node identifier.
     __identifier__ = 'Matplotlib'
@@ -833,29 +901,13 @@ class PltFigureNode(GenericNode):
 
         self.view.add_widget(self.plot_widget)
         self.view.draw_node()
-
-        self.plot_widget.update_plot()
         
         self.add_label("Information")
 
+        self.reset_outputs()
+
         self.is_iterated_compatible = True
 
-
-    #     print(self.label_list["Information"].label_widget.parent()) #   The layout of the plt node
-    #     print(self.label_list["Information"].label_widget.layout()) #   The layout of the custom node
-        
-    #     self.temp_do_stuff(self.label_list["Information"].label_widget.parent())
-
-    #     print(self.view.widgets["canvas_width"])
-    #     print(self.view.widgets["canvas_width"].layout())
-    #     print(self.view.widgets["canvas_width"].parent())
-    #     print(self.view.parent())
-
-    # def temp_do_stuff(self, object_:_NodeGroupBox):
-    #     print(object_.layout())
-    #     print(object_.layout().count())             #   This is 1
-    #     print(object_.layout().itemAt(0).widget())  #   This is the label widget
-    #     # print(object_.layout().parent().parent().layout())
 
     def update_from_input(self):
         if not self.get_value_from_port("Input Plottable 1") == None or not self.get_value_from_port("Input Plottable 2") == None:
@@ -895,11 +947,31 @@ class PltFigureNode(GenericNode):
             if self.get_twin_input("Title").get_property() != "":
                 plot_parameters["Title"] = self.get_twin_input("Title").get_property()
 
-            self.plot_widget.update_plot_list(self.input_arrays_1, self.input_arrays_2, plot_parameters)
+            self.plot_widget.update_plot({
+                        "cut_direction": None, 
+                        "parameters":{"width":self.get_property("canvas_width"), "height":self.get_property("canvas_height")},
+                        "list":[
+                                {
+                                    "array1": self.input_arrays_1, 
+                                    "array2": self.input_arrays_2, 
+                                    "parameters": plot_parameters
+                                }
+                            ]})
 
             self.set_output_property("Figure", PltContainer(self.plot_widget.canvas.fig,
-                                                            self.plot_widget.canvas.canvas,
-                                                            plot_parameters), False)
+                                                                {
+                                                                    "cut_direction": None,
+                                                                    "parameters":{"width":self.get_property("canvas_width"), "height":self.get_property("canvas_height")},
+                                                                    "list":[
+                                                                        {
+                                                                            "axis": self.plot_widget.canvas.canvas,
+                                                                            "array1": self.input_arrays_1, 
+                                                                            "array2": self.input_arrays_2, 
+                                                                            "parameters": plot_parameters,
+                                                                            "cut_direction": None
+                                                                        }]
+                                                                }
+                                                            ), False)
 
     def check_inputs(self):
         if not self.get_value_from_port("Input Plottable 1") == None:
@@ -931,12 +1003,6 @@ class PltFigureNode(GenericNode):
             self.set_property("is_valid", False)
             self.change_label("Information", "Given width should be a float", True)
 
-
-    def reset_outputs(self):
-        super(PltFigureNode, self).reset_outputs()
-
-        self.plot_widget.update_plot_list(None, None, {"legend": False, "x_log":False, "y_log":False, "color_bar":False})
-        self.change_label("Information", "", False)
 
 
 
@@ -997,3 +1063,131 @@ class SaveFigureNode(GenericNode):
         if not is_float(self.get_property("canvas_dpi")):
             self.set_property("is_valid", False)
             self.change_label("Information", "Given DPI should be a float", True)
+
+
+
+
+
+
+class GenericSplitNode(GenericFigureNode):
+
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    # NODE_NAME = 'Vertical Split'
+
+    def __init__(self):
+        super(GenericSplitNode, self).__init__()
+
+        # create input & output ports
+        self.add_custom_input('Input Figure 1', PortValueType.FIGURE)
+        self.add_custom_input('Input Figure 2', PortValueType.FIGURE)
+
+        self.add_twin_input('Ratio 1', PortValueType.INTEGER, default="1")
+        self.add_twin_input('Ratio 2', PortValueType.INTEGER, default="1")
+
+        self.add_custom_output('Figure', PortValueType.FIGURE)
+        
+        self.add_text_input("canvas_width", "Width", "6")
+        self.add_text_input("canvas_height", "Height", "6")
+
+        self.plot_widget = pltWidget(self.view, name="plot")
+
+        self.create_property('Plot_Widget', None)
+
+        self.view.add_widget(self.plot_widget)
+        self.view.draw_node()
+
+        self.add_label("Information")
+
+        self.reset_outputs()
+
+        self.cut_key = ""
+
+    def update_from_input(self):
+        self.change_label("Information", "", False)
+
+        if self.is_input_valid("Input Figure 1")[0]:
+            param_list_1 = self.get_value_from_port("Input Figure 1").get_property().get_property("Parameters_list")
+        else:
+            param_list_1 = {"cut_direction": None}
+            
+        if self.is_input_valid("Input Figure 2")[0]:
+            param_list_2 = self.get_value_from_port("Input Figure 2").get_property().get_property("Parameters_list")
+        else:
+            param_list_2 = {"cut_direction": None}
+
+        self.set_output_property("Figure", PltContainer(self.plot_widget.canvas.fig,
+                                                        {
+                                                            "cut_direction": self.cut_key,
+                                                            "ratio1":int(self.get_property("Ratio 1")), 
+                                                            "ratio2":int(self.get_property("Ratio 2")),
+                                                            "parameters":{"width":self.get_property("canvas_width"), "height":self.get_property("canvas_height")},
+                                                            "list":[param_list_1, param_list_2]
+                                                        }), False)
+        
+        self.plot_widget.update_plot({
+                                        "cut_direction": self.cut_key,
+                                        "ratio1":int(self.get_property("Ratio 1")), 
+                                        "ratio2":int(self.get_property("Ratio 2")),
+                                        "parameters":{"width":self.get_property("canvas_width"), 
+                                        "height":self.get_property("canvas_height"), },
+                                        "list":[param_list_1, param_list_2]
+                                    })
+
+    def check_inputs(self):
+        is_valid_1, message_1 = self.is_input_valid("Input Figure 1")
+        is_valid_2, message_2 = self.is_input_valid("Input Figure 2")
+
+        self.set_property("is_valid", is_valid_1 or is_valid_2)
+
+        if not is_valid_1 or is_valid_2:
+            self.change_label("Information", "None of the input figure is valid.", True)
+        else:
+            for key in ["canvas_height", "canvas_width"]:
+                if self.get_property("is_valid"):
+                    is_valid, message = self.is_input_valid(key)
+
+                    if not is_valid:
+                        self.set_property("is_valid", is_valid)
+                        self.change_label("Information", message, True)
+                        
+            for key in ["Ratio 1", "Ratio 2"]:
+                if self.get_property("is_valid"):
+                    is_valid, message = self.is_twin_input_valid(key)
+
+                    if not is_valid:
+                        self.set_property("is_valid", is_valid)
+                        self.change_label("Information", message, True)
+
+
+
+
+
+class VerticalSplitNode(GenericSplitNode):
+
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Vertical Split'
+
+    def __init__(self):
+        super(VerticalSplitNode, self).__init__()
+
+        self.cut_key = "V"
+        
+
+class HorizontalSplitNode(GenericSplitNode):
+
+    # unique node identifier.
+    __identifier__ = 'Matplotlib'
+
+    # initial default node name.
+    NODE_NAME = 'Horizontal Split'
+
+    def __init__(self):
+        super(HorizontalSplitNode, self).__init__()
+
+        self.cut_key = "H"

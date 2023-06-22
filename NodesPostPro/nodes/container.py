@@ -264,10 +264,12 @@ class PltContainer:
     """
         The countainer is initialized empty and undefined
     """
-    def __init__(self, fig, axes, parameters):
-        self.fig = fig
-        self.axes = axes
-        self.parameters = parameters
+    def __init__(self, figure:Figure, input_parameters:dict):
+        self.fig = figure
+        self.parameters_list = input_parameters
+        # self.axes = input_parameters["axis"]
+        # self.parameters = input_parameters["parameters"]
+        # self.cut = input_parameters["cut"]
 
     """
         Returns the contained value
@@ -275,10 +277,12 @@ class PltContainer:
     def get_property(self, property_name:str):
         if property_name == "Figure":
             return self.fig
-        elif property_name == "Axes":
-            return self.axes
-        elif property_name == "Parameters":
-            return self.parameters
+        # elif property_name == "Axes":
+        #     return self.axes
+        elif property_name == "Parameters_list":
+            return self.parameters_list
+        # elif property_name == "Cut":
+        #     return self.cut
         else:
             raise ValueError("Given property name does not exist: "+property_name)
         

@@ -191,6 +191,12 @@
         "label":"External iterator and column plot",
         "file":"hotkeys/hotkey_functions.py",
         "function_name":"external_iterator_column_plot"
+      },
+      {
+        "type":"command",
+        "label":"Multiple plot",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"multi_plot"
       }
     ]
   },

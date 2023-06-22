@@ -299,4 +299,7 @@ def iterator_random_hist(graph):
 def external_iterator_column_plot(graph):
     load_example(graph, "external_iterator_column_plot.json")
 
+def multi_plot(graph):
+    load_example(graph, "multi_plot.json")
+
     

@@ -81,6 +81,7 @@ def main():
         math_nodes.OneMathNode,
         math_nodes.TwoMathNode,
         math_nodes.TrigonometryNode,
+        math_nodes.IfNode,
 
         #   Math nodes
         string_nodes.ReplaceNode,

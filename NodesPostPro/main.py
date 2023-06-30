@@ -113,6 +113,7 @@ def main():
         iterator_nodes.ExternalNode,
         iterator_nodes.InternalNode,
         iterator_nodes.InteratorListNode,
+        iterator_nodes.InteratorFilterNode,
 
         #   Pandas nodes
         pandas_nodes.LoadFileNode,

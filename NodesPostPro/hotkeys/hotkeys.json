@@ -197,6 +197,12 @@
         "label":"Multiple plot",
         "file":"hotkeys/hotkey_functions.py",
         "function_name":"multi_plot"
+      },
+      {
+        "type":"command",
+        "label":"Iterator filter",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"iterator_filter"
       }
     ]
   },

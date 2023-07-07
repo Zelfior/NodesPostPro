@@ -319,3 +319,63 @@ class TwoMathNode(GenericNode):
 
         return output_dict
         
+
+
+class IfNode(GenericNode):
+    """
+    An example of a node with a embedded QLineEdit.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Math'
+
+    # initial default node name.
+    NODE_NAME = 'If'
+
+    def __init__(self):
+        super(IfNode, self).__init__()
+
+        #   create output port for the read dataframe
+        self.add_custom_input('Input 1', PortValueType.NUMBER)
+        self.add_custom_input('Input 2', PortValueType.NUMBER)
+        self.add_custom_output('Output', PortValueType.BOOL)
+
+        self.add_combo_menu('Condition', 'Condition', ["<", "<=", "=", ">=", ">"])
+                               
+        self.add_label("Information")
+
+        self.is_iterated_compatible = True
+
+        
+    def check_function(self, input_dict, first=False):
+        if (not "Input 1" in input_dict) or (type(input_dict["Input 1"]) == str):
+            return False, "Input 1 not valid", "Information"
+        
+        if (not "Input 2" in input_dict) or (type(input_dict["Input 2"]) == str):
+            return False, "Input 2 not valid", "Information"
+        
+        return True, "", "Information"
+
+    
+    def update_function(self, input_dict, first=False):
+        
+        output_dict = {}
+        condition = self.get_property("Condition")
+
+        if condition == "<":
+            output_dict["Output"] = (float(input_dict["Input 1"]) < float(input_dict["Input 2"]))
+        elif condition == "<=":
+            output_dict["Output"] = (float(input_dict["Input 1"]) <= float(input_dict["Input 2"]))
+        elif condition == "=":
+            output_dict["Output"] = (float(input_dict["Input 1"]) == float(input_dict["Input 2"]))
+        elif condition == ">=":
+            output_dict["Output"] = (float(input_dict["Input 1"]) >= float(input_dict["Input 2"]))
+        elif condition == ">":
+            output_dict["Output"] = (float(input_dict["Input 1"]) > float(input_dict["Input 2"]))
+
+        output_dict["__message__Information"] = str(output_dict["Output"])
+
+        return output_dict
+
+
+

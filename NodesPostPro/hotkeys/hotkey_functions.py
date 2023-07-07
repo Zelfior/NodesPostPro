@@ -291,4 +291,7 @@ def external_iterator_column_plot(graph):
 def multi_plot(graph):
     load_example(graph, "multi_plot.json")
 
+def iterator_filter(graph):
+    load_example(graph, "iterator_filter.json")
+
     

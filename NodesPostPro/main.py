@@ -81,6 +81,7 @@ def main():
         math_nodes.OneMathNode,
         math_nodes.TwoMathNode,
         math_nodes.TrigonometryNode,
+        math_nodes.IfNode,
 
         #   Math nodes
         string_nodes.ReplaceNode,
@@ -113,6 +114,7 @@ def main():
         iterator_nodes.ExternalNode,
         iterator_nodes.InternalNode,
         iterator_nodes.InteratorListNode,
+        iterator_nodes.InteratorFilterNode,
 
         #   Pandas nodes
         pandas_nodes.LoadFileNode,

@@ -3,10 +3,91 @@
     "layout_direction":0,
     "acyclic":true,
     "pipe_collision":false,
-    "pipe_slicing":false
+    "pipe_slicing":false,
+    "pipe_style":1,
+    "accept_connection_types":{},
+    "reject_connection_types":{}
   },
   "nodes":{
-    "0x1f1c15757c0":{
+    "0x1f93e818400":{
+      "type_":"Input.InputStringNode",
+      "icon":null,
+      "name":"String",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":258.0,
+      "height":68.05000000000001,
+      "pos":[
+        818.1948997369366,
+        591.9012417900453
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Value":"green"
+      }
+    },
+    "0x1f93e812af0":{
+      "type_":"Input.InputFloatNode",
+      "icon":null,
+      "name":"Float",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":258.0,
+      "height":68.05000000000001,
+      "pos":[
+        818.1948997369373,
+        509.50995485827747
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Value":"150."
+      }
+    },
+    "0x1f93e7c3e20":{
       "type_":"Iterator.InternalNode",
       "icon":null,
       "name":"Internal",
@@ -48,7 +129,46 @@
         "Information":"Values count: 500"
       }
     },
-    "0x1f1c1575e50":{
+    "0x1f9393d3e20":{
+      "type_":"Cast Variables.IntegerToFloatCastNode",
+      "icon":null,
+      "name":"Integer to Float",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":182.0,
+      "height":60,
+      "pos":[
+        214.01689181106832,
+        438.32567111798204
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Information":"0.0 x 500"
+      }
+    },
+    "0x1f9393e7850":{
       "type_":"Random.RandomUniformNode",
       "icon":null,
       "name":"Uniform",
@@ -91,7 +211,7 @@
         "Information":"0.0 x 500"
       }
     },
-    "0x1f1c26a0610":{
+    "0x1f93e7d8d60":{
       "type_":"Iterator.InteratorListNode",
       "icon":null,
       "name":"Iterated to list",
@@ -116,8 +236,8 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":189.0,
-      "height":60,
+      "width":210.0,
+      "height":61.75,
       "pos":[
         848.573028585455,
         436.4853705771275
@@ -130,7 +250,7 @@
         "Information":"List length: 500\nType: float"
       }
     },
-    "0x1f1c26a0af0":{
+    "0x1f93e7d80d0":{
       "type_":"Matplotlib.HistNode",
       "icon":null,
       "name":"Hist",
@@ -174,7 +294,7 @@
         "Information":""
       }
     },
-    "0x1f1c26aea60":{
+    "0x1f93c35e460":{
       "type_":"Matplotlib.PltFigureNode",
       "icon":null,
       "name":"Figure",
@@ -200,7 +320,7 @@
       "selected":false,
       "visible":true,
       "width":833.0,
-      "height":947.95,
+      "height":834.5500000000001,
       "pos":[
         1425.0385084407421,
         435.7997689978253
@@ -221,193 +341,76 @@
         "Plot_Widget":"",
         "Information":""
       }
-    },
-    "0x1f1c4a295b0":{
-      "type_":"Cast Variables.IntegerToFloatCastNode",
-      "icon":null,
-      "name":"Integer to Float",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":189.0,
-      "height":60,
-      "pos":[
-        214.01689181106832,
-        438.32567111798204
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Information":"0.0 x 500"
-      }
-    },
-    "0x1f1c4a23b50":{
-      "type_":"Input.InputFloatNode",
-      "icon":null,
-      "name":"Float",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":258.0,
-      "height":68.05000000000001,
-      "pos":[
-        818.1948997369373,
-        509.50995485827747
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Value":"150."
-      }
-    },
-    "0x1f1c26da670":{
-      "type_":"Input.InputStringNode",
-      "icon":null,
-      "name":"String",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":258.0,
-      "height":68.05000000000001,
-      "pos":[
-        818.1948997369366,
-        591.9012417900453
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Value":"green"
-      }
     }
   },
   "connections":[
     {
       "out":[
-        "0x1f1c15757c0",
+        "0x1f93e7c3e20",
         "i"
       ],
       "in":[
-        "0x1f1c4a295b0",
+        "0x1f9393d3e20",
         "Input"
       ]
     },
     {
       "in":[
-        "0x1f1c1575e50",
+        "0x1f9393e7850",
         "Max"
       ],
       "out":[
-        "0x1f1c4a295b0",
+        "0x1f9393d3e20",
         "Output"
       ]
     },
     {
       "out":[
-        "0x1f1c1575e50",
+        "0x1f9393e7850",
         "Output Value"
       ],
       "in":[
-        "0x1f1c26a0610",
+        "0x1f93e7d8d60",
         "Input"
       ]
     },
     {
       "out":[
-        "0x1f1c26a0610",
+        "0x1f93e7d8d60",
         "Output"
       ],
       "in":[
-        "0x1f1c26a0af0",
+        "0x1f93e7d80d0",
         "X"
       ]
     },
     {
       "in":[
-        "0x1f1c26a0af0",
+        "0x1f93e7d80d0",
         "X min"
       ],
       "out":[
-        "0x1f1c4a23b50",
+        "0x1f93e812af0",
         "Output Value"
       ]
     },
     {
       "in":[
-        "0x1f1c26a0af0",
+        "0x1f93e7d80d0",
         "color"
       ],
       "out":[
-        "0x1f1c26da670",
+        "0x1f93e818400",
         "Output Value"
       ]
     },
     {
       "out":[
-        "0x1f1c26a0af0",
+        "0x1f93e7d80d0",
         "Element"
       ],
       "in":[
-        "0x1f1c26aea60",
+        "0x1f93c35e460",
         "Input Plottable 1"
       ]
     }

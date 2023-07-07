@@ -9,7 +9,89 @@
     "reject_connection_types":{}
   },
   "nodes":{
-    "0x204f9580520":{
+    "0x1f93c33dfa0":{
+      "type_":"Input.InputStringNode",
+      "icon":null,
+      "name":"String",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":258.0,
+      "height":68.05000000000001,
+      "pos":[
+        -68.3266622189262,
+        254.67210463418002
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Value":"Plot_column_XXX"
+      }
+    },
+    "0x1f9392bedc0":{
+      "type_":"Iterator.ExternalNode",
+      "icon":null,
+      "name":"External",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":235.0,
+      "height":194.05,
+      "pos":[
+        -462.2008647760189,
+        225.49799766345154
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Min":"2",
+        "Max":"5",
+        "Step":"1",
+        "Execute":true,
+        "Information":"Values count: 3"
+      }
+    },
+    "0x1f93b94a550":{
       "type_":"Pandas.LoadFileNode",
       "icon":null,
       "name":"Read CSV file",
@@ -46,14 +128,138 @@
       "custom":{
         "is_valid":true,
         "Browse file":true,
-        "Filename":"C:\\Users\\tm787802\\Desktop\\NodesPostPro\\NodesPostPro\\example_files\\test.csv",
         "Filename_label":"",
         "Separator":",",
         "Separator_label":"",
         "Information":"Columns : 30, lines : 6281"
       }
     },
-    "0x204f95be100":{
+    "0x1f93c35e370":{
+      "type_":"List.GetListElementNode",
+      "icon":null,
+      "name":"Get element",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":343.0,
+      "height":105.85000000000001,
+      "pos":[
+        -151.69467556148243,
+        112.1360366329626
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Input Index":"0",
+        "Input Index_label":"Input Index : 2",
+        "Information":"Type: str"
+      }
+    },
+    "0x1f939302490":{
+      "type_":"String.ReplaceNode",
+      "icon":null,
+      "name":"Replace",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":267.0,
+      "height":163.6,
+      "pos":[
+        271.58185015133927,
+        204.18511973376786
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "From":"XXX",
+        "From_label":"",
+        "To":"",
+        "To_label":"To : TMER",
+        "Information":"Output: Plot_column_TMER"
+      }
+    },
+    "0x1f9392bef10":{
+      "type_":"Pandas.GetColumnNode",
+      "icon":null,
+      "name":"Get column from name",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":373.0,
+      "height":105.85000000000001,
+      "pos":[
+        247.27253917064616,
+        3.6471348378718673
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "Column name":"",
+        "Column name_label":"Column name : TMER",
+        "Information":"Output shape : (6281, 1)"
+      }
+    },
+    "0x1f9391e4070":{
       "type_":"Matplotlib.PlotNode",
       "icon":null,
       "name":"Plot",
@@ -78,7 +284,7 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":223.0,
+      "width":222.0,
       "height":190.9,
       "pos":[
         710.4162049838989,
@@ -95,7 +301,7 @@
         "Information":""
       }
     },
-    "0x204f963efa0":{
+    "0x1f93ee84850":{
       "type_":"Matplotlib.PltFigureNode",
       "icon":null,
       "name":"Figure",
@@ -143,214 +349,7 @@
         "Information":""
       }
     },
-    "0x204fbae04f0":{
-      "type_":"List.GetListElementNode",
-      "icon":null,
-      "name":"Get element",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":343.0,
-      "height":105.85000000000001,
-      "pos":[
-        -151.69467556148243,
-        112.1360366329626
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Input Index":"0",
-        "Input Index_label":"Input Index : 2",
-        "Information":"Type: str"
-      }
-    },
-    "0x204fbb772e0":{
-      "type_":"Pandas.GetColumnNode",
-      "icon":null,
-      "name":"Get column from name",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":373.0,
-      "height":105.85000000000001,
-      "pos":[
-        247.27253917064616,
-        3.6471348378718673
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Column name":"",
-        "Column name_label":"Column name : TMER",
-        "Information":"Output shape : (6281, 1)"
-      }
-    },
-    "0x204fbb5dd30":{
-      "type_":"Iterator.ExternalNode",
-      "icon":null,
-      "name":"External",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":235.0,
-      "height":194.05,
-      "pos":[
-        -462.2008647760189,
-        225.49799766345154
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Min":"2",
-        "Max":"5",
-        "Step":"1",
-        "Execute":true,
-        "Information":"Values count: 3"
-      }
-    },
-    "0x204fbb7e880":{
-      "type_":"String.ReplaceNode",
-      "icon":null,
-      "name":"Replace",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":261.0,
-      "height":163.6,
-      "pos":[
-        271.58185015133927,
-        204.18511973376786
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "From":"XXX",
-        "From_label":"",
-        "To":"",
-        "To_label":"To : TMER",
-        "Information":"Output: Plot_column_TMER"
-      }
-    },
-    "0x204fbb7ee80":{
-      "type_":"Input.InputStringNode",
-      "icon":null,
-      "name":"String",
-      "color":[
-        13,
-        18,
-        23,
-        255
-      ],
-      "border_color":[
-        74,
-        84,
-        85,
-        255
-      ],
-      "text_color":[
-        255,
-        255,
-        255,
-        180
-      ],
-      "disabled":false,
-      "selected":false,
-      "visible":true,
-      "width":258.0,
-      "height":68.05000000000001,
-      "pos":[
-        -68.3266622189262,
-        254.67210463418002
-      ],
-      "layout_direction":0,
-      "port_deletion_allowed":false,
-      "subgraph_session":{},
-      "custom":{
-        "is_valid":true,
-        "Value":"Plot_column_XXX"
-      }
-    },
-    "0x204fbb9b100":{
+    "0x1f939302610":{
       "type_":"Matplotlib.SaveFigureNode",
       "icon":null,
       "name":"Save Figure",
@@ -394,111 +393,111 @@
   "connections":[
     {
       "out":[
-        "0x204f9580520",
+        "0x1f93b94a550",
         "Output DataFrame"
       ],
       "in":[
-        "0x204fbb772e0",
+        "0x1f9392bef10",
         "Input DataFrame"
       ]
     },
     {
       "out":[
-        "0x204f9580520",
+        "0x1f93b94a550",
         "Columns names"
       ],
       "in":[
-        "0x204fbae04f0",
+        "0x1f93c35e370",
         "Input List"
       ]
     },
     {
       "in":[
-        "0x204f95be100",
+        "0x1f9391e4070",
         "Y"
       ],
       "out":[
-        "0x204fbb772e0",
+        "0x1f9392bef10",
         "Output DataFrame"
       ]
     },
     {
       "in":[
-        "0x204f95be100",
+        "0x1f9391e4070",
         "label"
       ],
       "out":[
-        "0x204fbae04f0",
+        "0x1f93c35e370",
         "Output Element"
       ]
     },
     {
       "out":[
-        "0x204f95be100",
+        "0x1f9391e4070",
         "Element"
       ],
       "in":[
-        "0x204f963efa0",
+        "0x1f93ee84850",
         "Input Plottable 1"
       ]
     },
     {
       "out":[
-        "0x204f963efa0",
+        "0x1f93ee84850",
         "Figure"
       ],
       "in":[
-        "0x204fbb9b100",
+        "0x1f939302610",
         "Input Figure"
       ]
     },
     {
       "in":[
-        "0x204fbae04f0",
+        "0x1f93c35e370",
         "Input Index"
       ],
       "out":[
-        "0x204fbb5dd30",
+        "0x1f9392bedc0",
         "i"
       ]
     },
     {
       "out":[
-        "0x204fbae04f0",
+        "0x1f93c35e370",
         "Output Element"
       ],
       "in":[
-        "0x204fbb772e0",
+        "0x1f9392bef10",
         "Column name"
       ]
     },
     {
       "out":[
-        "0x204fbae04f0",
+        "0x1f93c35e370",
         "Output Element"
       ],
       "in":[
-        "0x204fbb7e880",
+        "0x1f939302490",
         "To"
       ]
     },
     {
       "in":[
-        "0x204fbb7e880",
+        "0x1f939302490",
         "Input"
       ],
       "out":[
-        "0x204fbb7ee80",
+        "0x1f93c33dfa0",
         "Output Value"
       ]
     },
     {
       "out":[
-        "0x204fbb7e880",
+        "0x1f939302490",
         "Output"
       ],
       "in":[
-        "0x204fbb9b100",
+        "0x1f939302610",
         "File name"
       ]
     }

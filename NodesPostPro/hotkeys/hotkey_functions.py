@@ -5,6 +5,7 @@
 # ------------------------------------------------------------------------------
 
 import os
+import hotkeys.save_load as save_load
 
 def zoom_in(graph):
     """
@@ -50,7 +51,7 @@ def open_session(graph):
     current = graph.current_session()
     file_path = graph.load_dialog(current)
     if file_path:
-        graph.load_session(file_path)
+        save_load.load_session(graph, file_path)
 
 
 def import_session(graph):
@@ -60,7 +61,7 @@ def import_session(graph):
     current = graph.current_session()
     file_path = graph.load_dialog(current)
     if file_path:
-        graph.import_session(file_path)
+        save_load.import_session(graph, file_path)
 
 
 def save_session(graph):
@@ -69,7 +70,7 @@ def save_session(graph):
     """
     current = graph.current_session()
     if current:
-        graph.save_session(current)
+        save_load.save_session(graph, current)
         msg = 'Session layout saved:\n{}'.format(current)
         viewer = graph.viewer()
         viewer.message_dialog(msg, title='Session Saved')
@@ -84,7 +85,7 @@ def save_session_as(graph):
     current = graph.current_session()
     file_path = graph.save_dialog(current)
     if file_path:
-        graph.save_session(file_path)
+        save_load.save_session(graph, file_path)
 
 
 def new_session(graph):
@@ -260,14 +261,10 @@ def load_example(graph, example_file_name):
     file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "examples", example_file_name)
     
     if file_path:
-        graph.load_session(file_path)
+        save_load.load_session(graph, file_path)
 
     graph.clear_selection()
     graph.fit_to_selection()
-    
-    for node in graph.all_nodes():
-        node.set_to_update(True)
-        node.update_values()
 
 
 def load_read_csv(graph):
@@ -278,14 +275,6 @@ def pickle_imshow_savefig(graph):
 
 def tripoli_fill_between(graph):
     load_example(graph, "tripoli_fill_between.json")
-
-    for node in graph.all_nodes():
-        if node.name() == "Set axis":
-            node.value_widget.set_value(58)
-        if node.name() == "Set axis 1":
-            node.value_widget.set_value(59)
-        if node.name() == "Set axis 2":
-            node.value_widget.set_value(60)
     
 def internal_iterator_random(graph):
     load_example(graph, "internal_iterator_random.json")

@@ -177,7 +177,7 @@ class InputListNode(GenericNode):
     def trigger(self):
         if self.table.table_widget.finished:
             self.update_values()
-    
+
     def check_function(self, input_dict, first = False):
         # self.set_property("Input Table", self.table.get_value())
 

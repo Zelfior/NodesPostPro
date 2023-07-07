@@ -333,7 +333,6 @@ class ImShowNode(GenericNode):
 
         self.element_type = "imshow"
 
-
     def check_inputs(self):
         is_valid, message = self.is_input_valid("Y")
 

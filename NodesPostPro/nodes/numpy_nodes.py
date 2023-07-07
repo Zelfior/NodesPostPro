@@ -42,12 +42,11 @@ class SetAxisNode(GenericNode):
             return False, "Input Array is not valid", "Information"
         return True, "", "Information"
 
-
     def update_function(self, input_dict, first=False):
         if first:
             if self.axis_widget.get_range()[-1] != len(input_dict["Input Array"].shape) - 1:
                 self.axis_widget.set_range(0, len(input_dict["Input Array"].shape) - 1)
-    
+
             if self.value_widget.get_range()[-1] != input_dict["Input Array"].shape[self.axis_widget.get_value()] - 1:
                 self.value_widget.set_range(0, input_dict["Input Array"].shape[self.axis_widget.get_value()] - 1)
 

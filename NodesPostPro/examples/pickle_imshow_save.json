@@ -3,10 +3,13 @@
     "layout_direction":0,
     "acyclic":true,
     "pipe_collision":false,
-    "pipe_slicing":false
+    "pipe_slicing":false,
+    "pipe_style":1,
+    "accept_connection_types":{},
+    "reject_connection_types":{}
   },
   "nodes":{
-    "0x1b3c01de220":{
+    "0x24636a4e310":{
       "type_":"Pickle.LoadNumpyNode",
       "icon":null,
       "name":"Load Numpy array",
@@ -31,8 +34,8 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":283.0,
-      "height":217.15,
+      "width":330.0,
+      "height":191.95000000000002,
       "pos":[
         -400.0,
         1000.0
@@ -43,13 +46,14 @@
       "custom":{
         "is_valid":true,
         "Browse file":true,
-        "Information":"Array shape : (50, 60, 70)",
+        "Filename_label":"",
+        "Information":"Output shape : (50, 60, 70)",
         "Python version":"3.8.6 ",
         "Numpy version":"1.24.2",
         "Pickle version":"4.0"
       }
     },
-    "0x1b3bbfbbc40":{
+    "0x24638bdcfd0":{
       "type_":"Numpy.SetAxisNode",
       "icon":null,
       "name":"Set axis",
@@ -74,7 +78,7 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":249.0,
+      "width":311.0,
       "height":130.0,
       "pos":[
         0.0,
@@ -85,12 +89,12 @@
       "subgraph_session":{},
       "custom":{
         "is_valid":true,
-        "Axis":0,
-        "Value":0,
-        "Information":"Output shape : (60, 70)"
+        "Axis":1,
+        "Value":5,
+        "Information":"Output shape : (50, 70)"
       }
     },
-    "0x1b3bbfcbee0":{
+    "0x246369352b0":{
       "type_":"Matplotlib.ImShowNode",
       "icon":null,
       "name":"ImShow",
@@ -115,8 +119,8 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":197.0,
-      "height":134.2,
+      "width":196.0,
+      "height":98.5,
       "pos":[
         400.0,
         1000.0
@@ -130,7 +134,7 @@
         "Information":""
       }
     },
-    "0x1b3bbfd3af0":{
+    "0x24636935c40":{
       "type_":"Matplotlib.PltFigureNode",
       "icon":null,
       "name":"Figure",
@@ -178,7 +182,7 @@
         "Information":""
       }
     },
-    "0x1b3bc0ce9d0":{
+    "0x24638bb3040":{
       "type_":"Input.InputStringNode",
       "icon":null,
       "name":"String",
@@ -217,7 +221,7 @@
         "Value":"figure.png"
       }
     },
-    "0x1b3c31ceac0":{
+    "0x24638e7b910":{
       "type_":"Matplotlib.SaveFigureNode",
       "icon":null,
       "name":"Save Figure",
@@ -261,52 +265,52 @@
   "connections":[
     {
       "out":[
-        "0x1b3c01de220",
+        "0x24638bb3040",
+        "Output Value"
+      ],
+      "in":[
+        "0x24638e7b910",
+        "File name"
+      ]
+    },
+    {
+      "out":[
+        "0x24636a4e310",
         "Output Array"
       ],
       "in":[
-        "0x1b3bbfbbc40",
+        "0x24638bdcfd0",
         "Input Array"
       ]
     },
     {
       "out":[
-        "0x1b3bbfbbc40",
+        "0x24638bdcfd0",
         "Output Array"
       ],
       "in":[
-        "0x1b3bbfcbee0",
+        "0x246369352b0",
         "Y"
       ]
     },
     {
       "out":[
-        "0x1b3bbfcbee0",
+        "0x246369352b0",
         "Element"
       ],
       "in":[
-        "0x1b3bbfd3af0",
+        "0x24636935c40",
         "Input Plottable 1"
       ]
     },
     {
       "out":[
-        "0x1b3bbfd3af0",
+        "0x24636935c40",
         "Figure"
       ],
       "in":[
-        "0x1b3c31ceac0",
+        "0x24638e7b910",
         "Input Figure"
-      ]
-    },
-    {
-      "out":[
-        "0x1b3bc0ce9d0",
-        "Output Value"
-      ],
-      "in":[
-        "0x1b3c31ceac0",
-        "File name"
       ]
     }
   ]

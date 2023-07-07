@@ -5,7 +5,7 @@
 # ------------------------------------------------------------------------------
 
 import os
-import hotkeys.save_load as save_load
+import NodesPostPro.hotkeys.save_load as save_load
 
 def zoom_in(graph):
     """

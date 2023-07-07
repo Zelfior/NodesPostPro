@@ -2,7 +2,6 @@ from NodeGraphQt import BaseNode
 from NodesPostPro.nodes.custom_widgets import *
 
 from NodesPostPro.nodes.container import *
-from NodesPostPro.nodes.node_heritage import *
 
 import functools
 
@@ -526,9 +525,10 @@ class GenericNode(BaseNode):
     """
     def propagate(self):
         #   Getting children in order to update
+        import NodesPostPro.nodes.node_heritage as node_heritage
 
-        update_order_names = get_propagation_order(self)
-        children_list = get_children_dict(self)
+        update_order_names = node_heritage.get_propagation_order(self)
+        children_list = node_heritage.get_children_dict(self)
 
         del update_order_names[0]
 

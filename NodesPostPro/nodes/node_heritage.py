@@ -1,4 +1,4 @@
-from nodes.generic_node import GenericNode
+import NodesPostPro.nodes.generic_node as generic_node
 
 
 def sort_propagation(nodes_heritage:dict):
@@ -33,12 +33,12 @@ def sort_propagation(nodes_heritage:dict):
     return node_order
 
 
-def get_propagation_order(base_node:GenericNode):
+def get_propagation_order(base_node:generic_node.GenericNode):
     nodes_heritage = get_heritage(base_node, True)
 
     return sort_propagation(nodes_heritage)
 
-def get_heritage(base_node:GenericNode, propagate:bool):
+def get_heritage(base_node:generic_node.GenericNode, propagate:bool):
     children_list = [{"name": base_node.name(), "children": []}]
 
     for port_name in base_node.outputs():
@@ -53,7 +53,7 @@ def get_heritage(base_node:GenericNode, propagate:bool):
 
     return children_list
 
-def get_children_dict(base_node:GenericNode, propagate=True):
+def get_children_dict(base_node:generic_node.GenericNode, propagate=True):
     children_dict = {}
 
     for port_name in base_node.outputs():

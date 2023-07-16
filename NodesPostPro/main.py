@@ -26,7 +26,8 @@ from NodesPostPro.nodes import input_nodes, \
                     pickle_nodes, \
                     numpy_nodes, \
                     tripoli_nodes, \
-                    iterator_nodes
+                    iterator_nodes, \
+                    color_nodes
 
 def tracefunc(frame:FrameType, event:str, arg, indent=[0]):
     if event == "call":
@@ -73,7 +74,6 @@ def main():
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
         input_nodes.InputListNode,
-        input_nodes.InputColorNode,
 
         #   Tools nodes
         tool_nodes.PrintNode,
@@ -151,8 +151,12 @@ def main():
 
         #   Random nodes
         random_nodes.RandomUniformNode,
-        random_nodes.RandomIntegerNode
+        random_nodes.RandomIntegerNode,
         
+        
+        #   Color nodes
+        color_nodes.InputColorNode,
+        color_nodes.ColorMapPickerNode
     ])
 
     # show the node graph widget.

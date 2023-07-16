@@ -203,6 +203,12 @@
         "label":"Iterator filter",
         "file":"hotkeys/hotkey_functions.py",
         "function_name":"iterator_filter"
+      },
+      {
+        "type":"command",
+        "label":"Color maps",
+        "file":"hotkeys/hotkey_functions.py",
+        "function_name":"color_maps"
       }
     ]
   },

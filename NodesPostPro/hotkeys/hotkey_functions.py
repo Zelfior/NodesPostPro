@@ -294,4 +294,7 @@ def multi_plot(graph):
 def iterator_filter(graph):
     load_example(graph, "iterator_filter.json")
 
+def color_maps(graph):
+    load_example(graph, "color_maps.json")
+
     

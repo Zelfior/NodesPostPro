@@ -73,6 +73,7 @@ def main():
         input_nodes.InputBooleanNode,
         input_nodes.InputStringNode,
         input_nodes.InputListNode,
+        input_nodes.InputColorNode,
 
         #   Tools nodes
         tool_nodes.PrintNode,

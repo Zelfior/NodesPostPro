@@ -22,6 +22,7 @@ class PortValueType(Enum):
     ANY = 11
     NUMBER = 12
     MATH_COMPATIBLE = 13
+    COLOR = 14
 
 """
     Color association with the port type enum
@@ -53,6 +54,8 @@ def get_color_from_enum(enum_value):
         return (30, 150, 150)
     elif enum_value == PortValueType.MATH_COMPATIBLE:
         return (0, 100, 100)
+    elif enum_value == PortValueType.COLOR:
+        return (255, 122, 122)
     else:
         raise ValueError("No color defined for PortValueType "+str(enum_value))
     
@@ -87,6 +90,18 @@ def check_type(value, enum_value):
         return type(value) in [int, float]
     elif enum_value == PortValueType.MATH_COMPATIBLE:
         return type(value) in [int, float, np.ndarray, pd.DataFrame]
+    elif enum_value == PortValueType.COLOR:
+        is_valid = type(value) == list and len(value) == 3
+
+        if is_valid:
+            for element in value:
+                if not check_type(element, PortValueType.INTEGER):
+                    is_valid = False
+
+        if is_valid:
+            is_valid = (max(value) < 256) and min(value) >= 0
+            
+        return is_valid
     else:
         raise ValueError("PortValueType "+str(enum_value)+" not implemented in function check_type")
     

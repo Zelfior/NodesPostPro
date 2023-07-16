@@ -1,6 +1,5 @@
 from NodesPostPro.nodes.generic_node import GenericNode, PortValueType, check_cast_type_from_string
-
-    
+from Qt import QtWidgets, QtCore, QtGui
 
 class InputFloatNode(GenericNode):
     """
@@ -202,3 +201,46 @@ class InputListNode(GenericNode):
         print("Property to set", name, value)
 
         super(InputListNode, self).set_property(name, value, push_undo=push_undo)
+
+
+
+
+
+class InputColorNode(GenericNode):
+    """
+        Node giving a float as output.
+    """
+
+    # unique node identifier.
+    __identifier__ = 'Input'
+
+    # initial default node name.
+    NODE_NAME = 'Color'
+
+    def __init__(self):
+        super(InputColorNode, self).__init__()
+
+        #   create output port for the read dataframe
+        self.add_custom_output('Output Value', PortValueType.COLOR)
+
+        #   create QLineEdit text input widget for the file path
+        # color_picker = self.add_color_picker_input('Value', 'Value')
+        self.button = self.add_button_widget(name="       ", width=0)
+
+        self.color = [255, 0, 0]
+
+        self.button.set_link(self.select_color)
+        self.button.button_widget.setStyleSheet("background-color : rgb"+str(tuple(self.color)))
+
+    def select_color(self):
+        self.color = list(QtWidgets.QColorDialog.getColor().getRgb()[0:3])
+        self.button.button_widget.setStyleSheet("background-color : rgb"+str(tuple(self.color)))
+        self.update_values()
+
+    def check_inputs(self):
+        self.set_property("is_valid",True)
+
+    def update_from_input(self):
+        self.get_output_property("Output Value").set_property(self.color)
+
+

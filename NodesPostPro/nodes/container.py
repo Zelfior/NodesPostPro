@@ -91,15 +91,7 @@ def check_type(value, enum_value):
     elif enum_value == PortValueType.MATH_COMPATIBLE:
         return type(value) in [int, float, np.ndarray, pd.DataFrame]
     elif enum_value == PortValueType.COLOR:
-        is_valid = type(value) == list and len(value) == 3
-
-        if is_valid:
-            for element in value:
-                if not check_type(element, PortValueType.INTEGER):
-                    is_valid = False
-
-        if is_valid:
-            is_valid = (max(value) < 256) and min(value) >= 0
+        is_valid = type(value) == str and len(value) == 7 and value.startswith("#")
             
         return is_valid
     else:

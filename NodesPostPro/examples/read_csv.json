@@ -3,13 +3,49 @@
     "layout_direction":0,
     "acyclic":true,
     "pipe_collision":false,
-    "pipe_slicing":false,
-    "pipe_style":1,
-    "accept_connection_types":{},
-    "reject_connection_types":{}
+    "pipe_slicing":false
   },
   "nodes":{
-    "0x15e4cbbe6d0":{
+    "0x13a57f76040":{
+      "type_":"Input.InputColorNode",
+      "icon":null,
+      "name":"Color",
+      "color":[
+        13,
+        18,
+        23,
+        255
+      ],
+      "border_color":[
+        74,
+        84,
+        85,
+        255
+      ],
+      "text_color":[
+        255,
+        255,
+        255,
+        180
+      ],
+      "disabled":false,
+      "selected":false,
+      "visible":true,
+      "width":205.0,
+      "height":60,
+      "pos":[
+        75.26369975255088,
+        125.95374343830477
+      ],
+      "layout_direction":0,
+      "port_deletion_allowed":false,
+      "subgraph_session":{},
+      "custom":{
+        "is_valid":true,
+        "       ":true
+      }
+    },
+    "0x13a5a2984c0":{
       "type_":"Pandas.LoadFileNode",
       "icon":null,
       "name":"Read CSV file",
@@ -52,7 +88,7 @@
         "Information":"Columns : 30, lines : 6281"
       }
     },
-    "0x15e4cbd8eb0":{
+    "0x13a5a298c10":{
       "type_":"Pandas.GetColumnSelectorNode",
       "icon":null,
       "name":"Get column selector",
@@ -77,7 +113,7 @@
       "disabled":false,
       "selected":false,
       "visible":true,
-      "width":367.0,
+      "width":338.0,
       "height":93.25,
       "pos":[
         0.0,
@@ -92,7 +128,7 @@
         "Information":"Lines : 6281"
       }
     },
-    "0x15e51fded30":{
+    "0x13a57b623a0":{
       "type_":"Matplotlib.PlotNode",
       "icon":null,
       "name":"Plot",
@@ -134,7 +170,7 @@
         "Information":""
       }
     },
-    "0x15e51fe2850":{
+    "0x13a57b7a040":{
       "type_":"Matplotlib.PltFigureNode",
       "icon":null,
       "name":"Figure",
@@ -160,7 +196,7 @@
       "selected":false,
       "visible":true,
       "width":833.0,
-      "height":834.5500000000001,
+      "height":947.95,
       "pos":[
         800.0,
         0.0
@@ -186,41 +222,51 @@
   "connections":[
     {
       "out":[
-        "0x15e4cbbe6d0",
+        "0x13a5a2984c0",
         "Output DataFrame"
       ],
       "in":[
-        "0x15e4cbd8eb0",
+        "0x13a5a298c10",
         "Input DataFrame"
       ]
     },
     {
       "out":[
-        "0x15e4cbd8eb0",
+        "0x13a5a298c10",
         "Output DataFrame"
       ],
       "in":[
-        "0x15e51fded30",
+        "0x13a57b623a0",
         "Y"
       ]
     },
     {
       "out":[
-        "0x15e4cbd8eb0",
+        "0x13a5a298c10",
         "Selected column name"
       ],
       "in":[
-        "0x15e51fded30",
+        "0x13a57b623a0",
         "label"
       ]
     },
     {
+      "in":[
+        "0x13a57b623a0",
+        "color"
+      ],
       "out":[
-        "0x15e51fded30",
+        "0x13a57f76040",
+        "Output Value"
+      ]
+    },
+    {
+      "out":[
+        "0x13a57b623a0",
         "Element"
       ],
       "in":[
-        "0x15e51fe2850",
+        "0x13a57b7a040",
         "Input Plottable 1"
       ]
     }

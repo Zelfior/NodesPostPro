@@ -225,7 +225,7 @@ class InputColorNode(GenericNode):
 
         #   create QLineEdit text input widget for the file path
         # color_picker = self.add_color_picker_input('Value', 'Value')
-        self.button = self.add_button_widget(name="       ", width=0)
+        self.button = self.add_button_widget(name="       ")
 
         self.color = [255, 0, 0]
 
@@ -241,6 +241,6 @@ class InputColorNode(GenericNode):
         self.set_property("is_valid",True)
 
     def update_from_input(self):
-        self.get_output_property("Output Value").set_property(self.color)
+        self.get_output_property("Output Value").set_property('#{:02x}{:02x}{:02x}'.format(self.color[0], self.color[1], self.color[2]))
 
 

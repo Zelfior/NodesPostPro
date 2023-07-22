@@ -65,12 +65,20 @@ def load_session(graph:NodeGraph, file_path):
     Args:
         file_path (str): path to the serialized layout file.
     """
+
+    for node in graph.all_nodes():
+        node.set_to_update(False)
+        
     file_path = file_path.strip()
     if not os.path.isfile(file_path):
         raise IOError('file does not exist: {}'.format(file_path))
 
     graph.clear_session()
     import_session(graph, file_path)
+
+    for node in graph.all_nodes():
+        node.set_to_update(True)
+
 
 def import_session(graph:NodeGraph, file_path):
     """
@@ -101,7 +109,7 @@ def import_session(graph:NodeGraph, file_path):
     graph._model.session = file_path
 
     graph.session_changed.emit(file_path)
-
+    
 def get_node_data(data, node_name):
     for n_id, n_data in data.get('nodes', {}).items():
         if n_data["name"] == node_name:

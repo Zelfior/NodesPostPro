@@ -6,6 +6,12 @@
 
 import os
 import NodesPostPro.hotkeys.save_load as save_load
+from NodeGraphQt.base.graph import NodeGraph
+from NodeGraphQt.base.menu import NodeGraphMenu, NodesMenu
+from Qt import QtGui, QtCore
+from distutils.version import LooseVersion
+import json
+
 
 def zoom_in(graph):
     """
@@ -78,12 +84,17 @@ def save_session(graph):
         save_session_as(graph)
 
 
-def save_session_as(graph):
+def save_session_as(graph, folder_path = ""):
     """
     Prompts a file save dialog to serialize a session.
     """
     current = graph.current_session()
-    file_path = graph.save_dialog(current)
+
+    if folder_path=="":
+        file_path = graph.save_dialog(current)
+    else:
+        file_path = graph.save_dialog(current_dir = folder_path)
+
     if file_path:
         save_load.save_session(graph, file_path)
 
@@ -297,4 +308,105 @@ def iterator_filter(graph):
 def color_maps(graph):
     load_example(graph, "color_maps.json")
 
+def read_json(file_path):
+    with open(file_path, 'r') as openfile:
+        return json.load(openfile)
+    return
+
+def write_json(data, file_path):
+    json_object = json.dumps(data, indent=4)
     
+    # Writing to sample.json
+    with open(file_path, "w+") as outfile:
+        outfile.write(json_object)
+
+
+def reload_user_examples(graph:NodeGraph):
+    
+    file_path = os.path.dirname(os.path.realpath(__file__))
+    hotkey_path = str(os.path.join(file_path, 'hotkeys.json'))
+
+    current_json_data = read_json(hotkey_path)
+    index_user_examples = 0
+
+    while not "label" in current_json_data[index_user_examples] or not "User examples" in current_json_data[index_user_examples]["label"]:
+        index_user_examples+=1
+
+    while not current_json_data[index_user_examples]["items"][0] == {"type":"separator"}:
+        del current_json_data[index_user_examples]["items"][0]
+
+    file_list = os.listdir(os.path.join(file_path, "..", "user_examples"))
+
+    for element in file_list:
+        if element.endswith(".json"):
+            
+            json_entry = {
+                            "type":"command",
+                            "label":element.replace(".json", "").replace("_", " "),
+                            "file":"hotkeys/user_custom_functions.py",
+                            "function_name":element.replace(".json", "").lower().replace(" ", "_")
+                        }
+
+            current_json_data[index_user_examples]["items"].insert(0, json_entry)
+
+    write_json(current_json_data, hotkey_path)
+
+    
+    user_custom_functions_path = str(os.path.join(file_path, 'user_custom_functions.py'))
+    user_custom_file = open(user_custom_functions_path, "w+")
+    
+    user_custom_file.write("import os\n")
+    user_custom_file.write("import NodesPostPro.hotkeys.save_load as save_load\n")
+    user_custom_file.write("\n")
+    user_custom_file.write("def load_example(graph, example_file_name):\n")
+    user_custom_file.write("    file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), \"user_examples\", example_file_name)\n")
+    user_custom_file.write("    \n")
+    user_custom_file.write("    if file_path:\n")
+    user_custom_file.write("        save_load.load_session(graph, file_path)\n")
+    user_custom_file.write("\n")
+    user_custom_file.write("    graph.clear_selection()\n")
+    user_custom_file.write("    graph.fit_to_selection()\n")
+    user_custom_file.write("\n")
+
+    for element in file_list: 
+        user_custom_file.write("def "+element.replace(".json", "").lower().replace(" ", "_")+"(graph):\n")
+        user_custom_file.write("    load_example(graph, \""+element+"\")\n\n")
+
+    user_custom_file.close()
+
+    menus = graph._viewer.context_menus()
+    new_menu = NodeGraphMenu(graph, menus['graph'])
+    
+    new_menu.qmenu.clear()
+    
+    undo_action = graph.undo_stack().createUndoAction(graph._viewer, '&Undo')
+    redo_action = graph.undo_stack().createRedoAction(graph._viewer, '&Redo')
+
+    undo_action.setShortcuts(QtGui.QKeySequence.Undo)
+    redo_action.setShortcuts(QtGui.QKeySequence.Redo)
+
+    if LooseVersion(QtCore.qVersion()) >= LooseVersion('5.10'):
+        undo_action.setShortcutVisibleInContextMenu(True)
+        redo_action.setShortcutVisibleInContextMenu(True)
+
+    new_menu.qmenu.addAction(undo_action)
+    new_menu.qmenu.addAction(redo_action)
+    new_menu.qmenu.addSeparator()
+
+    graph._context_menu['graph'] = new_menu
+    
+    
+    current_path = os.getcwd()
+    
+    os.chdir(os.path.join(file_path, '..'))
+    graph.set_context_menu_from_file(hotkey_path)
+    os.chdir(current_path)
+    
+def add_user_example(graph):
+    save_session_as(graph, folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "user_examples"))
+
+    reload_user_examples(graph)
+
+def open_user_example_folder(graph):
+    folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "user_examples")
+    os.startfile(folder_path)

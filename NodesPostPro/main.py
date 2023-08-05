@@ -77,6 +77,7 @@ def main():
 
         #   Tools nodes
         tool_nodes.PrintNode,
+        tool_nodes.IntSelectionNode,
 
         #   Math nodes
         math_nodes.OneMathNode,

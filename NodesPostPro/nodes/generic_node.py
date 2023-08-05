@@ -152,6 +152,7 @@ class GenericNode(BaseNode):
         self.twin_inputs = []
 
         self.int_selectors = []
+        self.int_sliders = []
 
         self.check_seed = -1
 
@@ -675,6 +676,25 @@ class GenericNode(BaseNode):
         self.view.draw_node()
 
         return button
+
+
+    def add_slider(self, name):
+        slider = IntSlider_Widget(self.view, name=name)
+        self.widget_properties[name] = PortValueType.INTEGER
+
+        self.create_property(name, 0)
+
+        slider.value_changed.connect(lambda k, v: self.set_property(k, v))
+        
+        self.view.add_widget(slider)
+        self.view.draw_node()
+
+        self.property_to_update.append(name)
+
+        self.int_sliders.append(slider)
+
+        return slider
+    
 
     def add_checkbox(self, name, text=''):
         super(GenericNode, self).add_checkbox(name, text=text)

@@ -3,6 +3,7 @@ from enum import Enum
 import pandas as pd
 import numpy as np
 from Qt import QtWidgets, QtCore
+from PyQt5.QtCore import Qt
 
 
 
@@ -314,3 +315,88 @@ class InputTableWidget(NodeBaseWidget):
     def set_length(self, value):
         self.table_widget.set_length(value)
 
+
+
+
+
+
+
+
+
+"""
+
+
+
+
+
+
+"""
+class IntSliderWidget(QtWidgets.QWidget):
+    def __init__(self, parent=None, name=''):
+        super(IntSliderWidget, self).__init__(parent)
+
+        self.val_min = 0
+        self.val_max = 50
+
+        from PySide2.QtCore import Qt
+
+        self.int_slider = QtWidgets.QSlider(Qt.Horizontal, self)
+        self.int_slider.setRange(self.val_min, self.val_max)
+        self.int_slider.setSingleStep(1)
+        self.int_slider.setValue(0)
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.setContentsMargins(15, 0, 15, 0)
+        layout.addWidget(self.int_slider)
+
+
+    def set_range(self, val_min, val_max):
+        if self.get_value() > val_max:
+            self.set_value(val_max)
+        if self.get_value() < val_min:
+            self.set_value(val_min)
+
+        self.val_min = val_min
+        self.val_max = val_max
+
+        self.int_slider.setRange(val_min, val_max)
+
+    def get_value(self):
+        return self.int_slider.value()
+
+    def get_range(self):
+        return [self.val_min, self.val_max]
+
+    def set_value(self, value):
+        return self.int_slider.setValue(value)
+    
+
+
+class IntSlider_Widget(NodeBaseWidget):
+    def __init__(self, parent=None, name='', label=''):
+        super(IntSlider_Widget, self).__init__(parent)
+
+        # set the name for node property.
+        self.set_name(name)
+
+        # set the label above the widget.
+        self.set_label(label)
+
+        self.int_slider_widget = IntSliderWidget(name = name)
+
+        self.int_slider_widget.int_slider.valueChanged.connect(self.on_value_changed)
+
+        self.set_custom_widget(self.int_slider_widget)
+
+    def get_value(self):
+        return self.int_slider_widget.get_value()
+
+    def get_range(self):
+        return self.int_slider_widget.get_range()
+
+    def set_range(self, val_min, val_max):
+        return self.int_slider_widget.set_range(val_min, val_max)
+        
+    def set_value(self, value):
+        return self.int_slider_widget.set_value(value)
+    

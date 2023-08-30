@@ -1,9 +1,11 @@
 from NodeGraphQt import NodeBaseWidget
+
+from PySide2 import QtWidgets
+
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.gridspec import SubplotSpec 
-from Qt import QtWidgets
 
 import NodeGraphQt
 

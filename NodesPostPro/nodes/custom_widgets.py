@@ -3,7 +3,6 @@ from enum import Enum
 import pandas as pd
 import numpy as np
 from Qt import QtWidgets, QtCore
-from PyQt5.QtCore import Qt
 
 
 

@@ -822,10 +822,9 @@ class GenericNode(BaseNode):
         return list_children
 
         
-    def get_file_name(self, ext=None):
-        ext = '*{} '.format(ext) if ext else ''
+    def get_file_name(self, ext="csv"):
         ext_filter = ';;'.join([
-            'CSV file ({}*csv)'.format(ext), 'All Files (*)'
+            ext+' file (*{})'.format(ext), 'All Files (*)'
         ])
 
         current_dir = os.getcwd()

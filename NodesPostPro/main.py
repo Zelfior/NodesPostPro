@@ -148,6 +148,8 @@ def main():
 
         #   Tripoli outputs
         tripoli_nodes.TripoliExtendedMeshNode,
+        tripoli_nodes.TripoliExtendedMeshSerieNode,
+        tripoli_nodes.AP281Node,
 
 
         #   Random nodes

@@ -20,6 +20,8 @@ from NodesPostPro.nodes.custom_widgets import IntSelector_Widget
 from NodesPostPro.nodes.cast_nodes import is_float
 from NodesPostPro.nodes.container import PltContainer
 
+from matplotlib.colors import LogNorm, Normalize
+
 
 def plot_element_on_axis(figure : Figure, axis : Axes, element):
 
@@ -38,9 +40,15 @@ def plot_element_on_axis(figure : Figure, axis : Axes, element):
     elif element['element_type'] == "imshow":
         # if not "X" in element:
         #     return None
-        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority"]}
+        kwargs_dict = {key:element[key] for key in element if key not in ["X", "Y", "element_type", "priority", "norm"]}
         kwargs_dict["aspect"] = "auto"
-        return axis.imshow(element['Y'], **kwargs_dict)
+
+        if element["norm"] == "log":
+            scale = LogNorm()
+        else:
+            scale = Normalize()
+
+        return axis.imshow(element['Y'], norm = scale, **kwargs_dict)
 
     elif element['element_type'] == "scatter":
         # if not "X" in element:
@@ -322,7 +330,7 @@ class ImShowNode(GenericNode):
 
         self.add_custom_input('label', PortValueType.STRING)
 
-        # self.add_combo_menu('norm', 'norm', items=["linear", "log", "symlog", "logit"])
+        self.add_combo_menu('norm', 'norm', items=["linear", "log"])
         
         self.priority_widget = self.add_int_selector(name="Priority", label='Priority')
         self.priority_widget.set_range(0, 50)
@@ -371,7 +379,7 @@ class ImShowNode(GenericNode):
             if input_value is not None:
                 properties_dict[input] = input_value.get_property()
 
-        # properties_dict['norm'] = self.get_property('norm')
+        properties_dict['norm'] = self.get_property('norm')
 
         properties_dict['origin']='lower'
 
